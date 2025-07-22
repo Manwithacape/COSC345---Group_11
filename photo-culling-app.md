@@ -1,4 +1,4 @@
-# AI-Powered Photo Culling Desktop App (Local-First)
+# Photo culling app 
 
 This document describes the architecture and technology stack for a desktop application that helps photographers automatically select the best images from a large photo shoot using machine learning and computer vision.
 
@@ -157,4 +157,3 @@ To begin, set up a basic pipeline like this:
 3. Build a simple UI to view images and record "keep/discard" decisions.
 4. Train a scikit-learn model on your decisions.
 5. Use that model to automatically sort or filter future photo sets.
-
