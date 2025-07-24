@@ -7,6 +7,7 @@
 ### Agenda 
 - [x] Set everyone up
 - [x] Progress towards idea documentation
-- [x] 8am Tut replacement
+- [x] 8am Tut replacement - After the lab on thursday
 
 ### Notes
+Meeeting in lab b instead of burns 7
