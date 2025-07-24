@@ -113,6 +113,8 @@ These models are quick to train and require little configuration. They are ideal
 
 ### 6. PyQt (or Tkinter)
 
+__Daniel is happy to have a looky into this.__
+
 **What it does**  
 PyQt builds the desktop interface where you can:
 - View photos one by one or in batches
