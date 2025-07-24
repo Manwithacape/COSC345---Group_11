@@ -5,8 +5,8 @@
 
 ## Thursday 24-07
 ### Agenda 
-- Set everyone up
-- Progress towards idea documentation
-- 8am Tut replacement
+- [x] Set everyone up
+- [x] Progress towards idea documentation
+- [x] 8am Tut replacement
 
 ### Notes
