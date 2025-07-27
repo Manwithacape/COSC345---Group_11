@@ -13,6 +13,7 @@ SoftwareFolder/
 ShootName.json
 ```
 {
+    Shoot_name: "River Shoot",
     Gobal_focus_score: 67,
     global_framing_score: 30,
     global_ai_comment: 20,
