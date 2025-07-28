@@ -3,6 +3,7 @@ Group_11
 # Github/Gitbucket Duel Push
 *Daniel needs to add you to the GitHub repository before you can push to it*
 
+CD to the cloned down isgb repo
 
 run this: `git remote set-url --add --push origin https://isgb.otago.ac.nz/cosc345/git/paxda981/Group_11.git`
 
