@@ -11,3 +11,11 @@
 
 ### Notes
 Meeeting in lab b instead of burns 7
+
+
+# Meetings
+## 29-07
+### Agenda
+- [ ] Disscuss and roughly scope PRIMARY BASE Features. There are extra ideas which is great but we only have 11 weeks now. 
+- [ ] Go over GUI drafts NOT FINAL just ideas. 
+### Notes
