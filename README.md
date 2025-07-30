@@ -1,6 +1,6 @@
 Group_11
 ===============
-# Github/Gitbucket Duel Push
+# Github/Gitbucket Dual Push
 *Daniel needs to add you to the GitHub repository before you can push to it*
 
 CD to the cloned down isgb repo
