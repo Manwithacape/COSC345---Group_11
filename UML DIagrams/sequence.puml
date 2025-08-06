@@ -1,0 +1,66 @@
+@startuml
+skinparam style strict
+skinparam ArrowColor black
+skinparam ActorBorderColor black
+skinparam ParticipantBorderColor black
+skinparam ParticipantBackgroundColor #F9F9F9
+skinparam SequenceMessageAlign center
+
+actor User
+participant "Desktop GUI" as GUI
+participant "Collections" as CM
+participant "Thumbnail Generator" as TG
+participant "Database" as DB
+participant "Scoring Engine (OpenCV)" as SE
+participant "Preference Model" as PM
+
+== Upload and Collection Selection ==
+
+User -> GUI : Select images to upload
+GUI -> CM : Add to collection (new or existing)
+CM -> DB : Create/fetch collection record
+
+== Image Import and Thumbnail Generation ==
+
+loop for each image
+    GUI -> TG : Generate thumbnail(image)
+    TG -> DB : Save thumbnail
+    
+    GUI -> DB : Save image to collection
+end
+
+== Image Scoring ==
+
+GUI -> SE : Score all new images
+SE -> DB : Save image metrics
+SE -> DB : Store scores
+
+== Face Detection ==
+
+GUI -> SE : Find faces in images
+SE -> DB : Retrieve image data
+SE -> DB : Store faces
+
+== Show Scores ==
+
+User -> GUI : View scores
+GUI -> DB : Fetch image scores
+DB --> GUI : Return scores
+GUI -> User : Display scores
+
+== Filter Images ==
+
+User -> GUI : Apply filter criteria
+GUI -> DB : Query images with filters
+DB --> GUI : Return filtered images
+GUI -> User : Display filtered images
+
+== Preference-Based Selection / Culling Suggestions ==
+
+User -> GUI : Request best photos
+GUI -> PM : Get preferred images
+PM -> DB : Retrieve scores + metadata
+PM --> GUI : Return selected best photos
+GUI -> User : Display recommended photos
+
+@enduml

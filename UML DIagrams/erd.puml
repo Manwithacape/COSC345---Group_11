@@ -1,0 +1,99 @@
+@startuml
+skinparam style strict
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+hide methods
+hide stereotypes
+
+entity User {
+  userID
+  name
+  preferences
+}
+
+entity Collection {
+  collectionID
+  name
+  dateCreated
+}
+
+entity Photo {
+  photoID
+  filePath
+  dateAdded
+}
+
+entity ExifData {
+  exifID
+  photoID
+  thumbnailID
+  make
+  model
+  lensModel
+  focalLength
+  exposureTime
+  fNumber
+  isoSpeedRatings
+  dateTimeOriginal
+  gpsLatitude
+  gpsLongitude
+}
+
+'   exifID            ' auto generated
+'   photoID           ' FK to Photo
+'   thumbnailID       ' FK to Thumbnail
+'   make              ' camera manufacturer
+'   model             ' camera model
+'   lensModel         ' lens used
+'   focalLength       ' in mm
+'   exposureTime      ' e.g., 1/200
+'   fNumber           ' aperture (e.g., f/2.8)
+'   isoSpeedRatings   ' ISO value
+'   dateTimeOriginal  ' date photo was taken
+'   gpsLatitude       ' GPS latitude
+'   gpsLongitude      ' GPS longitude
+
+
+entity Thumbnail {
+  thumbnailID
+  imagePath
+}
+
+entity Score {
+  scoreID
+  metricName
+  value
+}
+
+entity Face {
+  faceID
+  boundingBox
+}
+
+entity ImageComment {
+  imageCommentID
+  photoID
+  content
+}
+'   photoID        ' FK to Photo
+
+entity CollectionComment {
+  collectionCommentID
+  collectionID
+  content
+}
+'   collectionID   ' FK to Collection
+
+
+
+' Relationships
+User ||--o{ Collection
+Collection ||--o{ Photo 
+Photo ||--|| Thumbnail 
+Photo ||--o{ Score 
+Photo ||--o{ Face
+Photo ||--|| ExifData
+Photo ||--o{ ImageComment
+Collection ||--o{ CollectionComment
+
+@enduml
