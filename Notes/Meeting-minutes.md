@@ -26,4 +26,5 @@ Meeeting in lab b instead of burns 7
 - [ ] Complete system modelling
 - [ ] Complete architectual design
 - [ ] Complete presentation for evidence review on 14th 
+- [ ] Figma GUI Mockups
 
