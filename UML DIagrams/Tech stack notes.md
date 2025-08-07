@@ -27,12 +27,12 @@ On import, thumbnails for each image should be generated and stored within the d
 Still TBC? Postgres?
 
 Would have to store:
-    - Thumbnails
-    - image metrics
-    - image faces
-    - image exif data / metadata
-    - collections
-    - *probably more important things*
+- Thumbnails
+- image metrics
+- image faces
+- image exif data / metadata
+- collections
+- *probably more important things*
 
 ---
 
@@ -57,6 +57,7 @@ This preference model will likely only look at the metrics computed by the scori
 ## Near-duplicate detection
 
 *Not yet on sequence diagram*
+
 Should be able to detect when photos look very similar and pick out either the best or least bad. Useful for when there is a burst of photos
 
 ---
