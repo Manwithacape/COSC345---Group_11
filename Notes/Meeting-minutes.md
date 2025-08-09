@@ -28,3 +28,5 @@ Meeeting in lab b instead of burns 7
 - [ ] Complete presentation for evidence review on 14th 
 - [ ] Figma GUI Mockups
 
+
+- Python eel repo tour to make sure everyone vaugly understands how the setup works. 
