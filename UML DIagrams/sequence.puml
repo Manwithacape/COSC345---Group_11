@@ -63,4 +63,10 @@ PM -> DB : Retrieve scores + metadata
 PM --> GUI : Return selected best photos
 GUI -> User : Display recommended photos
 
+== Near Duplicate Detection ==
+
+GUI -> SE : Detect near-duplicate images
+SE -> DB : Retrieve image features
+SE -> DB : Store duplicate group info
+
 @enduml

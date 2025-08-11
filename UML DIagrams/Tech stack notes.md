@@ -6,6 +6,8 @@ This document should hopefully sufficiently describe the roles of each component
 
 Launching this should intitally give splashscreen, and launch into a GUI which shows the collections in a side bar on LHS, images from the selected collection (if any) inthe middle of the screen, and details about the image that has been selected (if any) on the RHS of the screen in a side car
 
+pyEel - Daniel has found a good Python gui thing. Like web dev?
+
 ---
 
 ## Collections
@@ -55,9 +57,6 @@ This preference model will likely only look at the metrics computed by the scori
 ---
 
 ## Near-duplicate detection
-
-*Not yet on sequence diagram*
-
-Should be able to detect when photos look very similar and pick out either the best or least bad. Useful for when there is a burst of photos
+Should be able to detect when photos look very similar and pick out either the best or least bad. Useful for when there is a burst of photos. Probably done through the OpenCV engine as well. Would have to work out a way to make it store easily within the database. 
 
 ---

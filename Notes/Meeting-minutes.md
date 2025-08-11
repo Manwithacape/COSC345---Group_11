@@ -22,9 +22,10 @@ Meeeting in lab b instead of burns 7
 
 ## 07/08
 ### Todo until presentation 
-- [ ] Plan out all 4 sprints complete with user stories for each sprint scheduled
-- [ ] Complete system modelling
-- [ ] Complete architectual design
-- [ ] Complete presentation for evidence review on 14th 
-- [ ] Figma GUI Mockups
+- [ ] Plan out all 4 sprints complete with user stories for each sprint scheduled - Marick
+- [ ] Complete system modelling - Kevin
+- [ ] Complete architectual design - Kevin
+- [ ] Complete presentation for evidence review on 14th - Will
+- [ ] Figma GUI Mockups - Cam 
+- [ ] OpenCV scoring prototype - Daniel
 
