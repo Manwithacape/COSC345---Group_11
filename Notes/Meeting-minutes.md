@@ -29,3 +29,5 @@ Meeeting in lab b instead of burns 7
 - [ ] Figma GUI Mockups - Cam 
 - [ ] OpenCV scoring prototype - Daniel
 
+
+- Python eel repo tour to make sure everyone vaugly understands how the setup works. 

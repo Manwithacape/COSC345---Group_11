@@ -1,0 +1,61 @@
+@font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 400;
+    src: url('/fonts/OpenSans-Regular.ttf') format('truetype');
+}
+
+* {
+    margin: 0em;
+    padding: 0em;
+    box-sizing: border-box;
+}
+
+:root {
+  --text-size : 16px;
+  --spaceing : 1rem;
+  --text: black;
+  
+  --primary : white;
+  --secondary :  rgb(50, 101, 142);
+  --tertiary : rgb(140, 81, 38);
+
+  --shadow_color: rgba(0, 0, 0, 0.1);
+  --shadow_size: 0em 0.2em 0.5em;
+  --shadow: var(--shadow_size) var(--shadow_color);
+
+  --transition: all 0.3s ease-in-out;
+}
+
+/* Global Style Classes */
+.shadow {
+    box-shadow: var(--shadow);
+}
+
+.underline {
+    text-decoration: underline;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.italic {
+    font-style: italic;
+}
+
+.button {
+    background-color: var(--secondary);
+    color: var(--primary);
+    padding: var(--spaceing);
+    border: none;
+    cursor: pointer;
+
+    transition: var(--transition);
+}
+
+.button:hover {
+    background-color: var(--tertiary);
+    box-shadow: var(--shadow);
+}
+
