@@ -20,8 +20,8 @@
   --secondary :  rgb(50, 101, 142);
   --tertiary : rgb(140, 81, 38);
 
-  --shadow_color: rgba(0, 0, 0, 0.1);
-  --shadow_size: 0em 0.2em 0.5em;
+  --shadow_color: rgba(0, 0, 0, 0.565);
+  --shadow_size: 0.5em 0.5em 0.5em;
   --shadow: var(--shadow_size) var(--shadow_color);
 
   --transition: all 0.3s ease-in-out;
@@ -57,5 +57,106 @@
 .button:hover {
     background-color: var(--tertiary);
     box-shadow: var(--shadow);
+}
+
+/* MAIN LAYOUT STYLES */
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+
+}
+
+main {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+}
+
+#sidebar {
+    display: flex;
+    flex-direction: row;
+    width: 25%;
+    background-color: gray;
+
+}
+
+#content-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    padding: 1em;
+}
+
+
+
+
+
+/* CUSTOM LAYOUTS */
+#card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(30rem, 1fr));
+    gap: 1rem;
+    padding: 1em;
+
+
+    .collection-card {
+        position: relative;
+        aspect-ratio: 4 / 3;
+        box-shadow: var(--shadow);
+        display: flex;
+        cursor: pointer;
+
+        transition: var(--transition);
+
+        .collection-card-tag {
+            font-size: 1.5em;
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: green; /* Example tag color */
+            width: 3em;
+            height: 3em;
+            clip-path: polygon(100% 0, 0 0, 100% 100%);
+            
+            
+        }
+        
+        .collection-card-image {
+            aspect-ratio: 4 / 3;
+            width: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .collection-card-header {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5em;
+            
+            /* gradient with black at bottom - transparent at top */
+            padding: 1em;
+
+            h2 {
+                text-shadow: black 0.1em 0.1em 0.2em;
+                color: white;
+            }
+
+            h4 {
+                text-shadow: black 0.1em 0.1em 0.2em;
+                color: white;
+            }
+        }
+    }
+
+    .collection-card:hover {
+        transform: scale(1.02);
+    }
 }
 
