@@ -82,21 +82,26 @@ main {
 }
 
 #content-container {
-    display: flex;
-    flex-direction: column;
     width: 100%;
     height: 100%;
     padding: 1em;
 }
 
-
-
-
-
 /* CUSTOM LAYOUTS */
-#card-container {
+#collection-card-container {
+    display: flex;
+    flex-direction: column;
+}
+
+#collection-card-search {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1em;
+}
+
+#collection-card-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(30rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
     gap: 1rem;
     padding: 1em;
 
@@ -116,11 +121,9 @@ main {
             top: 0;
             right: 0;
             background-color: green; /* Example tag color */
-            width: 3em;
-            height: 3em;
+            width: 20%;
+            aspect-ratio: 1 / 1;
             clip-path: polygon(100% 0, 0 0, 100% 100%);
-            
-            
         }
         
         .collection-card-image {
