@@ -1,0 +1,35 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+title Systems Model
+
+' Main application
+component "Desktop GUI\n(pyEel)" as GUI
+component "Collections Manager" as Collections
+component "Thumbnail Generator" as Thumbnails
+component "Database\n(Postgres?)" as DB
+component "Scoring Engine\n(OpenCV + Metrics)" as Scoring
+component "Preference Model\n(User-Trained AI)" as Preference
+component "Near-Duplicate Detection" as Duplicates
+
+' Relationships
+GUI --> Collections : Manage collections\nImport/Add/View
+GUI --> Preference : Refine preferences\nView results
+GUI --> Duplicates : Run duplicate detection\nShow suggestions
+
+Collections --> DB : Store/retrieve collections\nPhotos & metadata
+Collections --> Thumbnails : Generate thumbnails on import
+Thumbnails --> DB : Store thumbnails
+
+Collections --> Scoring : Send photos for analysis
+Scoring --> DB : Store image metrics
+Scoring --> Preference : Provide metrics for evaluation
+
+Preference --> DB : Save preference profiles
+Preference --> GUI : Update UI with\nranked/categorized photos
+
+Duplicates --> DB : Access stored photos/metrics
+Duplicates --> GUI : Suggest best photo from duplicates
+
+@enduml

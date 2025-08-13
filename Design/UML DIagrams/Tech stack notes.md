@@ -2,7 +2,7 @@
 
 This document should hopefully sufficiently describe the roles of each component which is to make up the AI photo culling/grading/educational application. It will reference the sequence diagram of general use cases. This is only a high level overview of what is probably to happen. This document is only intended to ensure that everyone is on the same page regarding the jobs of each component within the system
 
-## Desktop GUI
+## Desktop GUI - MVC pattern
 
 Launching this should intitally give splashscreen, and launch into a GUI which shows a sidebar with quick navagation options. With a list of all collections with sorting options. 
 
