@@ -1,5 +1,6 @@
 ## ------ OTHER PROJECT FILES ------ ##
 import PhotoAnalysis as Analysis
+import FileHandle as FileHandler
 
 ## ------ IMPORTS AND EEL SET UP ------ ##
 import eel
@@ -11,6 +12,7 @@ from tkinter import filedialog
 eel.init('web')
 
 ## ------ EEL EXPOSED FUNCTIONS ------ ##
+## Create exposed wrapper functions for Eel to call from JavaScript
 @eel.expose
 def onStart():
     ## get the users root directory i.e. c:\Users\<username>\documents 
