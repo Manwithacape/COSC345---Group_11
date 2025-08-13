@@ -1,3 +1,7 @@
+## ------ OTHER PROJECT FILES ------ ##
+import PhotoAnalysis as Analysis
+
+## ------ IMPORTS AND EEL SET UP ------ ##
 import eel
 import os
 import tkinter as tk
@@ -6,7 +10,7 @@ from tkinter import filedialog
 # Initialize the eel web folder
 eel.init('web')
 
-
+## ------ EEL EXPOSED FUNCTIONS ------ ##
 @eel.expose
 def onStart():
     ## get the users root directory i.e. c:\Users\<username>\documents 
@@ -27,9 +31,6 @@ def onStart():
     print(f"Data directory initialized at: {data_dir}")
     return "Application started successfully!"
 
-    
-
-
 @eel.expose
 def add_numbers(a, b):
     """Function to add two numbers."""
@@ -46,6 +47,9 @@ def open_file():
     else:
         return "No file selected"
 
+## ------ HELPER FUNCTIONS ------ ##
 
+
+## ------ MAIN EXECUTION ------ ##
 if __name__ == '__main__':
     eel.start('index.html', size=(800, 600))

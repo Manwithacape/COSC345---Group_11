@@ -15,5 +15,17 @@ as always pull before you push.
 
 # Group Members
 
+# Organization 
+
+## Eel Exposure 
+please only Expose eel function in 'App.py'. 
+
+## Function Duplication 
+Please search for a functions before creating a new one.
+
+## Javascript
+please do not use inlined js functions in .html files. please use main.js or seperate .js files and include them in main.js
+
+
 
 
