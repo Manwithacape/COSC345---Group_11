@@ -4,7 +4,9 @@ This document should hopefully sufficiently describe the roles of each component
 
 ## Desktop GUI - MVC pattern
 
-Launching this should intitally give splashscreen, and launch into a GUI which shows the collections in a side bar on LHS, images from the selected collection (if any) inthe middle of the screen, and details about the image that has been selected (if any) on the RHS of the screen in a side car
+Launching this should intitally give splashscreen, and launch into a GUI which shows a sidebar with quick navagation options. With a list of all collections with sorting options. 
+
+Use dom manipulation via javascript to stay on the same page. Use python eel calls to do openCV tasks whos results are stored in local directories.  
 
 pyEel - Daniel has found a good Python gui thing. Like web dev?
 
@@ -21,6 +23,8 @@ When a user imports images, there is either the option to add to a collection, c
 ## Thumbnail generator
 
 On import, thumbnails for each image should be generated and stored within the database. This is to ensure that even in the even that the images are not stored on the computer, it is still possible to use the application in a more basic manner. 
+
+Use openCV.resize();
 
 ---
 
@@ -42,6 +46,8 @@ Would have to store:
 
 This will be some OpenCV black magic. Assuming it wouldn't be too difficult to find something online for face detection, and a solid way to score all the metrics we come up with. This should hopefully be quite well documented somewhere already and ideally not too time consuming to have working as a prototype.
 
+Detect and map openCV results into 0-1 metrics. i.e., sharpness 0.2 is a very blurry image.
+
 The scoring engine will be heavily relied upon to find the good and bad photos. The metrics should probably be kept flexible and easy to change for easier optimisations further down the line. See last paragraph of Preference model
 
 ---
@@ -58,5 +64,7 @@ This preference model will likely only look at the metrics computed by the scori
 
 ## Near-duplicate detection
 Should be able to detect when photos look very similar and pick out either the best or least bad. Useful for when there is a burst of photos. Probably done through the OpenCV engine as well. Would have to work out a way to make it store easily within the database. 
+
+Probably sift feature matches. 
 
 ---
