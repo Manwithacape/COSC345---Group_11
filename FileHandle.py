@@ -1,6 +1,7 @@
 ## ------ IMPORTS ------ ##
 import os
 import tkinter as tk
+import json
 from tkinter import filedialog
 
 ## ------ FILE HANDLE FUNCTION ------ ##
@@ -60,3 +61,22 @@ def select_directory():
         return directory_path
     else:
         return None
+    
+
+def add_element_to_json(json_file, element):
+    """
+    Adds an element to a JSON file.
+    
+    :param json_file: The path to the JSON file.
+    :param element: The element to add to the JSON file.
+    """
+  
+    if not os.path.exists(json_file):
+        with open(json_file, 'w') as f:
+            json.dump([], f)  # Initialize with an empty list
+
+    with open(json_file, 'r+') as f:
+        data = json.load(f)
+        data.append(element)
+        f.seek(0)
+        json.dump(data, f, indent=4)

@@ -19,19 +19,17 @@ def onStart():
     root_dir = os.path.expanduser('~')
     print(f"Root directory: {root_dir}")
 
-
     ## create or find a direcory for storing data called photoreview 
-    data_dir = os.path.join(root_dir, 'photoreview')
+    PhotoSIFT_dir = find_or_create_directory(os.path.join(root_dir, 'PhotoSIFT'));
 
-    if not os.path.exists(data_dir):
-        os.makedirs(data_dir)
+    ## create or find a directory for called user in the PhotoSIFT directory
+    user_dir = find_or_create_directory(os.path.join(PhotoSIFT_dir, 'user'));
 
-    ## Create or find a directory for storing collections called collections
-    collections_dir = os.path.join(data_dir, 'collections')
-    if not os.path.exists(collections_dir):
-        os.makedirs(collections_dir)
-    print(f"Data directory initialized at: {data_dir}")
-    return "Application started successfully!"
+    ## if there is no users.json file, create it
+    users_file = os.path.join(user_dir, 'users.json')
+    if not os.path.exists(users_file):
+        with open(users_file, 'w') as f:
+            f.write('{}')
 
 @eel.expose
 def add_numbers(a, b):
@@ -51,7 +49,14 @@ def open_file():
 
 ## ------ HELPER FUNCTIONS ------ ##
 
+def find_or_create_directory(_directory_name):
+    """Find or create a directory with the given name."""
+    if not os.path.exists(_directory_name):
+        os.makedirs(_directory_name)
+
+    return _directory_name
 
 ## ------ MAIN EXECUTION ------ ##
 if __name__ == '__main__':
-    eel.start('index.html', size=(800, 600))
+    # Set the app icon (toolbar icon) for the Eel window
+    eel.start('index.html', size=(800, 600), )

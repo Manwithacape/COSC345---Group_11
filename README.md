@@ -13,6 +13,21 @@ now pulling only pulls from isgb. pushing now pushes to isgb and github.
 
 as always pull before you push. 
 
+# General Git
+*Please DO NOT commit directly to main. This will be our stable branch.*
+
+to see your local branches:
+`git branch`
+
+to create a branch:
+`git branch <branch-name>`
+
+to get onto a branch
+`git checkout <branch-name>`
+commits are now commited to that branch and pushing now pushes the branch to the online origin
+
+I think Daniel is our git guy and will most likely handle merging in branches. And commiting to the stable branch. 
+ 
 # Group Members
 
 # Organization 

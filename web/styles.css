@@ -9,6 +9,8 @@
     margin: 0em;
     padding: 0em;
     box-sizing: border-box;
+
+    font-family: 'Open Sans', sans-serif;
 }
 
 :root {
@@ -17,14 +19,15 @@
   --text: black;
   
   --primary : white;
-  --secondary :  rgb(50, 101, 142);
-  --tertiary : rgb(140, 81, 38);
+  --secondary :  black;
+  --tertiary : rgb(37, 103, 207);
 
   --shadow_color: rgba(0, 0, 0, 0.565);
   --shadow_size: 0.5em 0.5em 0.5em;
   --shadow: var(--shadow_size) var(--shadow_color);
 
   --transition: all 0.3s ease-in-out;
+  --border: 1px solid var(--secondary);
 }
 
 /* Global Style Classes */
@@ -59,26 +62,165 @@
     box-shadow: var(--shadow);
 }
 
+.icon-button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    padding: 0.5em;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        object-position: center;
+    }
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--secondary);
+    padding: var(--spaceing);
+    margin: var(--spaceing);
+    width: 50%;
+
+    h2 {
+        margin-bottom: var(--spaceing);
+        text-decoration: underline;
+    }
+
+    .form-label-input-group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: var(--spaceing);
+
+        label {
+            margin: 0em;
+            padding: 0em;
+        }
+
+        input {
+            padding: 0.5em;
+            border: var(--border);
+            border-radius: 0em;
+
+        }
+    }
+}
+
 /* MAIN LAYOUT STYLES */
+header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    height: 5em;
+    width: 100%;
+    padding: var(--spaceing);
+
+    border-bottom: 1px solid var(--secondary);
+
+    a {
+        text-decoration: none;
+        color: var(--text);
+        display: flex;
+        flex-direction: row;
+        align-self: center;
+        justify-content: left;
+
+        h1 {
+            font-size: 3.5em;
+            margin: 0em;
+            padding: 0em;
+            color: var(--text);
+        }
+
+        img {
+            width: 3.5em;
+            height: 3.5em;
+            margin-right: 0.5em;
+        }
+    }
+
+    #userIcon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+       
+
+        #userText {
+            padding-right: var(--spaceing);
+        }
+
+        img {
+            object-fit: cover;
+            object-position: center;
+             width: 3.5em;
+            height: 3.5em;
+            border-radius: 50%;
+            border: 1px solid var(--secondary);
+            overflow: hidden;
+        }
+    }
+}
+
+html {
+    min-height: 100vh;
+}
+
 body {
     display: flex;
     flex-direction: column;
-    height: 100vh;
-
+    min-height: 100vh;
+    width: 100%;
 }
 
 main {
     display: flex;
     flex-direction: row;
-    height: 100%;
+    min-height: 100vh;
+    justify-content: left;
+
+    content-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+    }
 }
 
 #sidebar {
-    display: flex;
-    flex-direction: row;
-    width: 25%;
-    background-color: gray;
+    position: relative;
+    margin: 0em;
+    padding: 0em;
+    height: 100vh;
+    border-right: 1px solid var(--secondary);
 
+    #sidebar-controls {
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid var(--secondary);
+        height: 100%;
+        width: 3em;
+    }
+
+    #sidebar-content {
+        display: flex;
+        flex-direction: column;
+        padding: var(--spaceing);
+        width: 20em;
+        height: 100%;
+    }
+
+    #resizer {
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 1px;
+        height: 100%;
+        background-color: var(--secondary);
+        cursor: ew-resize;
+    }
 }
 
 #content-container {
@@ -97,13 +239,13 @@ main {
     display: flex;
     align-items: center;
     margin-bottom: 1em;
+    border: 1px solid var(--secondary);
 }
 
 #collection-card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
-    gap: 1rem;
-    padding: 1em;
+    gap: var(--spaceing);
 
 
     .collection-card {

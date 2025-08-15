@@ -2,119 +2,50 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Eel Example</title>
+        <title>Landing Page</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" type="text/css" href="/styles.css">
-        <script type="text/javascript" src="scripts/main.js"></script>
+        <link rel="icon" type="image/png" href="/favicon.png">
         <script type="text/javascript" src="/eel.js"></script>
+        <script type="text/javascript" src="scripts/main.js"></script>
     </head>
     <body>
-        <header> 
-            <h1>Photo Review</h1>
+        <header>
+            <h1> Welcome to PhotoSift</h1>
+            <p>Your personal photo review and organization tool.</p>
         </header>
 
-        <main>
-            <!-- This is the side bar -->
-            <aside id="sidebar">
-                <section id="sidebar-content">
+        <body>
+            <form class="form" id="login">
+                <h2 class="form-heading">Login</h2>
 
-                </section>
-                
-                <div id="resizer"></div>
-            </aside>
-            
-            <!-- This is The main content of the page we can change its content so that no page loading is required-->
-            <section id="content-container">
-                
+                <div class="form-label-input-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-label-input-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <a href="dashboard.html">Skip For debug</a>
+                <button class="button" type="submit">Login</button>
+            </form>
+            <h2>Or</h2>
+            <form id="signup">
+                <h2 class="form-heading">Sign Up</h2>
 
-                <div id="collection-card-container">
-                    <div id="collection-card-search">
-                        <input type="text" placeholder="Search Collections...">
-                    </div>
+                <div class="form-label-input-group">
+                    <label for="new-username">Username:</label>
+                    <input type="text" id="new-username" name="new-username" required>
+                </div>
+                <div class="form-label-input-group">
+                    <label for="new-password">Password:</label>
+                    <input type="password" id="new-password" name="new-password" required>
+                </div>
 
-                    <div id="collection-card-grid">   
-                        <div class="collection-card">
-                            <img class="collection-card-image" src="images/doomtda.jpeg" alt="Placeholder Image">
-                            <div class="collection-card-header">
-                                <h2 class="underline">Some Collection</h2>
-                                <h4> 03/07/2003 </h4>
-                            </div>
-                            <div class="collection-card-tag"></div>
-                        </div> <!-- This is the collection card -->
+                <button class="button" type="submit" onclick="registerUser()">Sign Up</button>
+            </form>
 
-                        <div class="collection-card">
-                            <img class="collection-card-image" src="images/doomtda.jpeg" alt="Placeholder Image">
-                            <div class="collection-card-header">
-                                <h2 class="underline">Some Collection</h2>
-                                <h4> 03/07/2003 </h4>
-                            </div>
-                            <div class="collection-card-tag"></div>
-                        </div> <!-- This is the collection card -->
-
-                        <div class="collection-card">
-                            <img class="collection-card-image" src="images/doomtda.jpeg" alt="Placeholder Image">
-                            <div class="collection-card-header">
-                                <h2 class="underline">Some Collection</h2>
-                                <h4> 03/07/2003 </h4>
-                            </div>
-                            <div class="collection-card-tag"></div>
-                        </div> <!-- This is the collection card -->
-
-                        <div class="collection-card">
-                            <img class="collection-card-image" src="images/doomtda.jpeg" alt="Placeholder Image">
-                            <div class="collection-card-header">
-                                <h2 class="underline">Some Collection</h2>
-                                <h4> 03/07/2003 </h4>
-                            </div>
-                            <div class="collection-card-tag"></div>
-                        </div> <!-- This is the collection card -->
-
-                        <div class="collection-card">
-                            <img class="collection-card-image" src="images/doomtda.jpeg" alt="Placeholder Image">
-                            <div class="collection-card-header">
-                                <h2 class="underline">Some Collection</h2>
-                                <h4> 03/07/2003 </h4>
-                            </div>
-                            <div class="collection-card-tag"></div>
-                        </div> <!-- This is the collection card -->
-
-                        <div class="collection-card">
-                            <img class="collection-card-image" src="images/doomtda.jpeg" alt="Placeholder Image">
-                            <div class="collection-card-header">
-                                <h2 class="underline">Some Collection</h2>
-                                <h4> 03/07/2003 </h4>
-                            </div>
-                            <div class="collection-card-tag"></div>
-                        </div> <!-- This is the collection card -->
-
-                        <div class="collection-card">
-                            <img class="collection-card-image" src="images/doomtda.jpeg" alt="Placeholder Image">
-                            <div class="collection-card-header">
-                                <h2 class="underline">Some Collection</h2>
-                                <h4> 03/07/2003 </h4>
-                            </div>
-                            <div class="collection-card-tag"></div>
-                        </div> <!-- This is the collection card -->
-
-                        <div class="collection-card">
-                            <img class="collection-card-image" src="images/doomtda.jpeg" alt="Placeholder Image">
-                            <div class="collection-card-header">
-                                <h2 class="underline">Some Collection</h2>
-                                <h4> 03/07/2003 </h4>
-                            </div>
-                            <div class="collection-card-tag"></div>
-                        </div> <!-- This is the collection card -->
-
-                        <div class="collection-card">
-                            <img class="collection-card-image" src="images/doomtda.jpeg" alt="Placeholder Image">
-                            <div class="collection-card-header">
-                                <h2 class="underline">Some Collection</h2>
-                                <h4> 03/07/2003 </h4>
-                            </div>
-                            <div class="collection-card-tag"></div>
-                        </div> <!-- This is the collection card -->
-                    </div> <!-- This is the collection card grid -->    
-                </div> <!-- This is the card container -->
-            </section> <!-- This is the content container -->
-        </main>
+        </body>
     </body>
 </html>
