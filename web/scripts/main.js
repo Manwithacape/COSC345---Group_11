@@ -15,17 +15,9 @@ window.onload = function() {
     });
 };
 
-function addNumbers() {
-    eel.add_numbers(1, 2)(function(result) {
-        document.getElementById("output").innerText = "Result: " + result + " (from Python!)";
-    });
-}
 
-function open_file() {
-    eel.open_file()(function(result) {
-        document.getElementById("output").innerText = "File opened: " + result;
-    });
-}
+
+
 
 // ------ SIDEBAR CONTROLS ------
 function hideSidebar() {
@@ -52,6 +44,23 @@ function toggleSidebar() {
         hideSidebar();
     }
 }
+
+// ------ COLLECTION CREATION ------
+function handleCreateCollection(event) {
+    event.preventDefault(); // Prevent form from submitting normally
+    const collectionName = document.getElementById("collection-name").value;
+    const collectionDescription = document.getElementById("collection-description").value;
+    const collectionSource = document.getElementById("collection-source").value;
+    eel.create_collection(collectionName, collectionDescription, collectionSource);
+}
+
+function selectDirectory() {
+    eel.select_directory('directory')(function(directory) {
+        document.getElementById("collection-source").value = directory;
+        document.getElementById("collection-source-output").innerText = "Selected Directory: " + directory;
+    });
+}
+
 
 // ------ AUTOMATICALLY LOADED ELEMENTS ------
 function loadHeader() {
