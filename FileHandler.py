@@ -31,7 +31,7 @@ class FileHandler:
             "description": colletion_description,
             "created_on": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "source": collection_source,
-            "photos": []
+            "photos": self.get_files(collection_source, include_subdirs=True, file_types=['.jpg', '.png', '.jpeg'])
         }
         json_file_path = os.path.join(new_collection_path, 'collection.json')
         self.write_json(default_data, json_file_path)
@@ -57,8 +57,16 @@ class FileHandler:
         return file_path
     
     @staticmethod
-    def get_files(path):
+    def get_files(path, include_subdirs=False, file_types=None):
         """Get all files in a directory."""
         if not os.path.exists(path):
             raise FileNotFoundError(f"The path {path} does not exist.")
-        return [os.path.join(path, f) for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+        
+        files = []
+        for root, dirs, filenames in os.walk(path):
+            for filename in filenames:
+                if file_types is None or any(filename.endswith(ext) for ext in file_types):
+                    files.append(os.path.join(root, filename))
+            if not include_subdirs:
+                break
+        return files
