@@ -2,6 +2,7 @@
 import os
 import tkinter as tk
 import json
+import rawpy  # Ensure you have rawpy installed for RAW file handling
 from tkinter import filedialog
 from datetime import datetime
 
@@ -29,11 +30,11 @@ class FileHandler:
         # Create a default JSON file for the collection
         # individual photo data - this is packed into a list and that list is used to create the collection data
         photos_data = []
-        photo_files = self.get_files(collection_source, include_subdirs=True, file_types=['.jpg', '.png', '.jpeg'])
+        photo_files = self.get_files(collection_source, include_subdirs=True)
         for photo in photo_files:
             photos_data.append({
                 "source_path": photo,
-                "resized_path": None, ## Placeholder for resized image path
+                "preview_path": self.extract_jpg_from_raw(photo, new_collection_path),
                 "analysis": {
                     "sharpness": None,
                     "exposure": None,
@@ -92,3 +93,33 @@ class FileHandler:
             if not include_subdirs:
                 break
         return files
+    
+    def extract_jpg_from_raw(self, raw_file_path, output_path):
+        """Extract JPG files from a RAW file."""
+        file_ext = os.path.splitext(raw_file_path)[1]
+        file_name = f"{os.path.basename(raw_file_path)}{file_ext}"
+
+        # If this file is a jpg, png, or jpeg, copy it to the output path and return the path to the copied file
+        if file_name.lower().endswith(('.jpg', '.jpeg', '.png')):
+            output_file_path = os.path.join(output_path, f"{os.path.splitext(file_name)[0]}_preview.jpg")
+            with open(raw_file_path, 'rb') as src_file:
+                with open(output_file_path, 'wb') as dest_file:
+                    dest_file.write(src_file.read())
+            return output_file_path
+
+        # Try to extract preview JPEG from RAW file
+        try:
+            with rawpy.imread(raw_file_path) as raw:
+                thumb = raw.extract_thumb()
+                if thumb.format == rawpy.ThumbFormat.JPEG:
+                    output_file_path = os.path.join(output_path, f"{os.path.splitext(file_name)[0]}_preview.jpg")
+                    with open(output_file_path, 'wb') as f:
+                        f.write(thumb.data)
+                    return output_file_path
+                else:
+                    print(f"No JPEG preview found in RAW file: {raw_file_path}")
+                    return None
+        except Exception as e:
+            print(f"Error extracting preview from RAW file {raw_file_path}: {e}")
+            return None
+        
