@@ -21,20 +21,41 @@ class FileHandler:
     
     def create_collection(self, collection_name, colletion_description, collection_source):
         """Create a new collection directory and a default JSON file."""
-        print(f"Creating collection: {collection_name}")
+        
+        # Create a new collection directory
         collection_path = os.path.join(self.Collections_dir, collection_name)
         new_collection_path = self.create_directory(collection_path)
         
         # Create a default JSON file for the collection
-        default_data = {
+        # individual photo data - this is packed into a list and that list is used to create the collection data
+        photos_data = []
+        photo_files = self.get_files(collection_source, include_subdirs=True, file_types=['.jpg', '.png', '.jpeg'])
+        for photo in photo_files:
+            photos_data.append({
+                "source_path": photo,
+                "resized_path": None, ## Placeholder for resized image path
+                "analysis": {
+                    "sharpness": None,
+                    "exposure": None,
+                    "saturation": None,
+                    "contrast": None,
+                    "brightness": None,
+                    "faces": []
+                }
+            })
+
+        # Create collection data 
+        collection_data = {
             "name": collection_name, 
             "description": colletion_description,
             "created_on": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "source": collection_source,
-            "photos": self.get_files(collection_source, include_subdirs=True, file_types=['.jpg', '.png', '.jpeg'])
+            "source_path": collection_source,
+            "photos": photos_data
         }
+
+        # Write the collection data to a JSON file
         json_file_path = os.path.join(new_collection_path, 'collection.json')
-        self.write_json(default_data, json_file_path)
+        self.write_json(collection_data, json_file_path)
         
     def write_json(self, data, file_path):
         """Write data to a JSON file."""
