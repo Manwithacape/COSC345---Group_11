@@ -40,7 +40,8 @@ class FileHandler:
                     "saturation": None,
                     "contrast": None,
                     "brightness": None,
-                    "faces": []
+                    "faces": [],
+                    "near-duplicates": []  # Placeholder for near-duplicate images
                 }
             })
 
