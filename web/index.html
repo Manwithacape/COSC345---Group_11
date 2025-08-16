@@ -15,37 +15,37 @@
         </header>
 
         <body>
-            
-            <form class="form" id="login">
-                <h2 class="form-heading">Login</h2>
+            <div class="form-container">
+                <form class="form shadow" id="login">
+                    <h1 class="form-heading">Login</h1>
 
-                <div class="form-label-input-group">
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" name="username" required>
-                </div>
-                <div class="form-label-input-group">
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                <a href="dashboard.html">Skip For debug</a>
-                <button class="button" type="submit">Login</button>
-            </form>
-            <h2>Or</h2>
-            <form id="signup">
-                <h2 class="form-heading">Sign Up</h2>
+                    <div class="form-label-input-group">
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    <div class="form-label-input-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <a href="dashboard.html">Skip For debug</a>
+                    <button class="button" type="submit">Login</button>
+                </form>
+                <h2>Or</h2>
+                <form id="signup" class="form shadow" onsubmit="handleSignUp(event)">
+                    <h2 class="form-heading">Sign Up</h2>
 
-                <div class="form-label-input-group">
-                    <label for="new-username">Username:</label>
-                    <input type="text" id="new-username" name="new-username" required>
-                </div>
-                <div class="form-label-input-group">
-                    <label for="new-password">Password:</label>
-                    <input type="password" id="new-password" name="new-password" required>
-                </div>
+                    <div class="form-label-input-group">
+                        <label for="new-username">Username:</label>
+                        <input type="text" id="new-username" name="new-username" required>
+                    </div>
+                    <div class="form-label-input-group">
+                        <label for="new-password">Password:</label>
+                        <input type="password" id="new-password" name="new-password" required>
+                    </div>
 
-                <button class="button" type="submit" onclick="registerUser()">Sign Up</button>
-            </form>
-
+                    <button class="button" type="submit" onclick="registerUser()">Sign Up</button>
+                </form>
+            </div>  
         </body>
     </body>
 </html>
