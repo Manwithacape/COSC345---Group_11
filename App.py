@@ -40,4 +40,4 @@ def select_directory(selection_type='directory'):
 if __name__ == '__main__':
     # Set the app icon (toolbar icon) for the Eel window
     eel.init('web')
-    eel.start('index.html', size=(1920, 1080))
+    eel.start('dashboard.html', size=(1920, 1080))
