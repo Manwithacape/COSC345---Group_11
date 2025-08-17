@@ -2,28 +2,40 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Eel Example</title>
+        <title>PhotoSIFT</title>
         <link rel="stylesheet" type="text/css" href="/styles.css">
+        <script type="text/javascript" src="scripts/elementloading.js"></script>
         <script type="text/javascript" src="scripts/main.js"></script>
         <script type="text/javascript" src="/eel.js"></script>
     </head>
     <body>
         <!-- HEADER AUTOMATICALLY LOADED HERE -->
-    <form class="form" id="upload-collection-form" onsubmit="handleCreateCollection(event)">
-            <h2 class="form-heading">Upload Collection</h2>
+        <div class="form-container">
+            <form class="form shadow" id="upload-collection-form" onsubmit="handleCreateCollection(event)">
+                <h1 class="form-heading">Upload Collection</h1>
 
-            <label for="collection-name">Collection Name:</label>
-            <input type="text" id="collection-name" name="collection-name" required>
+                <div class="form-label-input-group">
+                    <label for="collection-name">Collection Name:</label>
+                    <input type="text" id="collection-name" name="collection-name" required>
+                </div>
+                
+                <div class="form-label-input-group">
+                    <label for="collection-description">Description:</label>
+                    <input type="text" id="collection-description" name="collection-description" required>
+                </div>
+                
+                <div class="form-label-input-group">
+                    <label id="collection-source-output" for="collection-source">Select Directory:</label>
+                    <button type="button" class="button" onclick="selectDirectory()">Select Directory</button>
+                    <input type="hidden" id="collection-source" name="collection-source">
+                </div>
 
-            <label for="collection-description">Description:</label>
-            <input type="text" id="collection-description" name="collection-description" required>
-
-            <label id="collection-source-output" for="collection-source">Select Directory:</label>
-            <button type="button" class="button" onclick="selectDirectory()">Select Directory</button>
-            <input type="hidden" id="collection-source" name="collection-source">
-
-            <!-- Submit button -->
-            <input type="submit" value="Create Collection" class="button">
-
+                <!-- Submit button -->
+                <div class="form-controls">
+                    <a href="dashboard.html" class="button">Cancel</a>
+                    <input type="submit" value="Create Collection" class="button">
+                </div>
+            </form>
+        </div>
     </body>
 </html>

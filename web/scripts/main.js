@@ -23,17 +23,22 @@ window.onload = function() {
 function hideSidebar() {
     const sidebar = document.getElementById("sidebar-content");
     const resizer = document.getElementById("resizer");
-    
+    const toggleButton = document.getElementById("toggle-sidebar");
+
     sidebar.style.display = "none";
     resizer.style.display = "none";
+    toggleButton.src = "images/icons/Sidebar Controls/show-hollow.png"; // Change icon to show sidebar
+    toggleButton.alt = "show sidebar icon"; // Update alt text for accessibility
 }
 
 function showSidebar() {
     const sidebar = document.getElementById("sidebar-content");
     const resizer = document.getElementById("resizer");
+    const toggleButton = document.getElementById("toggle-sidebar");
     
     sidebar.style.display = "block";
     resizer.style.display = "block";
+    toggleButton.src = "images/icons/Sidebar Controls/hide-hollow.png"; // Change icon to hide sidebar
 }
 
 function toggleSidebar() {
