@@ -18,7 +18,9 @@ eel.init('web')
 @eel.expose
 def onStart():
     # db connect
-    db.init_db()
+    database = db.Database()
+    database.init_db()
+
 
     # Continue with file system setup
     root_dir = os.path.expanduser('~')
