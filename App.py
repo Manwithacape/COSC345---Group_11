@@ -8,9 +8,9 @@ import os
 import sys
 import tkinter as tk
 from tkinter import filedialog
-from FileHandler import FileHandler as fh
+from FileHandler import FileHandler
 import db
-FileHandler = fh.FileHandler()
+FileHandler = FileHandler()
 # Initialize the eel web folder
 eel.init('web')
 
