@@ -2,4 +2,4 @@
 __pycache__/
 
 ## db.cpython should not be ignored
-db.cpython*
+*.pyc
