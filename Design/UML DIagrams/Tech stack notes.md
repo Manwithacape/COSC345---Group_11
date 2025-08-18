@@ -30,7 +30,12 @@ Use openCV.resize();
 
 ## Database
 
-Still TBC? Postgres?
+Postgres
+psycopg2
+https://www.psycopg.org/docs/
+https://pypi.org/project/psycopg2/
+
+Appears to be a very popular tool for connecting to Postgres DB.
 
 Would have to store:
 - Thumbnails

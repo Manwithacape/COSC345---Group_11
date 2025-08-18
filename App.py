@@ -1,6 +1,6 @@
 ## ------ OTHER PROJECT FILES ------ ##
 import PhotoAnalysis as Analysis
-import FileHandle as FileHandler
+import FileHandler as fh
 
 ## ------ IMPORTS AND EEL SET UP ------ ##
 import eel
@@ -9,7 +9,7 @@ import sys
 import tkinter as tk
 from tkinter import filedialog
 import db
-
+FileHandler = fh.FileHandler()
 # Initialize the eel web folder
 eel.init('web')
 
@@ -41,31 +41,33 @@ def onStart():
             f.write('{}')
 
 @eel.expose
-def add_numbers(a, b):
-    """Function to add two numbers."""
-    return a + b
+def create_collection(collection_name, colletion_description, collection_source):
+    """ 
+    Wrapper function to create a new collection using the FileHandler class.
 
+    Args:
+        collection_name (str): The name of the collection.
+        colletion_description (str): A description of the collection.
+        collection_source (str): The source path for the collection.
+    """
+    FileHandler.create_collection(collection_name=collection_name, 
+                                  colletion_description=colletion_description,
+                                  collection_source=collection_source)
+                                  
 @eel.expose
-def open_file():
-    """open a file dialog to select a file and return the file path."""
-    root = tk.Tk()
-    root.withdraw()
-    file_path = filedialog.askopenfilename()
-    if file_path:
-        return file_path
-    else:
-        return "No file selected"
+def select_directory(selection_type='directory'):
 
-## ------ HELPER FUNCTIONS ------ ##
+    """
+    Wrapper function to open a file dialog for selecting a file or directory.
+    Args:
+        selection_type (str): Type of selection, either 'file' or 'directory'.
 
-def find_or_create_directory(_directory_name):
-    """Find or create a directory with the given name."""
-    if not os.path.exists(_directory_name):
-        os.makedirs(_directory_name)
+    Returns:
+        str: The path of the selected file or directory.
+    """
+    return FileHandler.open_file_dialog(selection_type)
 
-    return _directory_name
-
-## ------ MAIN EXECUTION ------ ##
 if __name__ == '__main__':
     # Set the app icon (toolbar icon) for the Eel window
-    eel.start('index.html', size=(800, 600), )
+    eel.init('web')
+    eel.start('dashboard.html', size=(1920, 1080))

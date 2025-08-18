@@ -21,6 +21,7 @@
   --primary : white;
   --secondary :  black;
   --tertiary : rgb(37, 103, 207);
+  --quaternary : silver;
 
   --shadow_color: rgba(0, 0, 0, 0.565);
   --shadow_size: 0.5em 0.5em 0.5em;
@@ -48,19 +49,24 @@
 }
 
 .button {
-    background-color: var(--secondary);
-    color: var(--primary);
+    background-color: var(--quaternary);
+    color: var(--secondary);
     padding: var(--spaceing);
     border: none;
     cursor: pointer;
+    text-decoration: none;
+    text-align: center;
 
     transition: var(--transition);
 }
 
 .button:hover {
     background-color: var(--tertiary);
+    color: var(--primary);
+    text-shadow: 0em 0em 1em white;
     box-shadow: var(--shadow);
 }
+
 
 .icon-button {
     background-color: transparent;
@@ -77,6 +83,16 @@
     }
 }
 
+.form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: var(--spaceing);
+}
+
 form {
     display: flex;
     flex-direction: column;
@@ -85,9 +101,16 @@ form {
     margin: var(--spaceing);
     width: 50%;
 
-    h2 {
+    h1 {
         margin-bottom: var(--spaceing);
+        text-align: center;
         text-decoration: underline;
+    }
+
+    .form-controls {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: var(--spaceing);
     }
 
     .form-label-input-group {

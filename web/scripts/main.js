@@ -15,33 +15,30 @@ window.onload = function() {
     });
 };
 
-function addNumbers() {
-    eel.add_numbers(1, 2)(function(result) {
-        document.getElementById("output").innerText = "Result: " + result + " (from Python!)";
-    });
-}
 
-function open_file() {
-    eel.open_file()(function(result) {
-        document.getElementById("output").innerText = "File opened: " + result;
-    });
-}
+
+
 
 // ------ SIDEBAR CONTROLS ------
 function hideSidebar() {
     const sidebar = document.getElementById("sidebar-content");
     const resizer = document.getElementById("resizer");
-    
+    const toggleButton = document.getElementById("toggle-sidebar");
+
     sidebar.style.display = "none";
     resizer.style.display = "none";
+    toggleButton.src = "images/icons/Sidebar Controls/show-hollow.png"; // Change icon to show sidebar
+    toggleButton.alt = "show sidebar icon"; // Update alt text for accessibility
 }
 
 function showSidebar() {
     const sidebar = document.getElementById("sidebar-content");
     const resizer = document.getElementById("resizer");
+    const toggleButton = document.getElementById("toggle-sidebar");
     
     sidebar.style.display = "block";
     resizer.style.display = "block";
+    toggleButton.src = "images/icons/Sidebar Controls/hide-hollow.png"; // Change icon to hide sidebar
 }
 
 function toggleSidebar() {
@@ -53,27 +50,62 @@ function toggleSidebar() {
     }
 }
 
+// ------ COLLECTION CREATION ------
+
+/**
+ * @function handleCreateCollection
+ * @description This function handles the creation of a new collection by gathering input values and calling the Eel function to create the collection.
+ * @param {*} event 
+ */
+function handleCreateCollection(event) {
+    event.preventDefault(); // Prevent form from submitting normally
+    const collectionName = document.getElementById("collection-name").value;
+    const collectionDescription = document.getElementById("collection-description").value;
+    const collectionSource = document.getElementById("collection-source").value;
+    eel.create_collection(collectionName, collectionDescription, collectionSource);
+}
+
+/**
+ * Function to select a directory using Eel.
+ * @function selectDirectory
+ * @description This function opens a directory selection dialog and updates the input field with the selected directory
+ * @param {string} selectionType - The type of selection, either 'file' or 'directory'.
+ * @returns {void}
+ */
+function selectDirectory(selectionType = 'directory') {
+    eel.select_directory(selectionType)(function(directory) {
+        document.getElementById("collection-source").value = directory;
+        document.getElementById("collection-source-output").innerText = "Selected Directory: " + directory;
+    });
+}
+
+
 // ------ AUTOMATICALLY LOADED ELEMENTS ------
+
+/**
+ * @function loadHeader
+ * @description This function fetches the header HTML file and inserts it into the body of the document.
+ */
 function loadHeader() {
-    // open the header file and insert it into the top of the body
     fetch('commonParts/header.html')
         .then(response => response.text())
         .then(data => {
             document.body.insertAdjacentHTML('afterbegin', data);
-            console.log("Header loaded successfully.");
         })
         .catch(error => {
             console.error("Error loading header:", error);
         });
 }
 
+/**
+ * @function loadSidebar
+ * @description This function fetches the sidebar HTML file and inserts it into the main container of the document.
+ */
 function loadSidebar() {
-    // open the sidebar file and insert it into the top of body.main
     fetch('commonParts/sidebar.html')
         .then(response => response.text())
         .then(data => {
             document.getElementById("main-container").insertAdjacentHTML('afterbegin', data);
-            console.log("Sidebar loaded successfully.");
         })
         .catch(error => {
             console.error("Error loading sidebar:", error);
