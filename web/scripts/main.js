@@ -7,7 +7,7 @@ window.onload = function() {
         if (Array.isArray(collections)) {
             collections.forEach(function(col) {
                 const imgPath = col.preview || null;
-                const card = createCollectionCard(col.name, "images/doomtda.jpeg", col.created_on);
+                const card = createCollectionCard(col.name, "images/Icons/General Icons/photo.png", col.created_on);
                 if (imgPath) {
                     eel.get_image_data_url(imgPath)(function(dataUrl) {
                         if (dataUrl) {
@@ -113,6 +113,9 @@ function handleCreateCollection(event) {
     const desc = document.getElementById("collection-description").value;
     const source = document.getElementById("collection-source").value;
     eel.create_collection(name, desc, source);
+
+    // redirect to dashboard after creation
+    window.location.href = "dashboard.html";
 }
 
 /**

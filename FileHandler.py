@@ -42,11 +42,9 @@ class FileHandler:
                     data = self.read_json(json_path)
                     if data:
                         preview = None
-                        if data.get('photos') and len(data['photos']) > 0:
-                            preview = data['photos'][0].get('preview_path')
                         collections.append({
                             'name': data.get('name', collection_name),
-                            'preview': preview,
+                            'preview': data.get('thumbnail'),
                             'created_on': data.get('created_on', '')
                         })
         return collections
@@ -70,9 +68,19 @@ class FileHandler:
         photos_data = []
         photo_files = self.get_files(collection_source, include_subdirs=True)
         for photo in photo_files:
+            # Generate a unique preview filename for each photo, including extension
+            preview_filename = f"{os.path.basename(photo)}_preview.jpg"
+            preview_path = os.path.join(new_collection_path, preview_filename)
+
+            # Normalize paths
+            photo = os.path.normpath(photo)
+            preview_path = os.path.normpath(preview_path)
+
+            # Save/copy the preview image to preview_path
+            self.extract_jpg_from_raw(photo, new_collection_path)  # This will save the preview image
             photos_data.append({
                 "source_path": photo,
-                "preview_path": self.extract_jpg_from_raw(photo, new_collection_path),
+                "preview_path": preview_path,
                 "analysis": {
                     "sharpness": None,
                     "exposure": None,
@@ -88,6 +96,7 @@ class FileHandler:
         collection_data = {
             "name": collection_name, 
             "description": colletion_description,
+            "thumbnail": photos_data[0]['preview_path'] if photos_data else None,
             "created_on": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "source_path": collection_source,
             "photos": photos_data
@@ -166,7 +175,7 @@ class FileHandler:
     @staticmethod
     def open_file_dialog(selection_type='file'):
         """
-        Open a file dialog to select a file or directory.
+        Open a file dialog to select a file or directory, with the dialog appearing on top.
 
         Args:
             selection_type (str): Type of selection ('file' or 'directory').
@@ -176,12 +185,14 @@ class FileHandler:
         """
         root = tk.Tk()
         root.withdraw()
+        root.attributes('-topmost', True)
         if selection_type == 'file':
-            file_path = filedialog.askopenfilename()
+            file_path = filedialog.askopenfilename(parent=root)
         elif selection_type == 'directory':
-            file_path = filedialog.askdirectory()
+            file_path = filedialog.askdirectory(parent=root)
         else:
             raise ValueError("Invalid selection type. Use 'file' or 'directory'.")
+        root.destroy()
         return file_path
     
     @staticmethod

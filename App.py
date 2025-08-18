@@ -46,16 +46,20 @@ def get_all_collections():
 
 @eel.expose
 def get_image_data_url(image_path):
-    """ 
-    THIS IS IMPORTANT FOR THE DASHBOARD TO DISPLAY IMAGES WEB PAGES
-    CHROME DOES NOT SUPPORT LOCAL FILES, SO WE CONVERT THEM TO BASE64 DATA URLS THEN PASS THEM TO THE FRONTEND
-    """
+    print(f"get_image_data_url called with: {image_path}")
     try:
+        dir_path = os.path.dirname(image_path)
+        print(f"Looking for: {image_path}")
+        print(f"Directory listing for {dir_path}: {os.listdir(dir_path) if os.path.exists(dir_path) else 'Directory does not exist'}")
+        print(f"Exists? {os.path.isfile(image_path)}")
+        if not os.path.isfile(image_path):
+            print(f"File does not exist: {image_path}")
+            return None
         with open(image_path, "rb") as img_file:
             encoded = base64.b64encode(img_file.read()).decode('utf-8')
-            # Guess mime type from extension
             ext = os.path.splitext(image_path)[1].lower()
             mime = "image/jpeg" if ext in [".jpg", ".jpeg"] else "image/png" if ext == ".png" else "image/*"
+            print(f"Successfully encoded image: {image_path}")
             return f"data:{mime};base64,{encoded}"
     except Exception as e:
         print(f"Error loading image {image_path}: {e}")
