@@ -1,7 +1,9 @@
 ## ------ IMPORTS ------ ##
+import os
+import sys
 import cv2 as cv 
 import numpy as np
-import os
+
 
 ## ------ IMAGE SCORING FUNCTIONS ------ ##
 def map(value, from_min, from_max, to_min, to_max):

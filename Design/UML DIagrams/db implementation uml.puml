@@ -1,0 +1,122 @@
+@startuml
+skinparam style strict
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+hide methods
+hide stereotypes
+
+entity users {
+  * user_id : BIGINT <<PK>>
+  --
+  name : TEXT
+  preferences : JSONB
+  created_at : TIMESTAMPTZ
+}
+
+entity collections {
+  * collection_id : BIGINT <<PK>>
+  --
+  user_id : BIGINT <<FK>>
+  name : TEXT
+  date_created : TIMESTAMPTZ
+}
+
+entity photos {
+  * photo_id : BIGINT <<PK>>
+  --
+  collection_id : BIGINT <<FK>>
+  file_path : TEXT <<UNIQUE>>
+  date_added : TIMESTAMPTZ
+}
+
+entity thumbnails {
+  * thumbnail_id : BIGINT <<PK>>
+  --
+  photo_id : BIGINT <<FK, UNIQUE>>
+  image_path : TEXT <<UNIQUE>>
+}
+
+entity exif_data {
+  * photo_id : BIGINT <<PK, FK>>
+  --
+  exif_id : BIGINT <<UNIQUE>>
+  thumbnail_id : BIGINT <<FK, UNIQUE>>
+  make : TEXT
+  model : TEXT
+  lens_model : TEXT
+  focal_length_mm : NUMERIC(6,2)
+  exposure_time : TEXT
+  f_number : NUMERIC(4,2)
+  iso_speed : INTEGER
+  datetime_original : TIMESTAMPTZ
+  gps_latitude : DOUBLE PRECISION
+  gps_longitude : DOUBLE PRECISION
+}
+
+entity scores {
+  * score_id : BIGINT <<PK>>
+  --
+  photo_id : BIGINT <<FK>>
+  metric_name : TEXT
+  value : DOUBLE PRECISION
+  created_at : TIMESTAMPTZ
+  --
+  <<UNIQUE(photo_id, metric_name)>>
+}
+
+entity faces {
+  * face_id : BIGINT <<PK>>
+  --
+  photo_id : BIGINT <<FK>>
+  bounding_box : JSONB
+  attributes : JSONB
+}
+
+entity image_comments {
+  * image_comment_id : BIGINT <<PK>>
+  --
+  photo_id : BIGINT <<FK>>
+  content : TEXT
+  created_at : TIMESTAMPTZ
+  created_by : BIGINT <<FK>>
+}
+
+entity collection_comments {
+  * collection_comment_id : BIGINT <<PK>>
+  --
+  collection_id : BIGINT <<FK>>
+  content : TEXT
+  created_at : TIMESTAMPTZ
+  created_by : BIGINT <<FK>>
+}
+
+entity near_duplicate_groups {
+  * group_id : BIGINT <<PK>>
+  --
+  created_at : TIMESTAMPTZ
+}
+
+entity near_duplicate_photos {
+  * group_id : BIGINT <<FK>>
+  * photo_id : BIGINT <<FK>>
+  --
+  similarity_score : DOUBLE PRECISION
+  --
+  <<PK(group_id, photo_id)>>
+}
+
+' ---------- Relationships ----------
+users ||--o{ collections
+collections ||--o{ photos
+photos ||--|| thumbnails
+photos ||--|| exif_data
+photos ||--o{ scores
+photos ||--o{ faces
+photos ||--o{ image_comments
+photos ||--o{ near_duplicate_photos
+collections ||--o{ collection_comments
+near_duplicate_groups ||--o{ near_duplicate_photos
+users ||--o{ image_comments : created_by
+users ||--o{ collection_comments : created_by
+
+@enduml

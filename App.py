@@ -5,8 +5,10 @@ import FileHandle as FileHandler
 ## ------ IMPORTS AND EEL SET UP ------ ##
 import eel
 import os
+import sys
 import tkinter as tk
 from tkinter import filedialog
+import db
 
 # Initialize the eel web folder
 eel.init('web')
@@ -15,6 +17,13 @@ eel.init('web')
 ## Create exposed wrapper functions for Eel to call from JavaScript
 @eel.expose
 def onStart():
+    # db connect
+    db.init_db()
+
+    # Continue with file system setup
+    root_dir = os.path.expanduser('~')
+    print(f"Root directory: {root_dir}")
+    
     ## get the users root directory i.e. c:\Users\<username>\documents 
     root_dir = os.path.expanduser('~')
     print(f"Root directory: {root_dir}")
