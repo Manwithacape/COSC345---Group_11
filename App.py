@@ -1,42 +1,15 @@
-import base64
-# Expose a function to serve images as base64 data URLs
-
-import eel
-
-@eel.expose
-def get_image_data_url(image_path):
-    try:
-        with open(image_path, "rb") as img_file:
-            encoded = base64.b64encode(img_file.read()).decode('utf-8')
-            # Guess mime type from extension
-            ext = os.path.splitext(image_path)[1].lower()
-            mime = "image/jpeg" if ext in [".jpg", ".jpeg"] else "image/png" if ext == ".png" else "image/*"
-            return f"data:{mime};base64,{encoded}"
-    except Exception as e:
-        print(f"Error loading image {image_path}: {e}")
-        return None
-    
-import eel
-import FileHandler as fh
-
-FileHandler = fh.FileHandler()
-
-# Expose a function to get all collections and their data from FileHandler
-@eel.expose
-def get_all_collections():
-    return FileHandler.get_all_collections()
-## ------ OTHER PROJECT FILES ------ ##
-import PhotoAnalysis as Analysis
-import FileHandler as fh
-
-## ------ IMPORTS AND EEL SET UP ------ ##
-import eel
 import os
+import base64
+import eel
 import tkinter as tk
 from tkinter import filedialog
 
+import FileHandler as fh
+import PhotoAnalysis as Analysis
+
 FileHandler = fh.FileHandler()
 
+## ------ EEL EXPOSED FUNCTIONS ------ ##
 @eel.expose
 def create_collection(collection_name, colletion_description, collection_source):
     """ 
@@ -64,7 +37,28 @@ def select_directory(selection_type='directory'):
     """
     return FileHandler.open_file_dialog(selection_type)
 
+@eel.expose
+def get_all_collections():
+    return FileHandler.get_all_collections()
+
+@eel.expose
+def get_image_data_url(image_path):
+    """ 
+    THIS IS IMPORTANT FOR THE DASHBOARD TO DISPLAY IMAGES WEB PAGES
+    CHROME DOES NOT SUPPORT LOCAL FILES, SO WE CONVERT THEM TO BASE64 DATA URLS THEN PASS THEM TO THE FRONTEND
+    """
+    try:
+        with open(image_path, "rb") as img_file:
+            encoded = base64.b64encode(img_file.read()).decode('utf-8')
+            # Guess mime type from extension
+            ext = os.path.splitext(image_path)[1].lower()
+            mime = "image/jpeg" if ext in [".jpg", ".jpeg"] else "image/png" if ext == ".png" else "image/*"
+            return f"data:{mime};base64,{encoded}"
+    except Exception as e:
+        print(f"Error loading image {image_path}: {e}")
+        return None
+
+## ------ MAIN FUNCTION ------ ##
 if __name__ == '__main__':
-    # Set the app icon (toolbar icon) for the Eel window
     eel.init('web')
     eel.start('dashboard.html', size=(1920, 1080))
