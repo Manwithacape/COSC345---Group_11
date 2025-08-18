@@ -64,7 +64,7 @@ def get_image_data_url(image_path):
     except Exception as e:
         print(f"Error loading image {image_path}: {e}")
         return None
-
+ 
 ## ------ MAIN FUNCTION ------ ##
 if __name__ == '__main__':
     eel.init('web')

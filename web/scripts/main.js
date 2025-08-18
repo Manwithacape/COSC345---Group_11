@@ -1,22 +1,34 @@
 // --- Automatic Element Loading ---
+
+function loadCollectionCardsSequentially(collections, index = 0) {
+    if (index >= collections.length) return;
+
+    const col = collections[index];
+    const imgPath = col.preview || null;
+    const card = createCollectionCard(col.name, "images/Icons/General Icons/photo.png", col.created_on);
+
+    if (imgPath) {
+        eel.get_image_data_url(imgPath)(function(dataUrl) {
+            if (dataUrl) {
+                card.querySelector('.collection-card-image').src = dataUrl;
+            }
+            addCollectionCardToGrid(card);
+            // Load the next card after this one finishes
+            loadCollectionCardsSequentially(collections, index + 1);
+        });
+    } else {
+        addCollectionCardToGrid(card);
+        loadCollectionCardsSequentially(collections, index + 1);
+    }
+}
+
 window.onload = function() {
     loadHeader();
     loadSidebar();
 
     eel.get_all_collections()(function(collections) {
         if (Array.isArray(collections)) {
-            collections.forEach(function(col) {
-                const imgPath = col.preview || null;
-                const card = createCollectionCard(col.name, "images/Icons/General Icons/photo.png", col.created_on);
-                if (imgPath) {
-                    eel.get_image_data_url(imgPath)(function(dataUrl) {
-                        if (dataUrl) {
-                            card.querySelector('.collection-card-image').src = dataUrl;
-                        }
-                    });
-                }
-                addCollectionCardToGrid(card);
-            });
+            loadCollectionCardsSequentially(collections);
         }
     });
 
@@ -80,11 +92,11 @@ function addCollectionCardToGrid(card, gridId = "collection-card-grid") {
 
 // --- Sidebar Controls ---
 function hideSidebar() {
-    setSidebarDisplay("none", "show-hollow.png", "show sidebar icon");
+    setSidebarDisplay("none", "show-hollow.png", "show sidebar icon", false);
 }
 
 function showSidebar() {
-    setSidebarDisplay("block", "hide-hollow.png", "hide sidebar icon");
+    setSidebarDisplay("block", "hide-hollow.png", "hide sidebar icon", true);
 }
 
 function toggleSidebar() {
@@ -96,12 +108,18 @@ function toggleSidebar() {
     }
 }
 
-function setSidebarDisplay(display, icon, alt) {
-    const sidebar = document.getElementById("sidebar-content");
+function setSidebarDisplay(display, icon, alt, border=true) {
+    const sidebar = document.getElementById("sidebar");
+    const sidebarContent = document.getElementById("sidebar-content");
     const resizer = document.getElementById("resizer");
     const toggleButton = document.getElementById("toggle-sidebar");
-    sidebar.style.display = display;
+    sidebarContent.style.display = display;
     resizer.style.display = display;
+    if (border) {
+        sidebar.style.borderRight = "1px solid var(--border-color)";
+    } else {
+        sidebar.style.borderRight = "none";
+    }
     toggleButton.src = `images/icons/Sidebar Controls/${icon}`;
     toggleButton.alt = alt;
 }
