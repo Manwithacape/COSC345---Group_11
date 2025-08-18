@@ -1,3 +1,6 @@
+## PhotoSIFT Application - Main Application File
+## This file initializes the Eel application and exposes functions for file handling and collection management.
+## ------ IMPORTS ------ ##
 import os
 import base64
 import eel

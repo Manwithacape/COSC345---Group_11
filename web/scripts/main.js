@@ -1,25 +1,16 @@
-// FUNCTIONS HERE 
-// inclutions from other js files
-
-// Run the onStart function when the page loads
-
-
+// --- Automatic Element Loading ---
 window.onload = function() {
-    // Automatic loading of common elements
     loadHeader();
     loadSidebar();
 
-    // Load all collections and render them as cards
-
     eel.get_all_collections()(function(collections) {
-        if (collections && Array.isArray(collections)) {
+        if (Array.isArray(collections)) {
             collections.forEach(function(col) {
-                let imgPath = col.preview ? col.preview : null;
-                let card = createCollectionCard(col.name, "images/doomtda.jpeg", col.created_on); // default image
+                const imgPath = col.preview || null;
+                const card = createCollectionCard(col.name, "images/doomtda.jpeg", col.created_on);
                 if (imgPath) {
                     eel.get_image_data_url(imgPath)(function(dataUrl) {
                         if (dataUrl) {
-                            // Set the image src to the data URL
                             card.querySelector('.collection-card-image').src = dataUrl;
                         }
                     });
@@ -32,106 +23,68 @@ window.onload = function() {
     console.log("Page loaded, initializing Eel...");
     eel.onStart()(function() {
         console.log("Application started successfully!");
-        if (document.getElementById("output")) {
-            document.getElementById("output").innerText = "Application started successfully!";
-        }
+        const output = document.getElementById("output");
+        if (output) output.innerText = "Application started successfully!";
     });
 };
 
+// --- Collection Card Functions ---
 /**
- * @function createCollectionCard
- * @description This function creates a collection card element that displays the collection's name, image, and date/time.
- * @param {string} collection_name - Display name and identifier for the collection.
- * @param {string} colletion_image_path - Path to the collection's thumbnail image.
- * @param {string} collection_date_time - Date and time associated with the collection, formatted as a string.
- * @returns {Element} - Returns a collection card element.
- * @example
- *  <a class="collection-card" href="collection-view.html">
-        <img class="collection-card-image" src="collection_image_path" alt="Collection Thumbnail for {collection_name}">
-        <div class="collection-card-header">
-            <h2 class="underline">{collection_name}</h2>
-            <h4>{collection_date_time}</h4>
-        </div>
-        <div class="collection-card-tag"></div>
-    </a>
+ * Creates a collection card element.
+ * @param {string} name - Collection name.
+ * @param {string} imagePath - Thumbnail image path.
+ * @param {string} dateTime - Collection date/time.
+ * @returns {Element}
  */
-function createCollectionCard(collection_name, colletion_image_path, collection_date_time) {
-    /*
-    <a class="collection-card" href="collection-view.html">
-        <img class="collection-card-image" src="collection_image_path" alt="Collection Thumbnail for {collection_name}">
-        <div class="collection-card-header">
-            <h2 class="underline">{collection_name}</h2>
-            <h4>{collection_date_time}</h4>
-        </div>
-        <div class="collection-card-tag"></div>
-    </a>
-    */
+function createCollectionCard(name, imagePath, dateTime) {
+    const card = document.createElement("a");
+    card.className = "collection-card";
+    card.href = "collection-view.html";
 
-    const collectionCard = document.createElement("a");
-    collectionCard.className = "collection-card";
-    collectionCard.href = "collection-view.html"; // Link to the collection view page
+    const img = document.createElement("img");
+    img.className = "collection-card-image";
+    img.src = imagePath;
+    img.alt = `Collection Thumbnail for ${name}`;
 
-    const collectionImage = document.createElement("img");
-    collectionImage.className = "collection-card-image";
-    collectionImage.src = colletion_image_path; // Set the image source
-    collectionImage.alt = "Collection Thumbnail for " + collection_name; // Alt text for accessibility
+    const header = document.createElement("div");
+    header.className = "collection-card-header";
+    const title = document.createElement("h2");
+    title.className = "underline";
+    title.textContent = name;
+    const date = document.createElement("h4");
+    date.textContent = dateTime;
 
-    const collectionHeader = document.createElement("div");
-    collectionHeader.className = "collection-card-header";
-    const collectionTitle = document.createElement("h2");
-    collectionTitle.className = "underline";
-    collectionTitle.textContent = collection_name; // Set the collection name
+    header.append(title, date);
+    card.append(img, header);
 
-    const collectionDate = document.createElement("h4");
-    collectionDate.textContent = collection_date_time; // Set the collection date
+    const tag = document.createElement("div");
+    tag.className = "collection-card-tag";
+    card.appendChild(tag);
 
-    const collectionTag = document.createElement("div");
-    collectionTag.className = "collection-card-tag"; // This can be used for tags or
-
-    collectionHeader.appendChild(collectionTitle);
-    collectionHeader.appendChild(collectionDate);
-    collectionCard.appendChild(collectionImage);
-    collectionCard.appendChild(collectionHeader);
-    collectionCard.appendChild(collectionTag);
-
-    return collectionCard; // Return the complete collection card element
+    return card;
 }
 
 /**
- * @function addCollectionCardToGrid
- * @description This function adds a collection card to the specified grid element in the dashboard.html.
- * @param {Element} collectionCard 
- * @param {String} gridId 
+ * Adds a collection card to the grid.
+ * @param {Element} card
+ * @param {string} gridId
  */
-function addCollectionCardToGrid(collectionCard, gridId = "collection-card-grid") {
+function addCollectionCardToGrid(card, gridId = "collection-card-grid") {
     const grid = document.getElementById(gridId);
     if (grid) {
-        grid.appendChild(collectionCard); // Append the collection card to the grid
+        grid.appendChild(card);
     } else {
-        console.error("Grid with ID '" + gridId + "' not found.");
+        console.error(`Grid with ID '${gridId}' not found.`);
     }
 }
 
-// ------ SIDEBAR CONTROLS ------
+// --- Sidebar Controls ---
 function hideSidebar() {
-    const sidebar = document.getElementById("sidebar-content");
-    const resizer = document.getElementById("resizer");
-    const toggleButton = document.getElementById("toggle-sidebar");
-
-    sidebar.style.display = "none";
-    resizer.style.display = "none";
-    toggleButton.src = "images/icons/Sidebar Controls/show-hollow.png"; // Change icon to show sidebar
-    toggleButton.alt = "show sidebar icon"; // Update alt text for accessibility
+    setSidebarDisplay("none", "show-hollow.png", "show sidebar icon");
 }
 
 function showSidebar() {
-    const sidebar = document.getElementById("sidebar-content");
-    const resizer = document.getElementById("resizer");
-    const toggleButton = document.getElementById("toggle-sidebar");
-    
-    sidebar.style.display = "block";
-    resizer.style.display = "block";
-    toggleButton.src = "images/icons/Sidebar Controls/hide-hollow.png"; // Change icon to hide sidebar
+    setSidebarDisplay("block", "hide-hollow.png", "hide sidebar icon");
 }
 
 function toggleSidebar() {
@@ -143,64 +96,47 @@ function toggleSidebar() {
     }
 }
 
-// ------ COLLECTION CREATION ------
+function setSidebarDisplay(display, icon, alt) {
+    const sidebar = document.getElementById("sidebar-content");
+    const resizer = document.getElementById("resizer");
+    const toggleButton = document.getElementById("toggle-sidebar");
+    sidebar.style.display = display;
+    resizer.style.display = display;
+    toggleButton.src = `images/icons/Sidebar Controls/${icon}`;
+    toggleButton.alt = alt;
+}
 
-/**
- * @function handleCreateCollection
- * @description This function handles the creation of a new collection by gathering input values and calling the Eel function to create the collection.
- * @param {*} event 
- */
+// --- Collection Creation ---
 function handleCreateCollection(event) {
-    event.preventDefault(); // Prevent form from submitting normally
-    const collectionName = document.getElementById("collection-name").value;
-    const collectionDescription = document.getElementById("collection-description").value;
-    const collectionSource = document.getElementById("collection-source").value;
-    eel.create_collection(collectionName, collectionDescription, collectionSource);
+    event.preventDefault();
+    const name = document.getElementById("collection-name").value;
+    const desc = document.getElementById("collection-description").value;
+    const source = document.getElementById("collection-source").value;
+    eel.create_collection(name, desc, source);
 }
 
 /**
- * Function to select a directory using Eel.
- * @function selectDirectory
- * @description This function opens a directory selection dialog and updates the input field with the selected directory
- * @param {string} selectionType - The type of selection, either 'file' or 'directory'.
- * @returns {void}
+ * Opens a directory selection dialog and updates the input field.
+ * @param {string} selectionType
  */
 function selectDirectory(selectionType = 'directory') {
     eel.select_directory(selectionType)(function(directory) {
         document.getElementById("collection-source").value = directory;
-        document.getElementById("collection-source-output").innerText = "Selected Directory: " + directory;
+        document.getElementById("collection-source-output").innerText = `Selected Directory: ${directory}`;
     });
 }
 
-
-// ------ AUTOMATICALLY LOADED ELEMENTS ------
-
-/**
- * @function loadHeader
- * @description This function fetches the header HTML file and inserts it into the body of the document.
- */
+// --- Load Common Parts ---
 function loadHeader() {
     fetch('commonParts/header.html')
-        .then(response => response.text())
-        .then(data => {
-            document.body.insertAdjacentHTML('afterbegin', data);
-        })
-        .catch(error => {
-            console.error("Error loading header:", error);
-        });
+        .then(res => res.text())
+        .then(html => document.body.insertAdjacentHTML('afterbegin', html))
+        .catch(err => console.error("Error loading header:", err));
 }
 
-/**
- * @function loadSidebar
- * @description This function fetches the sidebar HTML file and inserts it into the main container of the document.
- */
 function loadSidebar() {
     fetch('commonParts/sidebar.html')
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById("main-container").insertAdjacentHTML('afterbegin', data);
-        })
-        .catch(error => {
-            console.error("Error loading sidebar:", error);
-        }); 
+        .then(res => res.text())
+        .then(html => document.getElementById("main-container").insertAdjacentHTML('afterbegin', html))
+        .catch(err => console.error("Error loading sidebar:", err));
 }

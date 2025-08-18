@@ -1,3 +1,5 @@
+## ------ FILE HANDLER CLASS ------ ##
+
 ## ------ IMPORTS ------ ##
 import os
 import tkinter as tk
