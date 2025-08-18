@@ -1,46 +1,63 @@
-// FUNCTIONS HERE 
-// inclutions from other js files
 
-// Run the onStart function when the page loads
+// --- Collection Card Logic ---
+function createCollectionCard(name, imagePath, dateTime) {
+    const card = document.createElement("a");
+    card.className = "collection-card";
+    card.href = "collection-view.html";
+    const img = document.createElement("img");
+    img.className = "collection-card-image";
+    img.src = imagePath;
+    img.alt = `Collection Thumbnail for ${name}`;
+    const header = document.createElement("div");
+    header.className = "collection-card-header";
+    const title = document.createElement("h2");
+    title.className = "underline";
+    title.textContent = name;
+    const date = document.createElement("h4");
+    date.textContent = dateTime;
+    header.append(title, date);
+    card.append(img, header);
+    const tag = document.createElement("div");
+    tag.className = "collection-card-tag";
+    card.appendChild(tag);
+    return card;
+}
 
-window.onload = function() {
-    // Automatic loading of common elements
-    loadHeader();
-    loadSidebar();
-    
-    console.log("Page loaded, initializing Eel...");
-    eel.onStart()(function() {
-        console.log("Application started successfully!");
-        document.getElementById("output").innerText = "Application started successfully!";
-    });
-};
+function addCollectionCardToGrid(card, gridId = "collection-card-grid") {
+    const grid = document.getElementById(gridId);
+    if (grid) {
+        grid.appendChild(card);
+    } else {
+        console.error(`Grid with ID '${gridId}' not found.`);
+    }
+}
 
+function loadCollectionCardsSequentially(collections, index = 0) {
+    if (index >= collections.length) return;
+    const col = collections[index];
+    const imgPath = col.preview || null;
+    const card = createCollectionCard(col.name, "images/Icons/General Icons/photo.png", col.created_on);
+    if (imgPath) {
+        eel.get_image_data_url(imgPath)(function(dataUrl) {
+            if (dataUrl) {
+                card.querySelector('.collection-card-image').src = dataUrl;
+            }
+            addCollectionCardToGrid(card);
+            loadCollectionCardsSequentially(collections, index + 1);
+        });
+    } else {
+        addCollectionCardToGrid(card);
+        loadCollectionCardsSequentially(collections, index + 1);
+    }
+}
 
-
-
-
-// ------ SIDEBAR CONTROLS ------
+// --- Sidebar Logic ---
 function hideSidebar() {
-    const sidebar = document.getElementById("sidebar-content");
-    const resizer = document.getElementById("resizer");
-    const toggleButton = document.getElementById("toggle-sidebar");
-
-    sidebar.style.display = "none";
-    resizer.style.display = "none";
-    toggleButton.src = "images/icons/Sidebar Controls/show-hollow.png"; // Change icon to show sidebar
-    toggleButton.alt = "show sidebar icon"; // Update alt text for accessibility
+    setSidebarDisplay("none", "show-hollow.png", "show sidebar icon", false);
 }
-
 function showSidebar() {
-    const sidebar = document.getElementById("sidebar-content");
-    const resizer = document.getElementById("resizer");
-    const toggleButton = document.getElementById("toggle-sidebar");
-    
-    sidebar.style.display = "block";
-    resizer.style.display = "block";
-    toggleButton.src = "images/icons/Sidebar Controls/hide-hollow.png"; // Change icon to hide sidebar
+    setSidebarDisplay("block", "hide-hollow.png", "hide sidebar icon", true);
 }
-
 function toggleSidebar() {
     const sidebar = document.getElementById("sidebar-content");
     if (sidebar.style.display === "none" || sidebar.style.display === "") {
@@ -49,65 +66,81 @@ function toggleSidebar() {
         hideSidebar();
     }
 }
-
-// ------ COLLECTION CREATION ------
-
-/**
- * @function handleCreateCollection
- * @description This function handles the creation of a new collection by gathering input values and calling the Eel function to create the collection.
- * @param {*} event 
- */
-function handleCreateCollection(event) {
-    event.preventDefault(); // Prevent form from submitting normally
-    const collectionName = document.getElementById("collection-name").value;
-    const collectionDescription = document.getElementById("collection-description").value;
-    const collectionSource = document.getElementById("collection-source").value;
-    eel.create_collection(collectionName, collectionDescription, collectionSource);
+function setSidebarDisplay(display, icon, alt, border=true) {
+    const sidebar = document.getElementById("sidebar");
+    const sidebarContent = document.getElementById("sidebar-content");
+    const resizer = document.getElementById("resizer");
+    const toggleButton = document.getElementById("toggle-sidebar");
+    sidebarContent.style.display = display;
+    resizer.style.display = display;
+    if (border) {
+        sidebar.style.borderRight = "1px solid var(--border-color)";
+    } else {
+        sidebar.style.borderRight = "none";
+    }
+    toggleButton.src = `images/icons/Sidebar Controls/${icon}`;
+    toggleButton.alt = alt;
 }
 
-/**
- * Function to select a directory using Eel.
- * @function selectDirectory
- * @description This function opens a directory selection dialog and updates the input field with the selected directory
- * @param {string} selectionType - The type of selection, either 'file' or 'directory'.
- * @returns {void}
- */
+// --- Collection Creation Logic ---
+function handleCreateCollection(event) {
+    event.preventDefault();
+    const name = document.getElementById("collection-name").value;
+    const desc = document.getElementById("collection-description").value;
+    const source = document.getElementById("collection-source").value;
+    eel.create_collection(name, desc, source);
+    window.location.href = "dashboard.html";
+}
 function selectDirectory(selectionType = 'directory') {
     eel.select_directory(selectionType)(function(directory) {
         document.getElementById("collection-source").value = directory;
-        document.getElementById("collection-source-output").innerText = "Selected Directory: " + directory;
+        document.getElementById("collection-source-output").innerText = `Selected Directory: ${directory}`;
     });
 }
 
-
-// ------ AUTOMATICALLY LOADED ELEMENTS ------
-
-/**
- * @function loadHeader
- * @description This function fetches the header HTML file and inserts it into the body of the document.
- */
+// --- Common Parts Loading ---
 function loadHeader() {
     fetch('commonParts/header.html')
-        .then(response => response.text())
-        .then(data => {
-            document.body.insertAdjacentHTML('afterbegin', data);
-        })
-        .catch(error => {
-            console.error("Error loading header:", error);
-        });
+        .then(res => res.text())
+        .then(html => document.body.insertAdjacentHTML('afterbegin', html))
+        .catch(err => console.error("Error loading header:", err));
 }
-
-/**
- * @function loadSidebar
- * @description This function fetches the sidebar HTML file and inserts it into the main container of the document.
- */
 function loadSidebar() {
     fetch('commonParts/sidebar.html')
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById("main-container").insertAdjacentHTML('afterbegin', data);
-        })
-        .catch(error => {
-            console.error("Error loading sidebar:", error);
-        }); 
+        .then(res => res.text())
+        .then(html => document.getElementById("main-container").insertAdjacentHTML('afterbegin', html))
+        .catch(err => console.error("Error loading sidebar:", err));
 }
+
+// --- Event Listener Setup ---
+window.addEventListener('DOMContentLoaded', () => {
+    loadHeader();
+    loadSidebar();
+
+    // Restore selectDirectory button functionality
+    const selectDirBtn = document.getElementById("select-directory-btn");
+    if (selectDirBtn) {
+        selectDirBtn.addEventListener("click", () => {
+            selectDirectory();
+        });
+    }
+
+    // Restore sidebar toggle functionality
+    const toggleSidebarBtn = document.getElementById("toggle-sidebar");
+    if (toggleSidebarBtn) {
+        toggleSidebarBtn.addEventListener("click", () => {
+            toggleSidebar();
+        });
+    }
+
+    eel.get_all_collections()(collections => {
+        if (Array.isArray(collections)) {
+            loadCollectionCardsSequentially(collections);
+        }
+    });
+
+    eel.onStart()(() => {
+        const output = document.getElementById("output");
+        if (output) output.innerText = "Application started successfully!";
+    });
+});

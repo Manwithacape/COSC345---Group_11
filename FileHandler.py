@@ -1,3 +1,5 @@
+## ------ FILE HANDLER CLASS ------ ##
+
 ## ------ IMPORTS ------ ##
 import os
 import tkinter as tk
@@ -7,6 +9,8 @@ from tkinter import filedialog
 from datetime import datetime
 
 class FileHandler:
+   
+
     """Class to handle file operations for the PhotoSIFT application."""
     def __init__(self):
         self.root_dir = os.path.expanduser('~')
@@ -27,6 +31,24 @@ class FileHandler:
             os.makedirs(directory_name)
         return directory_name
     
+    def get_all_collections(self):
+        """Find all collection subdirectories and read their collection.json files."""
+        collections = []
+        if os.path.exists(self.Collections_dir):
+            for collection_name in os.listdir(self.Collections_dir):
+                collection_path = os.path.join(self.Collections_dir, collection_name)
+                json_path = os.path.join(collection_path, 'collection.json')
+                if os.path.isfile(json_path):
+                    data = self.read_json(json_path)
+                    if data:
+                        preview = None
+                        collections.append({
+                            'name': data.get('name', collection_name),
+                            'preview': data.get('thumbnail'),
+                            'created_on': data.get('created_on', '')
+                        })
+        return collections
+    
     def create_collection(self, collection_name, colletion_description, collection_source):
         """
         Create a new collection directory and a default JSON file.
@@ -46,9 +68,19 @@ class FileHandler:
         photos_data = []
         photo_files = self.get_files(collection_source, include_subdirs=True)
         for photo in photo_files:
+            # Generate a unique preview filename for each photo, including extension
+            preview_filename = f"{os.path.basename(photo)}_preview.jpg"
+            preview_path = os.path.join(new_collection_path, preview_filename)
+
+            # Normalize paths
+            photo = os.path.normpath(photo)
+            preview_path = os.path.normpath(preview_path)
+
+            # Save/copy the preview image to preview_path
+            self.extract_jpg_from_raw(photo, new_collection_path)  # This will save the preview image
             photos_data.append({
                 "source_path": photo,
-                "preview_path": self.extract_jpg_from_raw(photo, new_collection_path),
+                "preview_path": preview_path,
                 "analysis": {
                     "sharpness": None,
                     "exposure": None,
@@ -64,6 +96,7 @@ class FileHandler:
         collection_data = {
             "name": collection_name, 
             "description": colletion_description,
+            "thumbnail": photos_data[0]['preview_path'] if photos_data else None,
             "created_on": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "source_path": collection_source,
             "photos": photos_data
@@ -89,6 +122,16 @@ class FileHandler:
 
         return file_path
     
+    def read_json(self, file_path):
+        """Read and return JSON data from a file."""
+        try:
+            with open(file_path, 'r') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"Error reading JSON from {file_path}: {e}")
+            return None
+
+
     def extract_jpg_from_raw(self, raw_file_path, output_path):
         """
         Extract JPG files from a RAW file.
@@ -132,7 +175,7 @@ class FileHandler:
     @staticmethod
     def open_file_dialog(selection_type='file'):
         """
-        Open a file dialog to select a file or directory.
+        Open a file dialog to select a file or directory, with the dialog appearing on top.
 
         Args:
             selection_type (str): Type of selection ('file' or 'directory').
@@ -142,12 +185,14 @@ class FileHandler:
         """
         root = tk.Tk()
         root.withdraw()
+        root.attributes('-topmost', True)
         if selection_type == 'file':
-            file_path = filedialog.askopenfilename()
+            file_path = filedialog.askopenfilename(parent=root)
         elif selection_type == 'directory':
-            file_path = filedialog.askdirectory()
+            file_path = filedialog.askdirectory(parent=root)
         else:
             raise ValueError("Invalid selection type. Use 'file' or 'directory'.")
+        root.destroy()
         return file_path
     
     @staticmethod
