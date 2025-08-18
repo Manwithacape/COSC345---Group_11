@@ -3,24 +3,38 @@
 
 // Run the onStart function when the page loads
 
+
 window.onload = function() {
     // Automatic loading of common elements
     loadHeader();
     loadSidebar();
 
-    // Debug collection card creation
-    createCollectionCard("Example Collection 1", "images/doomtda.jpeg", "03/07/2003");
-    createCollectionCard("Example Collection 2", "images/doomtda.jpeg", "04/07/2003");
-    createCollectionCard("Example Collection 3", "images/doomtda.jpeg", "05/07/2003");
-    addCollectionCardToGrid(createCollectionCard("Example Collection 1", "images/doomtda.jpeg", "03/07/2003"));
-    addCollectionCardToGrid(createCollectionCard("Example Collection 2", "images/doomtda.jpeg", "04/07/2003"));
-    addCollectionCardToGrid(createCollectionCard("Example Collection 3", "images/doomtda.jpeg", "05/07/2003"));
+    // Load all collections and render them as cards
 
-    
+    eel.get_all_collections()(function(collections) {
+        if (collections && Array.isArray(collections)) {
+            collections.forEach(function(col) {
+                let imgPath = col.preview ? col.preview : null;
+                let card = createCollectionCard(col.name, "images/doomtda.jpeg", col.created_on); // default image
+                if (imgPath) {
+                    eel.get_image_data_url(imgPath)(function(dataUrl) {
+                        if (dataUrl) {
+                            // Set the image src to the data URL
+                            card.querySelector('.collection-card-image').src = dataUrl;
+                        }
+                    });
+                }
+                addCollectionCardToGrid(card);
+            });
+        }
+    });
+
     console.log("Page loaded, initializing Eel...");
     eel.onStart()(function() {
         console.log("Application started successfully!");
-        document.getElementById("output").innerText = "Application started successfully!";
+        if (document.getElementById("output")) {
+            document.getElementById("output").innerText = "Application started successfully!";
+        }
     });
 };
 

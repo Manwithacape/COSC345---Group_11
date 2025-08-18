@@ -1,3 +1,48 @@
+import base64
+# Expose a function to serve images as base64 data URLs
+
+import json
+import os
+import eel
+
+@eel.expose
+def get_image_data_url(image_path):
+    try:
+        with open(image_path, "rb") as img_file:
+            encoded = base64.b64encode(img_file.read()).decode('utf-8')
+            # Guess mime type from extension
+            ext = os.path.splitext(image_path)[1].lower()
+            mime = "image/jpeg" if ext in [".jpg", ".jpeg"] else "image/png" if ext == ".png" else "image/*"
+            return f"data:{mime};base64,{encoded}"
+    except Exception as e:
+        print(f"Error loading image {image_path}: {e}")
+        return None
+    
+# Expose a function to get all collections and their data
+@eel.expose
+def get_all_collections():
+    collections_dir = os.path.expanduser(os.path.join(os.path.expanduser('~'), 'PhotoSIFT', 'Collections'))
+    collections = []
+    if os.path.exists(collections_dir):
+        for collection_name in os.listdir(collections_dir):
+            collection_path = os.path.join(collections_dir, collection_name)
+            json_path = os.path.join(collection_path, 'collection.json')
+            if os.path.isfile(json_path):
+                try:
+                    with open(json_path, 'r') as f:
+                        data = json.load(f)
+                        # Get first image preview if available
+                        preview = None
+                        if data.get('photos') and len(data['photos']) > 0:
+                            preview = data['photos'][0].get('preview_path')
+                        collections.append({
+                            'name': data.get('name', collection_name),
+                            'preview': preview,
+                            'created_on': data.get('created_on', '')
+                        })
+                except Exception as e:
+                    print(f"Error reading {json_path}: {e}")
+    return collections
 ## ------ OTHER PROJECT FILES ------ ##
 import PhotoAnalysis as Analysis
 import FileHandler as fh
