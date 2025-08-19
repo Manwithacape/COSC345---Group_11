@@ -18,28 +18,17 @@ eel.init('web')
 ## Create exposed wrapper functions for Eel to call from JavaScript
 @eel.expose
 def onStart():
+    """Initialize the application and database."""
+    print("Application starting...")
+
+    # Print the data directory
+    print(f"Data Directory: {FileHandler.photoSIFT_dir}")
+    
     # db connect
     db.init_db()
+    print("Database initialized.")
 
-    # Continue with file system setup
-    root_dir = os.path.expanduser('~')
-    print(f"Root directory: {root_dir}")
     
-    ## get the users root directory i.e. c:\Users\<username>\documents 
-    root_dir = os.path.expanduser('~')
-    print(f"Root directory: {root_dir}")
-
-    ## create or find a direcory for storing data called photoreview 
-    PhotoSIFT_dir = find_or_create_directory(os.path.join(root_dir, 'PhotoSIFT'));
-
-    ## create or find a directory for called user in the PhotoSIFT directory
-    user_dir = find_or_create_directory(os.path.join(PhotoSIFT_dir, 'user'));
-
-    ## if there is no users.json file, create it
-    users_file = os.path.join(user_dir, 'users.json')
-    if not os.path.exists(users_file):
-        with open(users_file, 'w') as f:
-            f.write('{}')
 
 @eel.expose
 def create_collection(collection_name, colletion_description, collection_source):
@@ -74,20 +63,14 @@ def get_all_collections():
 
 @eel.expose
 def get_image_data_url(image_path):
-    print(f"get_image_data_url called with: {image_path}")
     try:
         dir_path = os.path.dirname(image_path)
-        print(f"Looking for: {image_path}")
-        print(f"Directory listing for {dir_path}: {os.listdir(dir_path) if os.path.exists(dir_path) else 'Directory does not exist'}")
-        print(f"Exists? {os.path.isfile(image_path)}")
         if not os.path.isfile(image_path):
-            print(f"File does not exist: {image_path}")
             return None
         with open(image_path, "rb") as img_file:
             encoded = base64.b64encode(img_file.read()).decode('utf-8')
             ext = os.path.splitext(image_path)[1].lower()
             mime = "image/jpeg" if ext in [".jpg", ".jpeg"] else "image/png" if ext == ".png" else "image/*"
-            print(f"Successfully encoded image: {image_path}")
             return f"data:{mime};base64,{encoded}"
     except Exception as e:
         print(f"Error loading image {image_path}: {e}")

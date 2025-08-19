@@ -5,8 +5,12 @@ import os
 import tkinter as tk
 import json
 import rawpy  # Ensure you have rawpy installed for RAW file handling
+import cv2 as cv
+import numpy as np
 from tkinter import filedialog
 from datetime import datetime
+from PhotoAnalysis import PhotoAnalyzer  # Import the PhotoAnalyzer class
+
 
 class FileHandler:
    
@@ -148,10 +152,10 @@ class FileHandler:
 
         # If this file is a jpg, png, or jpeg, copy it to the output path and return the path to the copied file
         if file_name.lower().endswith(('.jpg', '.jpeg', '.png')):
+            ## Resize the image and save it using PhotoAnalyzer
+            resized_image = PhotoAnalyzer.resize_image(cv.imread(raw_file_path), target_width=800)
             output_file_path = os.path.join(output_path, f"{os.path.splitext(file_name)[0]}_preview.jpg")
-            with open(raw_file_path, 'rb') as src_file:
-                with open(output_file_path, 'wb') as dest_file:
-                    dest_file.write(src_file.read())
+            cv.imwrite(output_file_path, resized_image)
             return output_file_path
 
         # Try to extract preview JPEG from RAW file
@@ -159,9 +163,11 @@ class FileHandler:
             with rawpy.imread(raw_file_path) as raw:
                 thumb = raw.extract_thumb()
                 if thumb.format == rawpy.ThumbFormat.JPEG:
+                    ## Resize the thumbnail and save
+                    thumb_image = cv.imdecode(np.frombuffer(thumb.data, np.uint8), cv.IMREAD_COLOR)
+                    resized_image = PhotoAnalyzer.resize_image(thumb_image, target_width=800)
                     output_file_path = os.path.join(output_path, f"{os.path.splitext(file_name)[0]}_preview.jpg")
-                    with open(output_file_path, 'wb') as f:
-                        f.write(thumb.data)
+                    cv.imwrite(output_file_path, resized_image)
                     return output_file_path
                 else:
                     print(f"No JPEG preview found in RAW file: {raw_file_path}")
