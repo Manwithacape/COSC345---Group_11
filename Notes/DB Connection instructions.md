@@ -17,6 +17,9 @@ CREATE DATABASE photosift;
 
 ---
 
+## Note (Cam)
+Have been using pgAdmin 4 - I suggest it easy to understand UI can help everyone setup if want
+
 ## 2. Python Connection
 
 Install the PostgreSQL Python library:

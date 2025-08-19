@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en"
+	<head>
+		<title>PhotoSIFT</title>
+        <link rel="stylesheet" type="text/css" href="/styles.css">
+        <script type="text/javascript" src="scripts/elementloading.js"></script>
+        <script type="text/javascript" src="scripts/main.js"></script>
+        <script type="text/javascript" src="/eel.js"></script>
+	</head>
+	<body>
+		<!-- <a class="create-camera" href="create-camera.html">Create a camera</a> -->
+<form class="create-camera" id="createCameraForm">
+  <label>Camera Name:</label>
+  <input name="camera_name" type="text" placeholder="Required" required>
+
+  <label>Camera Make:</label>
+  <input name="camera_make" type="text" placeholder="Required" required>
+
+  <label>Camera Model:</label>
+  <input name="camera_model" type="text">
+
+  <label>Lens Make</label>
+  <input name="lens_make" type="text">
+
+  <label>Lens Model</label>
+  <input name="lens_model" type="text">
+
+  <label>Aperture</label>
+  <input name="aperture" type="text" placeholder="e.g. f/2.8">
+
+  <label>Shutter Speed</label>
+  <input name="shutter_speed" type="text" placeholder="e.g. 1/250">
+
+  <label>ISO</label>
+  <input name="iso" type="text" placeholder="e.g. 800">
+
+  <button type="button" class="photo-of-camera">Upload Photo of Camera</button>
+  <button type="submit" class="submit-form">Add Camera</button>
+</form>
+
+<main id="camera-selection"></main>
+			
+		
+		</main>
+	</body>
+</html>
