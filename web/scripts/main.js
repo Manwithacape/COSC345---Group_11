@@ -58,13 +58,15 @@ function hideSidebar() {
     setSidebarDisplay("none", "show-hollow.png", "show sidebar icon", false);
 }
 function showSidebar() {
-    setSidebarDisplay("block", "hide-hollow.png", "hide sidebar icon", true);
+    setSidebarDisplay("flex", "hide-hollow.png", "hide sidebar icon", true);
+    // reset sidebar width when showing
+    const sidebarContent = document.getElementById("sidebar-content");
+    sidebarContent.style.width = "250px"; // Reset width when showing
 }
 function toggleSidebar() {
     const sidebar = document.getElementById("sidebar-content");
     if (sidebar.style.display === "none" || sidebar.style.display === "") {
         showSidebar();
-        sidebar.style.width = "250px"; // Reset width when showing
     } else {
         hideSidebar();
     }
