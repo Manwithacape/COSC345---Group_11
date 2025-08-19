@@ -230,7 +230,9 @@ main {
 }
 
 #sidebar {
-    /* top: 5em; height of header */
+    display: flex;
+    flex-direction: row;
+    position: relative;
     margin: 0em;
     z-index: 999;
     padding: 0em;
@@ -253,21 +255,22 @@ main {
         height: 100%;
     }
 
-    #resizer {
-        position: absolute;
-        right: 0;
-        top: 0;
-        width: 3px;
-        height: 100%;
-        border-left: 1px solid var(--secondary);
-        cursor: ew-resize;
+}
 
-        /* Allow Selecting */
-        -webkit-user-select: all;
-        -moz-user-select: all;
-        -ms-user-select: all;
-        user-select: all;
-    }
+#resizer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 5px;
+    height: 100%;
+    border-left: 1px solid var(--secondary);
+    cursor: ew-resize;
+    z-index: 1001;
+    /* Allow Selecting */
+    -webkit-user-select: all;
+    -moz-user-select: all;
+    -ms-user-select: all;
+    user-select: all;
 }
 
 #content-container {
