@@ -4,37 +4,39 @@
 		<title>PhotoSIFT</title>
         <link rel="stylesheet" type="text/css" href="/styles.css">
         <script type="text/javascript" src="scripts/elementloading.js"></script>
-        <script type="text/javascript" src="scripts/main.js"></script>
+        <script type="text/javascript" src="scripts/CameraCreation.js"></script>
         <script type="text/javascript" src="/eel.js"></script>
 	</head>
 	<body>
 		<!-- <a class="create-camera" href="create-camera.html">Create a camera</a> -->
-<form class="create-camera" id="createCameraForm">
+<form class="camera-selectionForm" id="createCameraForm" onsubmit="handleCreateCamera(event)">
   <label>Camera Name:</label>
-  <input name="camera_name" type="text" placeholder="Required" required>
+  <input name="camera-name" id="camera-name" type="text" placeholder="Required" required>
 
   <label>Camera Make:</label>
-  <input name="camera_make" type="text" placeholder="Required" required>
+  <input name="camera-make" id="camera-make" type="text" placeholder="Required" required>
 
   <label>Camera Model:</label>
-  <input name="camera_model" type="text">
+  <input name="camera-model" id="camera-model" type="text">
 
   <label>Lens Make</label>
-  <input name="lens_make" type="text">
+  <input name="lens-make" id="lens-make" type="text">
 
   <label>Lens Model</label>
-  <input name="lens_model" type="text">
+  <input name="lens-model" id="lens-model" type="text">
 
   <label>Aperture</label>
-  <input name="aperture" type="text" placeholder="e.g. f/2.8">
+  <input name="aperture" id="aperture" type="text" placeholder="e.g. f/2.8">
 
   <label>Shutter Speed</label>
-  <input name="shutter_speed" type="text" placeholder="e.g. 1/250">
+  <input name="shutter-speed" id="shutter-speed" type="text" placeholder="e.g. 1/250">
 
   <label>ISO</label>
-  <input name="iso" type="text" placeholder="e.g. 800">
+  <input name="iso" id="iso" type="text" placeholder="e.g. 800">
 
-  <button type="button" class="photo-of-camera">Upload Photo of Camera</button>
+  <button type="button" class="photo-of-camera" id="photo-of-camera-btn" onclick="selectImage()">Upload Photo of Camera</button>
+  <input type="hidden" id="photo-source" name="photo-source">
+
   <button type="submit" class="submit-form">Add Camera</button>
 </form>
 

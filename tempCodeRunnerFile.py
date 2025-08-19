@@ -25,12 +25,10 @@ def onStart():
     print(f"Data Directory: {FileHandler.photoSIFT_dir}")
     
     # db connect
-    database = db.Database()
-    database.init_db()
+    db.init_db()
+    print("Database initialized.")
 
-    # create a file handler instance
-    file_handler = FileHandler.FileHandler();
-
+    
 
 @eel.expose
 def create_collection(collection_name, colletion_description, collection_source):
@@ -56,18 +54,6 @@ def select_directory(selection_type='directory'):
 
     Returns:
         str: The path of the selected file or directory.
-    """
-    return FileHandler.open_file_dialog(selection_type)
-
-@eel.expose
-def select_file(selection_type='file'):
-    """
-    Wrapper function to open a file dialog for selecting a file.
-    Args:
-        selection_type (str): Type of selection, either 'file' or 'directory'.
-
-    Returns:
-        str: The path of the selected file.
     """
     return FileHandler.open_file_dialog(selection_type)
 
