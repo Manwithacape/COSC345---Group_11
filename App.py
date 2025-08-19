@@ -28,26 +28,9 @@ def onStart():
     database = db.Database()
     database.init_db()
 
+    # create a file handler instance
+    file_handler = FileHandler.FileHandler();
 
-    # Continue with file system setup
-    root_dir = os.path.expanduser('~')
-    print(f"Root directory: {root_dir}")
-    
-    ## get the users root directory i.e. c:\Users\<username>\documents 
-    root_dir = os.path.expanduser('~')
-    print(f"Root directory: {root_dir}")
-
-    ## create or find a direcory for storing data called photoreview 
-    PhotoSIFT_dir = find_or_create_directory(os.path.join(root_dir, 'PhotoSIFT'));
-
-    ## create or find a directory for called user in the PhotoSIFT directory
-    user_dir = find_or_create_directory(os.path.join(PhotoSIFT_dir, 'user'));
-
-    ## if there is no users.json file, create it
-    users_file = os.path.join(user_dir, 'users.json')
-    if not os.path.exists(users_file):
-        with open(users_file, 'w') as f:
-            f.write('{}')
 
 @eel.expose
 def create_collection(collection_name, colletion_description, collection_source):
