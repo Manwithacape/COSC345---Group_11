@@ -2,305 +2,247 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-def get_connection():
-    return psycopg2.connect(
-        dbname="postgres",
-        user="postgres",
-        password="admin",
-        host="localhost",
-        port="5432"
-    )
+# ---------------- Database Connection ----------------
+class Database:
+    def __init__(self, dbname="postgres", user="postgres", password="admin", host="localhost", port="5432"):
+        self.dbname = dbname
+        self.user = user
+        self.password = password
+        self.host = host
+        self.port = port
 
-def init_db():
-    conn = get_connection()
-    cur = conn.cursor()
+    def get_connection(self):
+        return psycopg2.connect(
+            dbname=self.dbname,
+            user=self.user,
+            password=self.password,
+            host=self.host,
+            port=self.port
+        )
 
-    # ---------- Users ----------
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            user_id BIGSERIAL PRIMARY KEY,
-            name TEXT NOT NULL,
-            preferences JSONB DEFAULT '{}'::jsonb,
-            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-        );
-    """)
+    def init_db(self):
+        conn = self.get_connection()
+        cur = conn.cursor()
 
-    # ---------- Collections ----------
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS collections (
-            collection_id BIGSERIAL PRIMARY KEY,
-            user_id BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-            name TEXT NOT NULL,
-            date_created TIMESTAMPTZ NOT NULL DEFAULT NOW()
-        );
-    """)
+        # ---------- Users ----------
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                user_id BIGSERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                preferences JSONB DEFAULT '{}'::jsonb,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            );
+        """)
 
-    # ---------- Photos ----------
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS photos (
-            photo_id BIGSERIAL PRIMARY KEY,
-            collection_id BIGINT REFERENCES collections(collection_id) ON DELETE SET NULL,
-            file_path TEXT NOT NULL UNIQUE,
-            date_added TIMESTAMPTZ NOT NULL DEFAULT NOW()
-        );
-    """)
+        # ---------- Collections ----------
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS collections (
+                collection_id BIGSERIAL PRIMARY KEY,
+                user_id BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+                name TEXT NOT NULL,
+                date_created TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            );
+        """)
 
-    # ---------- Thumbnails ----------
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS thumbnails (
-            thumbnail_id BIGSERIAL PRIMARY KEY,
-            photo_id BIGINT NOT NULL UNIQUE REFERENCES photos(photo_id) ON DELETE CASCADE,
-            image_path TEXT NOT NULL UNIQUE
-        );
-    """)
+        # ---------- Photos ----------
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS photos (
+                photo_id BIGSERIAL PRIMARY KEY,
+                collection_id BIGINT REFERENCES collections(collection_id) ON DELETE SET NULL,
+                file_path TEXT NOT NULL UNIQUE,
+                date_added TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            );
+        """)
 
-    # ---------- Exif Data ----------
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS exif_data (
-            exif_id BIGSERIAL UNIQUE,
-            photo_id BIGINT PRIMARY KEY REFERENCES photos(photo_id) ON DELETE CASCADE,
-            thumbnail_id BIGINT UNIQUE REFERENCES thumbnails(thumbnail_id) ON DELETE SET NULL,
-            make TEXT,
-            model TEXT,
-            lens_model TEXT,
-            focal_length_mm NUMERIC(6,2),
-            exposure_time TEXT,
-            f_number NUMERIC(4,2),
-            iso_speed INTEGER,
-            datetime_original TIMESTAMPTZ,
-            gps_latitude DOUBLE PRECISION,
-            gps_longitude DOUBLE PRECISION
-        );
-    """)
+        # ---------- Thumbnails ----------
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS thumbnails (
+                thumbnail_id BIGSERIAL PRIMARY KEY,
+                photo_id BIGINT NOT NULL UNIQUE REFERENCES photos(photo_id) ON DELETE CASCADE,
+                image_path TEXT NOT NULL UNIQUE
+            );
+        """)
 
-    # ---------- Scores ----------
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS scores (
-            score_id BIGSERIAL PRIMARY KEY,
-            photo_id BIGINT NOT NULL REFERENCES photos(photo_id) ON DELETE CASCADE,
-            metric_name TEXT NOT NULL,
-            value DOUBLE PRECISION NOT NULL,
-            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-            CONSTRAINT uq_scores_photo_metric UNIQUE (photo_id, metric_name)
-        );
-    """)
+        # ---------- Exif Data ----------
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS exif_data (
+                exif_id BIGSERIAL UNIQUE,
+                photo_id BIGINT PRIMARY KEY REFERENCES photos(photo_id) ON DELETE CASCADE,
+                thumbnail_id BIGINT UNIQUE REFERENCES thumbnails(thumbnail_id) ON DELETE SET NULL,
+                make TEXT,
+                model TEXT,
+                lens_model TEXT,
+                focal_length_mm NUMERIC(6,2),
+                exposure_time TEXT,
+                f_number NUMERIC(4,2),
+                iso_speed INTEGER,
+                datetime_original TIMESTAMPTZ,
+                gps_latitude DOUBLE PRECISION,
+                gps_longitude DOUBLE PRECISION
+            );
+        """)
 
-    # ---------- Faces ----------
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS faces (
-            face_id BIGSERIAL PRIMARY KEY,
-            photo_id BIGINT NOT NULL REFERENCES photos(photo_id) ON DELETE CASCADE,
-            bounding_box JSONB NOT NULL,
-            attributes JSONB DEFAULT '{}'::jsonb
-        );
-    """)
+        # ---------- Scores ----------
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS scores (
+                score_id BIGSERIAL PRIMARY KEY,
+                photo_id BIGINT NOT NULL REFERENCES photos(photo_id) ON DELETE CASCADE,
+                metric_name TEXT NOT NULL,
+                value DOUBLE PRECISION NOT NULL,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                CONSTRAINT uq_scores_photo_metric UNIQUE (photo_id, metric_name)
+            );
+        """)
 
-    # ---------- Image Comments ----------
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS image_comments (
-            image_comment_id BIGSERIAL PRIMARY KEY,
-            photo_id BIGINT NOT NULL REFERENCES photos(photo_id) ON DELETE CASCADE,
-            content TEXT NOT NULL,
-            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-            created_by BIGINT REFERENCES users(user_id) ON DELETE SET NULL
-        );
-    """)
+        # ---------- Faces ----------
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS faces (
+                face_id BIGSERIAL PRIMARY KEY,
+                photo_id BIGINT NOT NULL REFERENCES photos(photo_id) ON DELETE CASCADE,
+                bounding_box JSONB NOT NULL,
+                attributes JSONB DEFAULT '{}'::jsonb
+            );
+        """)
 
-    # ---------- Collection Comments ----------
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS collection_comments (
-            collection_comment_id BIGSERIAL PRIMARY KEY,
-            collection_id BIGINT NOT NULL REFERENCES collections(collection_id) ON DELETE CASCADE,
-            content TEXT NOT NULL,
-            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-            created_by BIGINT REFERENCES users(user_id) ON DELETE SET NULL
-        );
-    """)
+        # ---------- Image Comments ----------
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS image_comments (
+                image_comment_id BIGSERIAL PRIMARY KEY,
+                photo_id BIGINT NOT NULL REFERENCES photos(photo_id) ON DELETE CASCADE,
+                content TEXT NOT NULL,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                created_by BIGINT REFERENCES users(user_id) ON DELETE SET NULL
+            );
+        """)
 
-    # ---------- Near Duplicate Groups ----------
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS near_duplicate_groups (
-            group_id BIGSERIAL PRIMARY KEY,
-            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-        );
-    """)
+        # ---------- Collection Comments ----------
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS collection_comments (
+                collection_comment_id BIGSERIAL PRIMARY KEY,
+                collection_id BIGINT NOT NULL REFERENCES collections(collection_id) ON DELETE CASCADE,
+                content TEXT NOT NULL,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                created_by BIGINT REFERENCES users(user_id) ON DELETE SET NULL
+            );
+        """)
 
-    # ---------- Near Duplicate Photos ----------
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS near_duplicate_photos (
-            group_id BIGINT NOT NULL REFERENCES near_duplicate_groups(group_id) ON DELETE CASCADE,
-            photo_id BIGINT NOT NULL REFERENCES photos(photo_id) ON DELETE CASCADE,
-            similarity_score DOUBLE PRECISION,
-            PRIMARY KEY (group_id, photo_id)
-        );
-    """)
+        # ---------- Near Duplicate Groups ----------
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS near_duplicate_groups (
+                group_id BIGSERIAL PRIMARY KEY,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            );
+        """)
 
-    conn.commit()
-    cur.close()
-    conn.close()
+        # ---------- Near Duplicate Photos ----------
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS near_duplicate_photos (
+                group_id BIGINT NOT NULL REFERENCES near_duplicate_groups(group_id) ON DELETE CASCADE,
+                photo_id BIGINT NOT NULL REFERENCES photos(photo_id) ON DELETE CASCADE,
+                similarity_score DOUBLE PRECISION,
+                PRIMARY KEY (group_id, photo_id)
+            );
+        """)
 
-
-# ---------------- CRUD METHODS ----------------
-
-# ---- Users ----
-def create_user(name, preferences={}):
-    conn = get_connection()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute("INSERT INTO users (name, preferences) VALUES (%s, %s) RETURNING *;", (name, preferences))
-    user = cur.fetchone()
-    conn.commit()
-    cur.close()
-    conn.close()
-    return user
-
-def get_user(user_id):
-    conn = get_connection()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute("SELECT * FROM users WHERE user_id=%s;", (user_id,))
-    user = cur.fetchone()
-    cur.close()
-    conn.close()
-    return user
-
-def update_user(user_id, name=None, preferences=None):
-    conn = get_connection()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    if name:
-        cur.execute("UPDATE users SET name=%s WHERE user_id=%s;", (name, user_id))
-    if preferences is not None:
-        cur.execute("UPDATE users SET preferences=%s WHERE user_id=%s;", (preferences, user_id))
-    conn.commit()
-    cur.close()
-    conn.close()
-    return get_user(user_id)
-
-def delete_user(user_id):
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("DELETE FROM users WHERE user_id=%s;", (user_id,))
-    conn.commit()
-    cur.close()
-    conn.close()
+        conn.commit()
+        cur.close()
+        conn.close()
 
 
-# ---- Collections ----
-def create_collection(user_id, name):
-    conn = get_connection()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute("INSERT INTO collections (user_id, name) VALUES (%s, %s) RETURNING *;", (user_id, name))
-    collection = cur.fetchone()
-    conn.commit()
-    cur.close()
-    conn.close()
-    return collection
+# ---------------- Generic Base Model ----------------
+class BaseModel:
+    def __init__(self, db: Database, table_name: str, pk: str):
+        self.db = db
+        self.table_name = table_name
+        self.pk = pk
 
-def get_collection(collection_id):
-    conn = get_connection()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute("SELECT * FROM collections WHERE collection_id=%s;", (collection_id,))
-    collection = cur.fetchone()
-    cur.close()
-    conn.close()
-    return collection
+    def create(self, **kwargs):
+        keys = ", ".join(kwargs.keys())
+        values_placeholders = ", ".join(["%s"] * len(kwargs))
+        values = tuple(kwargs.values())
+        query = f"INSERT INTO {self.table_name} ({keys}) VALUES ({values_placeholders}) RETURNING *;"
+        conn = self.db.get_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute(query, values)
+        result = cur.fetchone()
+        conn.commit()
+        cur.close()
+        conn.close()
+        return result
 
-def update_collection(collection_id, name=None, user_id=None):
-    conn = get_connection()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    if name:
-        cur.execute("UPDATE collections SET name=%s WHERE collection_id=%s;", (name, collection_id))
-    if user_id:
-        cur.execute("UPDATE collections SET user_id=%s WHERE collection_id=%s;", (user_id, collection_id))
-    conn.commit()
-    cur.close()
-    conn.close()
-    return get_collection(collection_id)
+    def get(self, id_value):
+        conn = self.db.get_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute(f"SELECT * FROM {self.table_name} WHERE {self.pk}=%s;", (id_value,))
+        result = cur.fetchone()
+        cur.close()
+        conn.close()
+        return result
 
-def delete_collection(collection_id):
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("DELETE FROM collections WHERE collection_id=%s;", (collection_id,))
-    conn.commit()
-    cur.close()
-    conn.close()
+    def update(self, id_value, **kwargs):
+        set_clause = ", ".join([f"{k}=%s" for k in kwargs])
+        values = tuple(kwargs.values()) + (id_value,)
+        query = f"UPDATE {self.table_name} SET {set_clause} WHERE {self.pk}=%s RETURNING *;"
+        conn = self.db.get_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute(query, values)
+        result = cur.fetchone()
+        conn.commit()
+        cur.close()
+        conn.close()
+        return result
 
-
-# ---- Photos ----
-def create_photo(collection_id, file_path):
-    conn = get_connection()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute("INSERT INTO photos (collection_id, file_path) VALUES (%s, %s) RETURNING *;", (collection_id, file_path))
-    photo = cur.fetchone()
-    conn.commit()
-    cur.close()
-    conn.close()
-    return photo
-
-def get_photo(photo_id):
-    conn = get_connection()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute("SELECT * FROM photos WHERE photo_id=%s;", (photo_id,))
-    photo = cur.fetchone()
-    cur.close()
-    conn.close()
-    return photo
-
-def update_photo(photo_id, collection_id=None, file_path=None):
-    conn = get_connection()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    if collection_id:
-        cur.execute("UPDATE photos SET collection_id=%s WHERE photo_id=%s;", (collection_id, photo_id))
-    if file_path:
-        cur.execute("UPDATE photos SET file_path=%s WHERE photo_id=%s;", (file_path, photo_id))
-    conn.commit()
-    cur.close()
-    conn.close()
-    return get_photo(photo_id)
-
-def delete_photo(photo_id):
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("DELETE FROM photos WHERE photo_id=%s;", (photo_id,))
-    conn.commit()
-    cur.close()
-    conn.close()
+    def delete(self, id_value):
+        conn = self.db.get_connection()
+        cur = conn.cursor()
+        cur.execute(f"DELETE FROM {self.table_name} WHERE {self.pk}=%s;", (id_value,))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return True
 
 
-# ---- Thumbnails ----
-def create_thumbnail(photo_id, image_path):
-    conn = get_connection()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute("INSERT INTO thumbnails (photo_id, image_path) VALUES (%s, %s) RETURNING *;", (photo_id, image_path))
-    thumbnail = cur.fetchone()
-    conn.commit()
-    cur.close()
-    conn.close()
-    return thumbnail
+# ---------------- Table Classes ----------------
+class User(BaseModel):
+    def __init__(self, db):
+        super().__init__(db, "users", "user_id")
 
-def get_thumbnail(thumbnail_id):
-    conn = get_connection()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute("SELECT * FROM thumbnails WHERE thumbnail_id=%s;", (thumbnail_id,))
-    thumbnail = cur.fetchone()
-    cur.close()
-    conn.close()
-    return thumbnail
+class Collection(BaseModel):
+    def __init__(self, db):
+        super().__init__(db, "collections", "collection_id")
 
-def update_thumbnail(thumbnail_id, photo_id=None, image_path=None):
-    conn = get_connection()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    if photo_id:
-        cur.execute("UPDATE thumbnails SET photo_id=%s WHERE thumbnail_id=%s;", (photo_id, thumbnail_id))
-    if image_path:
-        cur.execute("UPDATE thumbnails SET image_path=%s WHERE thumbnail_id=%s;", (image_path, thumbnail_id))
-    conn.commit()
-    cur.close()
-    conn.close()
-    return get_thumbnail(thumbnail_id)
+class Photo(BaseModel):
+    def __init__(self, db):
+        super().__init__(db, "photos", "photo_id")
 
-def delete_thumbnail(thumbnail_id):
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("DELETE FROM thumbnails WHERE thumbnail_id=%s;", (thumbnail_id,))
-    conn.commit()
-    cur.close()
-    conn.close()
+class Thumbnail(BaseModel):
+    def __init__(self, db):
+        super().__init__(db, "thumbnails", "thumbnail_id")
+
+class ExifData(BaseModel):
+    def __init__(self, db):
+        super().__init__(db, "exif_data", "photo_id")  # photo_id is PK here
+
+class Score(BaseModel):
+    def __init__(self, db):
+        super().__init__(db, "scores", "score_id")
+
+class Face(BaseModel):
+    def __init__(self, db):
+        super().__init__(db, "faces", "face_id")
+
+class ImageComment(BaseModel):
+    def __init__(self, db):
+        super().__init__(db, "image_comments", "image_comment_id")
+
+class CollectionComment(BaseModel):
+    def __init__(self, db):
+        super().__init__(db, "collection_comments", "collection_comment_id")
+
+class NearDuplicateGroup(BaseModel):
+    def __init__(self, db):
+        super().__init__(db, "near_duplicate_groups", "group_id")
+
+class NearDuplicatePhoto(BaseModel):
+    def __init__(self, db):
+        super().__init__(db, "near_duplicate_photos", "photo_id")  # composite PK, handle carefully
