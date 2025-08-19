@@ -2,6 +2,7 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
+
 # ---------------- Database Connection ----------------
 class Database:
     def __init__(self, dbname="postgres", user="postgres", password="admin", host="localhost", port="5432"):
@@ -51,6 +52,21 @@ class Database:
                 collection_id BIGINT REFERENCES collections(collection_id) ON DELETE SET NULL,
                 file_path TEXT NOT NULL UNIQUE,
                 date_added TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            );
+        """)
+        
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS cameras (
+                camera_id     BIGSERIAL PRIMARY KEY,
+                camera_name   TEXT NOT NULL,
+                camera_make   TEXT NOT NULL,
+                camera_model  TEXT,
+                lens_make     TEXT,
+                lens_model    TEXT,
+                aperture      TEXT,
+                shutter_speed TEXT,
+                iso           TEXT,
+                photo_path    TEXT
             );
         """)
 
@@ -144,6 +160,8 @@ class Database:
             );
         """)
 
+        
+
         conn.commit()
         cur.close()
         conn.close()
@@ -151,6 +169,10 @@ class Database:
 
 # ---------------- Generic Base Model ----------------
 class BaseModel:
+
+    """
+    Base model class for database operations.
+    """
     def __init__(self, db: Database, table_name: str, pk: str):
         self.db = db
         self.table_name = table_name
@@ -200,6 +222,9 @@ class BaseModel:
         cur.close()
         conn.close()
         return True
+    
+    
+
 
 
 # ---------------- Table Classes ----------------
@@ -246,3 +271,9 @@ class NearDuplicateGroup(BaseModel):
 class NearDuplicatePhoto(BaseModel):
     def __init__(self, db):
         super().__init__(db, "near_duplicate_photos", "photo_id")  # composite PK, handle carefully
+
+class Camera(BaseModel):
+    def __init__(self, db):
+        super().__init__(db, "cameras", "camera_id")
+
+

@@ -1,63 +1,47 @@
-//  Create Camera Logic 
+// CameraCreation.js
+
 function createCamera(event) {
-	event.preventDefault();
-	const cameraName = document.getElementById("camera-name").value;
-	const cameraMake = document.getElementById("camera-make").value;
-	const cameraModel = document.getElementById("camera-model").value;
-	const lensMake = document.getElementById("lens-make").value;
-	const lensModel = document.getElementById("lensmodel").value;
-	const aperture = document.getElementById("aperture").value;
-	const shutterSpeed = document.getElementById("shutterspeed").value;
-	const iso = document.getElementById("iso").value;
-	const photoOfCamera = document.getElementById("photo-source").value;
-	eel.create_camera(
-		cameraName, cameraMake, cameraModel, lensMake, lensModel, aperture, shutterSpeed, iso, photoOfCamera 
-	)(function(response) {
-		if (response.success) {
-			window.location.href = "dashboard.html";
-}	
-	});
+  event.preventDefault();
+  const cameraName   = document.getElementById("camera-name").value.trim();
+  const cameraMake   = document.getElementById("camera-make").value.trim();
+  const cameraModel  = document.getElementById("camera-model").value.trim();
+  const lensMake     = document.getElementById("lens-make").value.trim();
+  const lensModel    = document.getElementById("lens-model").value.trim();
+  const aperture     = document.getElementById("aperture").value.trim();
+  const shutterSpeed = document.getElementById("shutter-speed").value.trim();
+  const iso          = document.getElementById("iso").value.trim();
+  const photoOfCamera= document.getElementById("photo-source").value || null;
+
+  eel.create_camera(
+    cameraName, cameraMake, cameraModel, lensMake, lensModel,
+    aperture, shutterSpeed, iso, photoOfCamera
+  )((resp) => {
+    if (resp && resp.success) {
+      // optionally show success and stay on page
+      // window.location.href = "dashboard.html";
+      alert(`Saved camera: ${resp.camera.camera_name}`);
+    } else {
+      alert("Failed to save camera");
+    }
+  });
 }
 
 function selectImage(selectionType = 'file'){
-	eel.select_file(selectionType)(function(filePath) {
-		document.getElementById("photo-of-camera").value = filePath;
-		document.getElementById("photo-source").innerText = `Selected Image: ${filePath}`;
-	});
+  eel.select_file(selectionType)((filePath) => {
+    if (!filePath) return;
+    document.getElementById("photo-source").value = filePath;               // store for submit
+    document.getElementById("photo-of-camera-btn").textContent = "✓ Image selected";
+  });
 }
 
-
 window.addEventListener('DOMContentLoaded', () => {
-    loadHeader();
-    loadSidebar();
+  loadHeader();
+  loadSidebar();
+  setTimeout(setupSidebarResizer, 300);
 
-    // Setup sidebar resizer after sidebar loads
-    setTimeout(setupSidebarResizer, 300); // Delay to ensure sidebar is loaded
-
-    // Restore selectDirectory button functionality
-    const selectImgButton = document.getElementById("photo-of-camera-btn");
-    if (selectImgButton) {
-        selectImgButton.addEventListener("click", () => {
-            selectImage();
-        });
-    }
-
-    // Restore sidebar toggle functionality
-    const toggleSidebarBtn = document.getElementById("toggle-sidebar");
-    if (toggleSidebarBtn) {
-        toggleSidebarBtn.addEventListener("click", () => {
-            toggleSidebar();
-        });
-    }
-
-    eel.getallcollections()(collections => {
-        if (Array.isArray(collections)) {
-            loadCollectionCardsSequentially(collections);
-        }
-    });
-
-    eel.onStart()(() => {
-        const output = document.getElementById("output");
-        if (output) output.innerText = "Application started successfully!";
-    });
+  // Ensure we only call onStart once per window
+  if (!sessionStorage.getItem('__photosift_onstart_called')) {
+    sessionStorage.setItem('__photosift_onstart_called','1');
+    eel.onStart()(()=>{});
+  }
 });

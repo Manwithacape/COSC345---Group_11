@@ -10,9 +10,14 @@ import tkinter as tk
 from tkinter import filedialog
 from FileHandler import FileHandler
 import db
+from db import Camera  # <-- Add this import
+
 FileHandler = FileHandler()
 # Initialize the eel web folder
 eel.init('web')
+
+db_instance = db.Database()
+
 
 ## ------ EEL EXPOSED FUNCTIONS ------ ##
 ## Create exposed wrapper functions for Eel to call from JavaScript
@@ -25,11 +30,10 @@ def onStart():
     print(f"Data Directory: {FileHandler.photoSIFT_dir}")
     
     # db connect
-    database = db.Database()
-    database.init_db()
+    db_instance.init_db()
 
     # create a file handler instance
-    file_handler = FileHandler.FileHandler();
+    file_handler = FileHandler.FileHandler()
 
 
 @eel.expose
@@ -45,7 +49,29 @@ def create_collection(collection_name, colletion_description, collection_source)
     FileHandler.create_collection(collection_name=collection_name, 
                                   colletion_description=colletion_description,
                                   collection_source=collection_source)
-                                  
+
+@eel.expose
+def create_camera(camera_name, camera_make, camera_model,
+                  lens_make, lens_model, aperture, shutter_speed, iso, photo_path):
+    camera_model_instance = Camera(db_instance)  # <-- Use the imported Camera class
+    row = camera_model_instance.create(
+        camera_name=camera_name,
+        camera_make=camera_make,
+        camera_model=camera_model,
+        lens_make=lens_make,
+        lens_model=lens_model,
+        aperture=aperture,
+        shutter_speed=shutter_speed,
+        iso=iso,
+        photo_path=photo_path
+    )
+    return {"success": bool(row), "camera": row}
+
+
+@eel.expose
+def list_cameras():
+    return db.list_cameras()
+      
 @eel.expose
 def select_directory(selection_type='directory'):
 
@@ -89,8 +115,12 @@ def get_image_data_url(image_path):
     except Exception as e:
         print(f"Error loading image {image_path}: {e}")
         return None
+    
+
  
 ## ------ MAIN FUNCTION ------ ##
 if __name__ == '__main__':
+    db_instance.init_db()
+    print("Database initialized.")
     eel.init('web')
     eel.start('dashboard.html', size=(1920, 1080), mode='chrome')
