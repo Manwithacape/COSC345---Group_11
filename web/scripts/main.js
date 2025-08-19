@@ -23,6 +23,8 @@ function createCollectionCard(name, imagePath, dateTime) {
     return card;
 }
 
+
+
 function addCollectionCardToGrid(card, gridId = "collection-card-grid") {
     const grid = document.getElementById(gridId);
     if (grid) {
@@ -62,6 +64,7 @@ function toggleSidebar() {
     const sidebar = document.getElementById("sidebar-content");
     if (sidebar.style.display === "none" || sidebar.style.display === "") {
         showSidebar();
+        sidebar.style.width = "250px"; // Reset width when showing
     } else {
         hideSidebar();
     }
@@ -82,6 +85,39 @@ function setSidebarDisplay(display, icon, alt, border=true) {
     toggleButton.alt = alt;
 }
 
+// --- Sidebar Resizer Logic ---
+function setupSidebarResizer() {
+    const resizer = document.getElementById("resizer");
+    const sidebarContent = document.getElementById("sidebar-content");
+    const sidebarControls = document.getElementById("sidebar-controls");
+    let isResizing = false;
+
+    resizer.addEventListener("mousedown", function(e) {
+        isResizing = true;
+        document.body.style.cursor = "ew-resize";
+    });
+
+    document.addEventListener("mousemove", function(e) {
+        if (!isResizing) return;
+        const newWidth = e.clientX - sidebarContent.getBoundingClientRect().left;
+        const maxWidth = 800; // Set your desired max width in px
+        sidebarContent.style.width = `${Math.max(0, Math.min(newWidth, maxWidth))}px`; // Clamp between 0 and maxWidth
+
+        // if the sidebar is less than or equal to 5px, hide it
+        const widthValue = parseInt(sidebarContent.style.width, 10);
+        const controlsWidth = parseInt(getComputedStyle(sidebarControls).width, 10);
+        if (widthValue <= controlsWidth) {
+            hideSidebar();
+        }
+    });
+
+    document.addEventListener("mouseup", function() {
+        if (isResizing) {
+            isResizing = false;
+            document.body.style.cursor = "";
+        }
+    });
+}
 // --- Collection Creation Logic ---
 function handleCreateCollection(event) {
     event.preventDefault();
@@ -116,6 +152,9 @@ function loadSidebar() {
 window.addEventListener('DOMContentLoaded', () => {
     loadHeader();
     loadSidebar();
+
+    // Setup sidebar resizer after sidebar loads
+    setTimeout(setupSidebarResizer, 300); // Delay to ensure sidebar is loaded
 
     // Restore selectDirectory button functionality
     const selectDirBtn = document.getElementById("select-directory-btn");
