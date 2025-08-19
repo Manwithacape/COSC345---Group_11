@@ -79,4 +79,4 @@ def get_image_data_url(image_path):
 ## ------ MAIN FUNCTION ------ ##
 if __name__ == '__main__':
     eel.init('web')
-    eel.start('dashboard.html', size=(1920, 1080), mode='default')
+    eel.start('dashboard.html', size=(1920, 1080), mode='chrome')
