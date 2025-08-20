@@ -27,6 +27,26 @@ Install the PostgreSQL Python library:
 ```bash
 pip install psycopg2
 ```
+
+
+
+---
+## 2.5. Create .env file
+
+Create .env file in root dir
+
+Sample contents:
+
+```bash
+DATABASE_USERNAME=postgres
+DATABASE_PASSWORD=admin
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_NAME=photosift
+```
+
+
+
 ---
 
 ## 3. Initialise Database
