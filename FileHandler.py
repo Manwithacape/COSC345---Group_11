@@ -81,16 +81,20 @@ class FileHandler:
             preview_path = os.path.normpath(preview_path)
 
             # Save/copy the preview image to preview_path
-            self.extract_jpg_from_raw(photo, new_collection_path)  # This will save the preview image
+            image_path = self.extract_jpg_from_raw(photo, new_collection_path)  # This will save the preview image
+
+            # Analyze the photo and get its data
+            image_scores = PhotoAnalyzer.score_image(image_path) ## returns a tuple with sharpness, exposure, saturation, contrast, and overall score 
+
             photos_data.append({
                 "source_path": photo,
                 "preview_path": preview_path,
                 "analysis": {
-                    "sharpness": None,
-                    "exposure": None,
-                    "saturation": None,
-                    "contrast": None,
-                    "brightness": None,
+                    "sharpness": image_scores[0],
+                    "exposure": image_scores[1],
+                    "saturation": image_scores[2],
+                    "contrast": image_scores[3],
+                    "weighted_score": image_scores[4],
                     "faces": [],
                     "near-duplicates": []  # Placeholder for near-duplicate images
                 }
