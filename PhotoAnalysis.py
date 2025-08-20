@@ -6,6 +6,24 @@ import numpy as np
 
 
 class PhotoAnalyzer:
+    @staticmethod
+    def resize_image(image, target_width=800):
+        """Resize image to target width, maintaining aspect ratio."""
+        if image is None:
+            return None
+        h, w = image.shape[:2]
+        if w == 0:
+            return image
+        scale = target_width / w
+        new_size = (int(w * scale), int(h * scale))
+        return cv.resize(image, new_size, interpolation=cv.INTER_AREA)
+
+    @staticmethod
+    def load_image(image_path):
+        """Load an image from the specified path."""
+        if not os.path.exists(image_path):
+            raise FileNotFoundError(f"Image not found: {image_path}")
+        return cv.imread(image_path)
     """Class to handle photo analysis operations."""
     @staticmethod
     def map_value(value, from_min, from_max, to_min, to_max):
@@ -23,10 +41,11 @@ class PhotoAnalyzer:
         Calculate the sharpness of an image as a proportion:
         0 = blurry, 1 = sharp.
         """
-        gray_image = PhotoAnalyzer.gray_image(image)
+        gray_image = PhotoAnalyzer.grayscale(image)
         laplacian_var = cv.Laplacian(gray_image, cv.CV_64F).var()
         # Normalize the variance to a range of 0 to 1
         sharpness = PhotoAnalyzer.map_value(laplacian_var, 0, 1000, 0, 1)
+        return sharpness
 
     @staticmethod
     def exposure_value(image):
@@ -35,13 +54,25 @@ class PhotoAnalyzer:
         1 = well-exposed (not too dark or too bright),
         0 = underexposed or overexposed.
         """
-        gray_image = gray_image(image)
+        gray_image = PhotoAnalyzer.grayscale(image)
         mean_intensity = np.mean(gray_image)
         # Assume ideal exposure is around mid-gray (127.5)
         # The further from 127.5, the worse the exposure
         exposure = 1.0 - (abs(mean_intensity - 127.5) / 127.5)
         exposure = max(0.0, min(1.0, exposure)) 
         return exposure
+    
+    @staticmethod
+    def contrast_value(image):
+        """
+        Detect the contrast of an image as a proportion:
+        1 = high contrast, 0 = low contrast.
+        """
+        gray_image = PhotoAnalyzer.grayscale(image)
+        min_val = np.min(gray_image)
+        max_val = np.max(gray_image)
+        contrast = (max_val - min_val) / 255.0
+        return contrast
     
     @staticmethod
     def saturation_value(image):
@@ -55,12 +86,11 @@ class PhotoAnalyzer:
         return saturation
     
     @staticmethod 
-    def score_image(image, sharpness_weight=1, exposure_weight=1, saturation_weight=1, contrast_weight=1):
+    def score_image(image_path, sharpness_weight=1, exposure_weight=1, saturation_weight=1, contrast_weight=1):
         """
-        returns a weighted average score for an image based on sharpness, exposure, saturation, and contrast.
+        returns a tuple with sharpness, exposure, saturation, contrast, and overall score (for now assuming weights of 1).
         """
-        if image is None:
-            raise ValueError("Image cannot be None.")
+        image = PhotoAnalyzer.load_image(image_path);
 
         sharpness = PhotoAnalyzer.sharpness_value(image)
         exposure = PhotoAnalyzer.exposure_value(image)
@@ -77,8 +107,12 @@ class PhotoAnalyzer:
         return sharpness, exposure, saturation, contrast, overall_score
     
     @staticmethod
-    def weighted_average(self, values, weights):
+    def weighted_average(values, weights):
         """Calculate a weighted average of the given values."""
         if len(values) != len(weights):
             raise ValueError("Values and weights must have the same length.")
-        return sum(v * w for v, w in zip(values, weights)) / sum(weights)
+        total = 0
+        for i in range(len(values)):
+            total += values[i] * weights[i]
+        
+        return total / len(values);
