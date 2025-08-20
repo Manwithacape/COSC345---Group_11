@@ -3,3 +3,5 @@ __pycache__/
 
 ## db.cpython should not be ignored
 *.pyc
+
+.env 
