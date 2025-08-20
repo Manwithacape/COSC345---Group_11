@@ -222,9 +222,16 @@ class BaseModel:
         cur.close()
         conn.close()
         return True
-    
-    
 
+    def list_all(self):
+        conn = self.db.get_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute(f"SELECT * FROM {self.table_name};")
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        return rows
+    
 
 
 # ---------------- Table Classes ----------------

@@ -84,6 +84,9 @@ INSERT INTO near_duplicate_groups (created_at) VALUES (NOW());
 -- Near-Duplicate Photos
 INSERT INTO near_duplicate_photos (group_id, photo_id, similarity_score) VALUES (1, 1, 0.95);
 INSERT INTO near_duplicate_photos (group_id, photo_id, similarity_score) VALUES (1, 2, 0.90);
+
+-- Cameras 
+INSERT INTO cameras (camera_name, camera_make, camera_model, lens_model, aperture, shutter_speed, iso) VALUES ('Canon EOS R5 Mark II', 'Canon', '24-105mm lens Kit','f/1.9'  ,'1/500s', '' )
 ```
 
 ---

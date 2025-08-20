@@ -50,10 +50,11 @@ def create_collection(collection_name, colletion_description, collection_source)
                                   colletion_description=colletion_description,
                                   collection_source=collection_source)
 
-@eel.expose
+
+@eel.expose # Function to create a new camera entry in the database
 def create_camera(camera_name, camera_make, camera_model,
                   lens_make, lens_model, aperture, shutter_speed, iso, photo_path):
-    camera_model_instance = Camera(db_instance)  # <-- Use the imported Camera class
+    camera_model_instance = Camera(db_instance)  
     row = camera_model_instance.create(
         camera_name=camera_name,
         camera_make=camera_make,
@@ -68,9 +69,10 @@ def create_camera(camera_name, camera_make, camera_model,
     return {"success": bool(row), "camera": row}
 
 
-@eel.expose
+@eel.expose #Function used to get all the cameras from the database
 def list_cameras():
-    return db.list_cameras()
+    camera_model_instance = Camera(db_instance)
+    return camera_model_instance.list_all() 
       
 @eel.expose
 def select_directory(selection_type='directory'):
@@ -115,6 +117,7 @@ def get_image_data_url(image_path):
     except Exception as e:
         print(f"Error loading image {image_path}: {e}")
         return None
+
     
 
  

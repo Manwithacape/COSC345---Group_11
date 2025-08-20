@@ -3,11 +3,12 @@
 	<head>
 		<title>PhotoSIFT</title>
         <link rel="stylesheet" type="text/css" href="/styles.css">
+        <script type="text/javascript" src="/eel.js"></script>
         <script type="text/javascript" src="scripts/elementloading.js"></script>
         <script type="text/javascript" src="scripts/CameraCreation.js"></script>
-        <script type="text/javascript" src="/eel.js"></script>
 	</head>
 	<body>
+    <main id="main-container">
 		<!-- <a class="create-camera" href="create-camera.html">Create a camera</a> -->
 <form class="camera-selectionForm" id="createCameraForm" onsubmit="createCamera(event)">
   <label>Camera Name:</label>
@@ -40,8 +41,27 @@
   <button type="submit" class="submit-form">Add Camera</button>
 </form>
 
-<main id="camera-selection"></main>
-			
+
+
+			<p>My Cameras</p>
+      <table id="cameras-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Make</th>
+            <th>Model</th>
+            <th>Lens Make</th>
+            <th>Lens Model</th>
+            <th>Aperture</th>
+            <th>Shutter Speed</th>
+            <th>ISO</th>
+            <th>Photo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Camera rows will be inserted here -->
+        </tbody>
+      </table>
 		
 		</main>
 	</body>
