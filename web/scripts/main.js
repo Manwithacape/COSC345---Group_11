@@ -1,30 +1,49 @@
 
 // --- Collection Card Logic ---
-function createCollectionCard(name, imagePath, dateTime) {
+/**
+ * @function createCollectionCard
+ * @description Creates a collection card element with a thumbnail image, title, and date.
+ * @param {String} name 
+ * @param {String} imagePath 
+ * @param {String} dateTime 
+ * @returns {HTMLElement} card
+ */
+function createCollectionCard(name="NO NAME", imagePath, dateTime="00-00 00:00:00") {
     const card = document.createElement("a");
     card.className = "collection-card";
     card.href = "collection-view.html";
+
     const img = document.createElement("img");
     img.className = "collection-card-image";
     img.src = imagePath;
     img.alt = `Collection Thumbnail for ${name}`;
+
     const header = document.createElement("div");
     header.className = "collection-card-header";
+
     const title = document.createElement("h2");
     title.className = "underline";
     title.textContent = name;
+
     const date = document.createElement("h4");
     date.textContent = dateTime;
+
     header.append(title, date);
     card.append(img, header);
+
     const tag = document.createElement("div");
     tag.className = "collection-card-tag";
+
     card.appendChild(tag);
     return card;
 }
 
-
-
+/**
+ * @function addCollectionCardToGrid
+ * @description Adds a collection card to a specified grid element.
+ * @param {HTMLElement} card 
+ * @param {HTMLElement} gridId 
+ */
 function addCollectionCardToGrid(card, gridId = "collection-card-grid") {
     const grid = document.getElementById(gridId);
     if (grid) {
@@ -34,6 +53,13 @@ function addCollectionCardToGrid(card, gridId = "collection-card-grid") {
     }
 }
 
+/**
+ * @function loadCollectionCardsSequentially
+ * @description Loads collection cards sequentially from an array of collections recusively.
+ * @param {Array} collections 
+ * @param {Int} index - The current index in the collections array. 
+ * @returns nothing
+ */
 function loadCollectionCardsSequentially(collections, index = 0) {
     if (index >= collections.length) return;
     const col = collections[index];
@@ -53,16 +79,30 @@ function loadCollectionCardsSequentially(collections, index = 0) {
     }
 }
 
-// --- Sidebar Logic ---
+// ------ SIDEBAR LOGIC ------
+/**
+ * @function hideSidebar
+ * @description Hides the sidebar and updates the toggle button icon.
+ */
 function hideSidebar() {
     setSidebarDisplay("none", "show-hollow.png", "show sidebar icon", false);
 }
+
+/**
+ * @function showSidebar
+ * @description Shows the sidebar and updates the toggle button icon.
+ */
 function showSidebar() {
     setSidebarDisplay("flex", "hide-hollow.png", "hide sidebar icon", true);
     // reset sidebar width when showing
     const sidebarContent = document.getElementById("sidebar-content");
     sidebarContent.style.width = "250px"; // Reset width when showing
 }
+
+/**
+ * @function toggleSidebar
+ * @description Toggles the sidebar visibility and updates the toggle button icon.
+ */
 function toggleSidebar() {
     const sidebar = document.getElementById("sidebar-content");
     if (sidebar.style.display === "none" || sidebar.style.display === "") {
@@ -71,6 +111,15 @@ function toggleSidebar() {
         hideSidebar();
     }
 }
+
+/**
+ * @function setSidebarDisplay
+ * @description Sets the display properties of the sidebar and updates the toggle button icon.
+ * @param {String} display 
+ * @param {String} icon 
+ * @param {String} alt 
+ * @param {String} border 
+ */
 function setSidebarDisplay(display, icon, alt, border=true) {
     const sidebar = document.getElementById("sidebar");
     const sidebarContent = document.getElementById("sidebar-content");
@@ -88,6 +137,11 @@ function setSidebarDisplay(display, icon, alt, border=true) {
 }
 
 // --- Sidebar Resizer Logic ---
+
+/**
+ * @function setupSidebarResizer
+ * @description Initializes the sidebar resizer functionality.
+ */
 function setupSidebarResizer() {
     const resizer = document.getElementById("resizer");
     const sidebarContent = document.getElementById("sidebar-content");
@@ -121,6 +175,12 @@ function setupSidebarResizer() {
     });
 }
 // --- Collection Creation Logic ---
+
+/**
+ * @function handleCreateCollection
+ * @description Handles the creation of a new collection by gathering input values and calling the eel function to create the collection.
+ * @param {Event} event 
+ */
 function handleCreateCollection(event) {
     event.preventDefault();
     const name = document.getElementById("collection-name").value;
@@ -129,6 +189,12 @@ function handleCreateCollection(event) {
     eel.create_collection(name, desc, source);
     window.location.href = "dashboard.html";
 }
+
+/**
+ * @function selectDirectory
+ * @description Opens a directory selection dialog and sets the selected directory path to the input field.
+ * @param {String} selectionType - The type of selection, default is 'directory'.
+ */
 function selectDirectory(selectionType = 'directory') {
     eel.select_directory(selectionType)(function(directory) {
         document.getElementById("collection-source").value = directory;
@@ -137,12 +203,21 @@ function selectDirectory(selectionType = 'directory') {
 }
 
 // --- Common Parts Loading ---
+/**
+ * @function loadHeader
+ * @description Loads the header HTML into the document body.
+ */
 function loadHeader() {
     fetch('commonParts/header.html')
         .then(res => res.text())
         .then(html => document.body.insertAdjacentHTML('afterbegin', html))
         .catch(err => console.error("Error loading header:", err));
 }
+
+/**
+ * @function loadSidebar
+ * @description Loads the sidebar HTML into the main container.
+ */
 function loadSidebar() {
     fetch('commonParts/sidebar.html')
         .then(res => res.text())
