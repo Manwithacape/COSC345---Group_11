@@ -52,8 +52,8 @@ function loadSidebar() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  loadHeader();
-  loadSidebar();
+  //loadHeader(); // Not needed here as this is in main.js
+  //loadSidebar(); // Not needed here as this is in main.js
   // setTimeout(setupSidebarResizer, 300);
 
   // Ensure we only call onStart once per window
