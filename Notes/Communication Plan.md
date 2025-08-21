@@ -32,6 +32,7 @@ This plan ensures clear, respectful, and efficient communication within the team
 - Reply to team messages within 24 hours (unless stated otherwise)  
 - If unavailable (due to exams, illness, etc.), notify the team in advance  
 - Attend all scheduled meetings or inform the group if you cannot attend  
+- Working hours: 9:00am-5:00pm
 
 ### Work Practices  
 - **Git Usage:**  
