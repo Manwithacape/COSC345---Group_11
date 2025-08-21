@@ -12,10 +12,9 @@ from FileHandler import FileHandler
 import db
 from db import Camera  # <-- Add this import
 
-FileHandler = FileHandler()
-# Initialize the eel web folder
-eel.init('web')
 
+## Initialize Helper Classes
+FileHandler = FileHandler()
 db_instance = db.Database()
 
 
@@ -23,17 +22,23 @@ db_instance = db.Database()
 ## Create exposed wrapper functions for Eel to call from JavaScript
 @eel.expose
 def onStart():
-    """Initialize the application and database."""
+    """
+    Initialize the application and database, print startup info, and handle errors gracefully.
+    """
     print("Application starting...")
 
-    # Print the data directory
-    print(f"Data Directory: {FileHandler.photoSIFT_dir}")
-    
-    # db connect
-    db_instance.init_db()
-
-    # create a file handler instance
+    # Create a file handler instance
     file_handler = FileHandler
+
+    # Print the data directory
+    print(f"Data Directory: {file_handler.photoSIFT_dir}")
+
+    # Try to connect to the database
+    try:
+        db_instance.init_db()
+        print("Database initialized successfully.")
+    except Exception as e:
+        print(f"Database initialization failed: {e}")
 
 
 @eel.expose
@@ -54,6 +59,19 @@ def create_collection(collection_name, colletion_description, collection_source)
 @eel.expose # Function to create a new camera entry in the database
 def create_camera(camera_name, camera_make, camera_model,
                   lens_make, lens_model, aperture, shutter_speed, iso, photo_path):
+    """ Wrapper function to create a new camera entry in the database.
+    Args:
+        camera_name (str): Name of the camera.
+        camera_make (str): Make of the camera.
+        camera_model (str): Model of the camera.
+        lens_make (str): Make of the lens.
+        lens_model (str): Model of the lens.
+        aperture (float): Aperture value.
+        shutter_speed (float): Shutter speed value.
+        iso (int): ISO value.
+        photo_path (str): Path to the photo associated with the camera.
+    Returns:
+        dict: A dictionary containing the success status and the created camera entry."""
     camera_model_instance = Camera(db_instance)  
     row = camera_model_instance.create(
         camera_name=camera_name,
@@ -71,12 +89,16 @@ def create_camera(camera_name, camera_make, camera_model,
 
 @eel.expose #Function used to get all the cameras from the database
 def list_cameras():
+    """ 
+    Wrapper function to list all cameras from the database.
+    Returns:
+        list: of all cameras in the database. 
+    """
     camera_model_instance = Camera(db_instance)
     return camera_model_instance.list_all() 
       
 @eel.expose
 def select_directory(selection_type='directory'):
-
     """
     Wrapper function to open a file dialog for selecting a file or directory.
     Args:
@@ -101,10 +123,23 @@ def select_file(selection_type='file'):
 
 @eel.expose
 def get_all_collections():
+    """
+    Wrapper function to get all collections from the FileHandler class.
+    Returns: 
+        list: A list of dictionaries containing collection information.
+    """
     return FileHandler.get_all_collections()
 
 @eel.expose
 def get_image_data_url(image_path):
+    """
+    Convert an image file to a base64 data URL for display in the web application.
+    Args:
+        image_path (str): The path to the image file.
+        
+    Returns:
+    str: A base64 data URL representing the image.
+    """
     try:
         dir_path = os.path.dirname(image_path)
         if not os.path.isfile(image_path):
@@ -118,11 +153,9 @@ def get_image_data_url(image_path):
         print(f"Error loading image {image_path}: {e}")
         return None
 
-    
-
- 
 ## ------ MAIN FUNCTION ------ ##
 if __name__ == '__main__':
+    eel.init('web')
     db_instance.init_db()
     print("Database initialized.")
     eel.init('web')
