@@ -33,7 +33,7 @@ def onStart():
     db_instance.init_db()
 
     # create a file handler instance
-    file_handler = FileHandler.FileHandler()
+    file_handler = FileHandler
 
 
 @eel.expose
