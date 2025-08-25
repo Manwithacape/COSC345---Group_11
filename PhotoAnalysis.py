@@ -3,7 +3,8 @@ import os
 import sys
 import cv2 as cv 
 import numpy as np
-
+from PIL import Image
+from sentence_transformers import SentenceTransformer, util
 
 class PhotoAnalyzer:
     @staticmethod
@@ -116,3 +117,47 @@ class PhotoAnalyzer:
             total += values[i] * weights[i]
         
         return total / len(values);
+
+    @staticmethod
+    def find_duplicates(image_paths, threshold=0.99, top_k=10, model_name="clip-ViT-B-32"):
+        """
+        Group images into duplicate/near duplicate clusters using CLIP embeddings.
+
+        :param image_paths (list[str]): List of image file paths
+        :param threshold (float): Cosine similarity threshold (1.0 = exact duplicates)
+        :top_k (int): Number of top duplicate/near-duplicate pairs to return - if show all set top_k=None
+        :param model name(str): CLIP model to use
+
+        :return dict{"duplicates": [...], "near-duplicates": [...]}: Each a list of tuples (score, path1, path2)
+        """
+
+        print("Loading CLIP Model...")
+        model = SentenceTransformer(model_name)
+
+        print(f"Encoding {len(image_paths)} images...")
+        encoded = model.encode(
+            [Image.open(fp).convert("RGB") for fp in image_paths], batch_size=32,
+            convert_to_tensor=False, show_progress_bar=True
+        )
+
+        print("Computing similarities..")
+        processed = util.paraphrase_mining_embeddings(encoded)
+
+        # Duplicates: exact matches
+        duplicates = [
+            (score, image_paths[i1], image_paths[i2])
+            for score, i1, i2 in processed if score >= 0.999
+        ][:top_k]
+
+        # Near-duplicates: Above threshold but not exact
+        near_duplicates = [
+            (score, image_paths[i1], image_paths[i2])
+            for score, i1, i2 in processed if threshold <= score < 0.999
+        ][:top_k]
+
+        print("Computation complete!")
+
+        return{
+            "duplicates": duplicates,
+            "near_duplicates": near_duplicates
+        }

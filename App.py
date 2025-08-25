@@ -9,6 +9,7 @@ import sys
 import tkinter as tk
 from tkinter import filedialog
 from FileHandler import FileHandler
+from PhotoAnalysis import PhotoAnalyzer
 import db
 FileHandler = FileHandler()
 # Initialize the eel web folder
@@ -77,6 +78,14 @@ def get_image_data_url(image_path):
     except Exception as e:
         print(f"Error loading image {image_path}: {e}")
         return None
+    
+@eel.expose
+def detect_duplicates(image_paths, threshold=0.99, top_k=10):
+    """
+    Eel wrapper to detect duplicates in a list of image paths.
+    Returns a dict with 'duplicates' and 'near_duplicates'.
+    """
+    return PhotoAnalyzer.find_duplicates(image_paths, threshold, top_k)
  
 ## ------ MAIN FUNCTION ------ ##
 if __name__ == '__main__':

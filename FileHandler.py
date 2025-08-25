@@ -49,7 +49,8 @@ class FileHandler:
                         collections.append({
                             'name': data.get('name', collection_name),
                             'preview': data.get('thumbnail'),
-                            'created_on': data.get('created_on', '')
+                            'created_on': data.get('created_on', ''),
+                            'photos': [photo['preview_path'] for photo in data.get('photos', [])]
                         })
         return collections
     
