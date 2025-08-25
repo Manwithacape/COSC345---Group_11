@@ -25,20 +25,9 @@ def onStart():
     """
     Initialize the application and database, print startup info, and handle errors gracefully.
     """
-    print("Application starting...")
+    print("Frontend (Re)loading...")
 
-    # Create a file handler instance
-    file_handler = FileHandler
-
-    # Print the data directory
-    print(f"Data Directory: {file_handler.photoSIFT_dir}")
-
-    # Try to connect to the database
-    try:
-        db_instance.init_db()
-        print("Database initialized successfully.")
-    except Exception as e:
-        print(f"Database initialization failed: {e}")
+    
 
 
 @eel.expose
@@ -153,10 +142,38 @@ def get_image_data_url(image_path):
         print(f"Error loading image {image_path}: {e}")
         return None
 
+## ------ Initialization ------ ##
+def backend_init():
+    """
+    Initialize backend components such as the database and print startup information.
+    """
+    print("Backend initializing...")
+
+    # Try to connect to the database
+    try:
+        db_instance.init_db()
+        print("  Database initialized successfully.")
+    except Exception as e:
+        print(f"  Database initialization failed: {e}")
+
+    # Create a file handler instance
+    file_handler = FileHandler
+    print(f"  Data Directory: {FileHandler.photoSIFT_dir}")
+
+def frontend_init(size=(1920, 1080), mode='chrome'):
+    """
+    Initialize frontend components and print relevant information.
+    Args:
+        size (tuple): The size of the Eel window.
+        mode (str): The mode to run Eel in (e.g., 'chrome', 'edge', etc.).
+    """
+    # Print the data directory
+    print("Frontend starting...")
+    eel.init('web')
+    eel.init('web')
+    eel.start('dashboard.html', size=size, mode=mode)
+
 ## ------ MAIN FUNCTION ------ ##
 if __name__ == '__main__':
-    eel.init('web')
-    db_instance.init_db()
-    print("Database initialized.")
-    eel.init('web')
-    eel.start('dashboard.html', size=(1920, 1080), mode='chrome')
+   backend_init()
+   frontend_init()
