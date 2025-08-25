@@ -1,5 +1,11 @@
 Group_11
 ===============
+# Requirements
+See `requirements.txt` for required dependencies. 
+
+Run `pip install -r requirements.txt` to install all
+
+---
 # Github/Gitbucket Dual Push
 *Daniel needs to add you to the GitHub repository before you can push to it*
 
