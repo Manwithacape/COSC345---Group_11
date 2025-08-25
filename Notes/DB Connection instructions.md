@@ -105,8 +105,13 @@ INSERT INTO near_duplicate_groups (created_at) VALUES (NOW());
 INSERT INTO near_duplicate_photos (group_id, photo_id, similarity_score) VALUES (1, 1, 0.95);
 INSERT INTO near_duplicate_photos (group_id, photo_id, similarity_score) VALUES (1, 2, 0.90);
 
--- Cameras 
-INSERT INTO cameras (camera_name, camera_make, camera_model, lens_model, aperture, shutter_speed, iso) VALUES ('Canon EOS R5 Mark II', 'Canon', '24-105mm lens Kit','f/1.9'  ,'1/500s', '' )
+-- Cameras
+INSERT INTO cameras (
+    camera_name, camera_make, camera_model, lens_model, aperture, shutter_speed, iso
+) VALUES (
+    'Canon EOS R5 Mark II', 'Canon', '24-105mm lens Kit', 'f/1.9', '1/500s', NULL
+);
+
 ```
 
 ---
@@ -130,4 +135,20 @@ SELECT u.name, c.content
 FROM collection_comments c
 JOIN users u ON c.created_by = u.user_id
 WHERE collection_id = 1;
+```
+
+``` SQL
+    -- Drop all tables 
+    DROP TABLE IF EXISTS near_duplicate_photos;
+    DROP TABLE IF EXISTS near_duplicate_groups;
+    DROP TABLE IF EXISTS collection_comments;
+    DROP TABLE IF EXISTS image_comments;
+    DROP TABLE IF EXISTS faces;
+    DROP TABLE IF EXISTS scores;
+    DROP TABLE IF EXISTS exif_data;
+    DROP TABLE IF EXISTS thumbnails;
+    DROP TABLE IF EXISTS photos;
+    DROP TABLE IF EXISTS collections;
+    DROP TABLE IF EXISTS cameras;
+    DROP TABLE IF EXISTS users;
 ```
