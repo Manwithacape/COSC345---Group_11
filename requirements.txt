@@ -1,0 +1,7 @@
+eel
+psycopg2-binary
+python-dotenv
+rawpy
+opencv-python
+numpy
+sentence_transformers
