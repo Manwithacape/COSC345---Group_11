@@ -9,6 +9,7 @@ import sys
 import tkinter as tk
 from tkinter import filedialog
 from FileHandler import FileHandler
+from PhotoAnalysis import PhotoAnalyzer
 import db
 from db import Camera  # <-- Add this import
 

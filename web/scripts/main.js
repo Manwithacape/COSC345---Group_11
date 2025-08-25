@@ -259,4 +259,43 @@ window.addEventListener('DOMContentLoaded', () => {
         const output = document.getElementById("output");
         if (output) output.innerText = "Application started successfully!";
     });
+
+    const findDupBtn = document.getElementById("find-duplicates-btn");
+    if (findDupBtn) {
+        findDupBtn.addEventListener("click", () => {
+
+            eel.get_all_collections()((collections) => {
+                let imagePaths = [];
+                collections.forEach(col => {
+                    if (Array.isArray(col.photos)){
+                        col.photos.forEach(photo => {
+                            imagePaths.push(photo)
+                        });
+                    }
+                });
+                
+                console.log("Sending to Python: ", imagePaths);
+        
+                eel.detect_duplicates(imagePaths, 0.99, 10)(function(result) {
+                    console.log("Duplicates:", result.duplicates);
+                    console.log("Near duplicates:", result.near_duplicates);
+        
+                    const outputDiv = document.getElementById("duplicate-results");
+                    outputDiv.innerHTML = "";
+        
+                    if (result.duplicates.length === 0 && result.near_duplicates.length === 0) {
+                        outputDiv.innerText = "No duplicates found!";
+                    } else {
+                        result.duplicates.forEach(d => {
+                            outputDiv.innerHTML += `<p>Duplicate (score ${d[0].toFixed(3)}): ${d[1]} & ${d[2]}</p>`;
+                        });
+                        result.near_duplicates.forEach(d => {
+                            outputDiv.innerHTML += `<p>Near Duplicate (score ${d[0].toFixed(3)}): ${d[1]} & ${d[2]}</p>`;
+                        });
+                    }
+                });
+            });
+            
+        });
+    }
 });

@@ -356,3 +356,13 @@ main {
     }
 }
 
+.duplicate-cluster {
+    margin-bottom: 1em;
+    padding: 0.5em
+}
+
+.duplicate-thumb {
+    max-width: 120px;
+    margin: 0.25em;
+    border: 1px solid #aaa;
+}
