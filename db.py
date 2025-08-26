@@ -10,6 +10,8 @@ class Database:
     """
     Handles connections to the PostgreSQL database using environment variables.
 
+    SEE `DB Connection instructions.md` for setup details.
+
     Environment variables (from .env):
         DATABASE_NAME      - Database name (default: photosift)
         DATABASE_USERNAME  - Database username (default: postgres)
@@ -153,7 +155,9 @@ class BaseModel:
         return result
 
     def update(self, id_value, **kwargs):
-        """Update a record and return the updated row."""
+        """
+        **kwargs - Key Word Arguments - for dynamic col setting
+        Update a record and return the updated row."""
         set_clause = ", ".join([f"{k}=%s" for k in kwargs])
         values = tuple(kwargs.values()) + (id_value,)
         query = f"UPDATE {self.table_name} SET {set_clause} WHERE {self.pk}=%s RETURNING *;"
