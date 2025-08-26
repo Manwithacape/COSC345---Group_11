@@ -79,6 +79,68 @@ class Database:
         self.execute_sql_script('sql/create_tables.sql')
         self.execute_sql_script('sql/populate_test_user.sql')
 
+    def create_collection_record(self, user_id, name, description = ""):
+        """
+        Create a new collection for a user.
+        
+        Args:
+            user_id (int): The ID of the user creating the collection.
+            name (str): The name of the collection.
+            description (str): A description of the collection.
+
+        Returns:
+            dict: The created collection record.
+        """
+        query = """
+        INSERT INTO collections (user_id, name, description)
+        VALUES (%s, %s, %s)
+        RETURNING *;
+        """
+        params = (user_id, name, description)
+        result = self.execute_query(query, params)
+        return result[0] if result else None
+
+    def create_photo_record(self, collection_id, original_path, thumbnail_path):
+        """
+        Create a new photo record in the database.
+
+        Args:
+            collection_id (int): The ID of the collection the photo belongs to.
+            original_path (str): The path to the original photo.
+            thumbnail_path (str): The path to the thumbnail image.
+
+        Returns:
+            dict: The created photo record.
+        """
+        query = """
+            INSERT INTO photos (collection_id, original_path, thumbnail_path)
+            VALUES (%s, %s, %s)
+            RETURNING *;
+            """
+        params = (collection_id, original_path, thumbnail_path)
+        result = self.execute_query(query, params)
+        return result[0] if result else None
+
+    def create_score_record(self, photo_id, metric_name, value):
+        """
+        Create a new score record for a photo.
+
+        Args:
+            photo_id (int): The ID of the photo.
+            metric_name (str): The name of the metric (e.g., 'sharpness', 'exposure').
+            value (float): The value of the metric.
+
+        Returns:
+            dict: The created score record.
+        """
+        query = """
+            INSERT INTO scores (photo_id, metric_name, value)
+            VALUES (%s, %s, %s)
+            RETURNING *;
+            """
+        params = (photo_id, metric_name, value)
+        result = self.execute_query(query, params)
+        return result[0] if result else None
 
 # ---------------- Generic Base Model ----------------
 class BaseModel:

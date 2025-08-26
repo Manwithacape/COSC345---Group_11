@@ -168,9 +168,7 @@ def frontend_init(size=(1920, 1080), mode='chrome'):
         size (tuple): The size of the Eel window.
         mode (str): The mode to run Eel in (e.g., 'chrome', 'edge', etc.).
     """
-    # Print the data directory
     print("Frontend starting...")
-    eel.init('web')
     eel.init('web')
     eel.start('dashboard.html', size=size, mode=mode)
 
