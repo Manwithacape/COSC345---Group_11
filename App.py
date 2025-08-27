@@ -1,3 +1,4 @@
+## App.py
 ## PhotoSIFT Application - Main Application File
 ## This file initializes the Eel application and exposes functions for file handling and collection management.
 ## ------ IMPORTS ------ ##
@@ -13,11 +14,9 @@ from PhotoAnalysis import PhotoAnalyzer
 import db
 from db import Camera  # <-- Add this import
 
-
 ## Initialize Helper Classes
 FileHandler = FileHandler()
 db_instance = db.Database()
-
 
 ## ------ EEL EXPOSED FUNCTIONS ------ ##
 ## Create exposed wrapper functions for Eel to call from JavaScript
@@ -27,9 +26,6 @@ def onStart():
     Initialize the application and database, print startup info, and handle errors gracefully.
     """
     print("Frontend (Re)loading...")
-
-    
-
 
 @eel.expose
 def create_collection(collection_name, colletion_description, collection_source):
@@ -41,10 +37,11 @@ def create_collection(collection_name, colletion_description, collection_source)
         colletion_description (str): A description of the collection.
         collection_source (str): The source path for the collection.
     """
-    FileHandler.create_collection(collection_name=collection_name, 
+    FileHandler.create_collection(
+                                  user_id=1,  # Assuming a default user_id for now
+                                  collection_name=collection_name, 
                                   colletion_description=colletion_description,
                                   collection_source=collection_source)
-
 
 @eel.expose # Function to create a new camera entry in the database
 def create_camera(camera_name, camera_make, camera_model,
@@ -75,7 +72,6 @@ def create_camera(camera_name, camera_make, camera_model,
         photo_path=photo_path
     )
     return {"success": bool(row), "camera": row}
-
 
 @eel.expose #Function used to get all the cameras from the database
 def list_cameras():
@@ -143,7 +139,7 @@ def get_image_data_url(image_path):
         print(f"Error loading image {image_path}: {e}")
         return None
 
-## ------ Initialization ------ ##
+## ------ App Initialization ------ ##
 def backend_init():
     """
     Initialize backend components such as the database and print startup information.
@@ -168,9 +164,7 @@ def frontend_init(size=(1920, 1080), mode='chrome'):
         size (tuple): The size of the Eel window.
         mode (str): The mode to run Eel in (e.g., 'chrome', 'edge', etc.).
     """
-    # Print the data directory
     print("Frontend starting...")
-    eel.init('web')
     eel.init('web')
     eel.start('dashboard.html', size=size, mode=mode)
 

@@ -1,4 +1,3 @@
-
 // --- Collection Card Logic ---
 /**
  * @function createCollectionCard
@@ -63,8 +62,8 @@ function addCollectionCardToGrid(card, gridId = "collection-card-grid") {
 function loadCollectionCardsSequentially(collections, index = 0) {
     if (index >= collections.length) return;
     const col = collections[index];
-    const imgPath = col.preview || null;
-    const card = createCollectionCard(col.name, "images/Icons/General Icons/photo.png", col.created_on);
+    const imgPath = col.thumbnail_path || null; // FIXED: use thumbnail_path
+    const card = createCollectionCard(col.name, "images/Icons/General Icons/photo.png", col.date_created); // FIXED: use date_created
     if (imgPath) {
         eel.get_image_data_url(imgPath)(function(dataUrl) {
             if (dataUrl) {
@@ -80,6 +79,14 @@ function loadCollectionCardsSequentially(collections, index = 0) {
 }
 
 // ------ SIDEBAR LOGIC ------
+
+/** Helper: check actual visibility via computed style */
+function isSidebarHidden() {
+    const el = document.getElementById("sidebar-content");
+    if (!el) return true;
+    return window.getComputedStyle(el).display === "none";
+}
+
 /**
  * @function hideSidebar
  * @description Hides the sidebar and updates the toggle button icon.
@@ -91,12 +98,15 @@ function hideSidebar() {
 /**
  * @function showSidebar
  * @description Shows the sidebar and updates the toggle button icon.
+ * NOTE: only resets width when bringing it back from hidden.
  */
 function showSidebar() {
-    setSidebarDisplay("flex", "hide-hollow.png", "hide sidebar icon", true);
-    // reset sidebar width when showing
     const sidebarContent = document.getElementById("sidebar-content");
-    sidebarContent.style.width = "250px"; // Reset width when showing
+    const wasHidden = isSidebarHidden();
+    setSidebarDisplay("flex", "hide-hollow.png", "hide sidebar icon", true);
+    if (wasHidden && sidebarContent) {
+        sidebarContent.style.width = "250px"; // Reset width only when restoring from hidden
+    }
 }
 
 /**
@@ -104,8 +114,7 @@ function showSidebar() {
  * @description Toggles the sidebar visibility and updates the toggle button icon.
  */
 function toggleSidebar() {
-    const sidebar = document.getElementById("sidebar-content");
-    if (sidebar.style.display === "none" || sidebar.style.display === "") {
+    if (isSidebarHidden()) {
         showSidebar();
     } else {
         hideSidebar();
@@ -125,15 +134,17 @@ function setSidebarDisplay(display, icon, alt, border=true) {
     const sidebarContent = document.getElementById("sidebar-content");
     const resizer = document.getElementById("resizer");
     const toggleButton = document.getElementById("toggle-sidebar");
-    sidebarContent.style.display = display;
-    resizer.style.display = display;
-    if (border) {
+    if (sidebarContent) sidebarContent.style.display = display;
+    if (resizer) resizer.style.display = display;
+    if (border && sidebar) {
         sidebar.style.borderRight = "1px solid var(--border-color)";
-    } else {
+    } else if (sidebar) {
         sidebar.style.borderRight = "none";
     }
-    toggleButton.src = `images/icons/Sidebar Controls/${icon}`;
-    toggleButton.alt = alt;
+    if (toggleButton) {
+        toggleButton.src = `images/icons/Sidebar Controls/${icon}`;
+        toggleButton.alt = alt;
+    }
 }
 
 // --- Sidebar Resizer Logic ---
@@ -146,9 +157,11 @@ function setupSidebarResizer() {
     const resizer = document.getElementById("resizer");
     const sidebarContent = document.getElementById("sidebar-content");
     const sidebarControls = document.getElementById("sidebar-controls");
+    if (!resizer || !sidebarContent || !sidebarControls) return;
+
     let isResizing = false;
 
-    resizer.addEventListener("mousedown", function(e) {
+    resizer.addEventListener("mousedown", function() {
         isResizing = true;
         document.body.style.cursor = "ew-resize";
     });
@@ -159,7 +172,7 @@ function setupSidebarResizer() {
         const maxWidth = 800; // Set your desired max width in px
         sidebarContent.style.width = `${Math.max(0, Math.min(newWidth, maxWidth))}px`; // Clamp between 0 and maxWidth
 
-        // if the sidebar is less than or equal to 5px, hide it
+        // if the sidebar is less than or equal to controls width, hide it
         const widthValue = parseInt(sidebarContent.style.width, 10);
         const controlsWidth = parseInt(getComputedStyle(sidebarControls).width, 10);
         if (widthValue <= controlsWidth) {
@@ -174,6 +187,7 @@ function setupSidebarResizer() {
         }
     });
 }
+
 // --- Collection Creation Logic ---
 
 /**
