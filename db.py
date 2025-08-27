@@ -4,7 +4,6 @@ import os
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv, find_dotenv
 
-
 # ---------------- Database Connection ----------------
 class Database:
     """
@@ -102,50 +101,6 @@ class Database:
         """
         self.execute_sql_script('sql/create_tables.sql')
         self.execute_sql_script('sql/populate_test_user.sql')
-
-    def create_collection_record(self, user_id, name, description = ""):
-        """
-        Create a new collection for a user.
-        
-        Args:
-            user_id (int): The ID of the user creating the collection.
-            name (str): The name of the collection.
-            description (str): A description of the collection.
-
-        Returns:
-            dict: The created collection record.
-        """
-        query = """
-        INSERT INTO collections (user_id, name, description)
-        VALUES (%s, %s, %s)
-        RETURNING *;
-        """
-        params = (user_id, name, description)
-        result = self.execute_query(query, params)
-        return result[0] if result else None
-
-    def create_photo_record(self, collection_id, original_path, thumbnail_path):
-        """
-        Create a new photo record in the database.
-
-        Args:
-            collection_id (int): The ID of the collection the photo belongs to.
-            original_path (str): The path to the original photo.
-            thumbnail_path (str): The path to the thumbnail image.
-
-        Returns:
-            dict: The created photo record.
-        """
-        query = """
-            INSERT INTO photos (collection_id, original_path, thumbnail_path)
-            VALUES (%s, %s, %s)
-            RETURNING *;
-            """
-        params = (collection_id, original_path, thumbnail_path)
-        result = self.execute_query(query, params)
-        return result[0] if result else None
-
-    def create_score_record(self, photo_id, metric_name, value):
         """
         Create a new score record for a photo.
 
@@ -166,7 +121,6 @@ class Database:
         result = self.execute_query(query, params)
         return result[0] if result else None
 
-    def create_full_collection(self, user_ids, collection_name, collection_description, photos_data):
         """
         Create a full collection with associated photos and their scores.
 
@@ -201,180 +155,3 @@ class Database:
                             self.create_score_record(photo_record['photo_id'], metric_name, value)
 
         return collections
-# ---------------- Generic Base Model ----------------
-class BaseModel:
-    """
-    Generic base model class that provides CRUD operations
-    for a given table.
-
-    Args:
-        db (Database): Instance of Database.
-        table_name (str): Table name in the database.
-        pk (str): Primary key column name.
-
-    Example:
-        db = Database()
-        users = User(db)
-        new_user = users.create(name="Alice")
-        print(new_user)
-    """
-
-    def __init__(self, db: Database, table_name: str, pk: str):
-        self.db = db
-        self.table_name = table_name
-        self.pk = pk
-
-    def create(self, **kwargs):
-        """Insert a new record and return it."""
-        keys = ", ".join(kwargs.keys())
-        values_placeholders = ", ".join(["%s"] * len(kwargs))
-        values = tuple(kwargs.values())
-        query = f"INSERT INTO {self.table_name} ({keys}) VALUES ({values_placeholders}) RETURNING *;"
-        conn = self.db.get_connection()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute(query, values)
-        result = cur.fetchone()
-        conn.commit()
-        cur.close()
-        conn.close()
-        return result
-
-    def get(self, id_value):
-        """Retrieve a record by primary key."""
-        conn = self.db.get_connection()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute(f"SELECT * FROM {self.table_name} WHERE {self.pk}=%s;", (id_value,))
-        result = cur.fetchone()
-        cur.close()
-        conn.close()
-        return result
-
-    def update(self, id_value, **kwargs):
-        """Update a record and return the updated row."""
-        set_clause = ", ".join([f"{k}=%s" for k in kwargs])
-        values = tuple(kwargs.values()) + (id_value,)
-        query = f"UPDATE {self.table_name} SET {set_clause} WHERE {self.pk}=%s RETURNING *;"
-        conn = self.db.get_connection()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute(query, values)
-        result = cur.fetchone()
-        conn.commit()
-        cur.close()
-        conn.close()
-        return result
-
-    def delete(self, id_value):
-        """Delete a record by primary key."""
-        conn = self.db.get_connection()
-        cur = conn.cursor()
-        cur.execute(f"DELETE FROM {self.table_name} WHERE {self.pk}=%s;", (id_value,))
-        conn.commit()
-        cur.close()
-        conn.close()
-        return True
-
-    def list_all(self):
-        """Return all rows in the table."""
-        conn = self.db.get_connection()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute(f"SELECT * FROM {self.table_name};")
-        rows = cur.fetchall()
-        cur.close()
-        conn.close()
-        return rows
-    
-
-# ---------------- Table Classes ----------------
-class User(BaseModel):
-    """Table model for `users` table (PK: user_id)."""
-    def __init__(self, db):
-        super().__init__(db, "users", "user_id")
-
-    # Example usage:
-    # db = Database()
-    # users = User(db)
-    # new_user = users.create(name="Alice", preferences={"theme":"dark"})
-    # fetched_user = users.get(new_user["user_id"])
-
-
-class Collection(BaseModel):
-    """Table model for `collections` table (PK: collection_id)."""
-    def __init__(self, db):
-        super().__init__(db, "collections", "collection_id")
-
-    # Example:
-    # collections = Collection(db)
-    # collections.create(user_id=1, name="Holiday Trip")
-
-
-class Photo(BaseModel):
-    """Table model for `photos` table (PK: photo_id)."""
-    def __init__(self, db):
-        super().__init__(db, "photos", "photo_id")
-
-    # Example:
-    # photos = Photo(db)
-    # photos.create(collection_id=1, path="/images/pic1.jpg")
-
-
-class Thumbnail(BaseModel):
-    """Table model for `thumbnails` table (PK: thumbnail_id)."""
-    def __init__(self, db):
-        super().__init__(db, "thumbnails", "thumbnail_id")
-
-
-class ExifData(BaseModel):
-    """Table model for `exif_data` table (PK: photo_id)."""
-    def __init__(self, db):
-        super().__init__(db, "exif_data", "photo_id")
-
-    # Example:
-    # exif = ExifData(db)
-    # exif.create(photo_id=1, camera_model="Canon", iso=100)
-
-
-class Score(BaseModel):
-    """Table model for `scores` table (PK: score_id)."""
-    def __init__(self, db):
-        super().__init__(db, "scores", "score_id")
-
-
-class Face(BaseModel):
-    """Table model for `faces` table (PK: face_id)."""
-    def __init__(self, db):
-        super().__init__(db, "faces", "face_id")
-
-
-class ImageComment(BaseModel):
-    """Table model for `image_comments` table (PK: image_comment_id)."""
-    def __init__(self, db):
-        super().__init__(db, "image_comments", "image_comment_id")
-
-
-class CollectionComment(BaseModel):
-    """Table model for `collection_comments` table (PK: collection_comment_id)."""
-    def __init__(self, db):
-        super().__init__(db, "collection_comments", "collection_comment_id")
-
-
-class NearDuplicateGroup(BaseModel):
-    """Table model for `near_duplicate_groups` table (PK: group_id)."""
-    def __init__(self, db):
-        super().__init__(db, "near_duplicate_groups", "group_id")
-
-
-class NearDuplicatePhoto(BaseModel):
-    """
-    Table model for `near_duplicate_photos` table (PK: photo_id).
-    NOTE: This table may use a composite primary key, so you might
-    need to extend this class for custom handling.
-    """
-    def __init__(self, db):
-        super().__init__(db, "near_duplicate_photos", "photo_id")
-
-
-class Camera(BaseModel):
-    """Table model for `cameras` table (PK: camera_id)."""
-    def __init__(self, db):
-        super().__init__(db, "cameras", "camera_id")
-
