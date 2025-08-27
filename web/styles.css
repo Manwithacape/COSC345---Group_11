@@ -43,9 +43,6 @@
     box-shadow: var(--shadow);
 }
 
-.underline {
-    text-decoration: underline;
-}
 
 .bold {
     font-weight: bold;
@@ -149,38 +146,59 @@ form {
 header {
     position: sticky;
     top: 0;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    height: 5em;
-    width: 100%;
-    padding: var(--spaceing);
-    background-color: var(--primary);
     z-index: 1000;
 
-    border-bottom: 1px solid var(--secondary);
+    display: flex;
+    align-items: center;               /* centers logo + title vertically */
+    justify-content: space-between;
+
+    height: 4.5em;                     /* a tad slimmer */
+    width: 100%;
+    padding: 0.5em var(--spaceing);
+    background-color: var(--primary);
+
+    /* lighter, less “heavy” divider */
+    border-bottom: 1px solid var(--quaternary);
 
     a {
         text-decoration: none;
         color: var(--text);
-        display: flex;
-        flex-direction: row;
-        align-self: center;
-        justify-content: left;
 
+        display: flex;
+        align-items: center;           /* center image + text */
+        gap: 0.5rem;                   /* space between logo and title */
+
+        /* Title */
         h1 {
-            font-size: 3.5em;
-            margin: 0em;
-            padding: 0em;
+            /* responsive size, avoids huge text on small screens */
+            font-size: clamp(1.5rem, 2.2vw + 1rem, 3rem);
+            line-height: 1.05;
+            margin: 0;
+            padding: 0;
+            font-weight: 800;
             color: var(--text);
+            text-decoration: none;     /* remove heavy underline */
+            letter-spacing: .2px;
         }
 
+        /* Optional: underline just a part of the word if you wrap it in a span */
+        h1 .brand-underline {
+            text-decoration: underline;
+            text-underline-offset: 6px;      /* softer underline */
+            text-decoration-thickness: 2px;
+        }
+
+        /* Logo */
         img {
-            width: 3.5em;
-            height: 3.5em;
-            margin-right: 0.5em;
+            width: 3em;
+            height: 3em;
+            margin: 0;
+            object-fit: cover;
+            object-position: center;
+            border-radius: 6px;        /* subtle rounding; remove if you want square */
         }
     }
+}
 
     #userIcon {
         display: flex;
@@ -237,6 +255,8 @@ main {
     z-index: 999;
     padding: 0em;
     height: 100vh;
+    background-color: #f8f9fa; /* very light grey */
+    border-right: 1px solid var(--quaternary);
     /* border-right: 1px solid var(--secondary); */
 
     #sidebar-controls {
@@ -253,8 +273,35 @@ main {
         padding: var(--spaceing);
         width: 20em;
         height: 100%;
-    }
 
+        /* Section headers */
+        h3 {
+            margin: 1em 0 0.5em;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Sidebar links */
+        a {
+            display: block;
+            padding: 0.75em 1em;
+            margin-bottom: 0.5em;
+            border-radius: 6px;
+            text-decoration: none;
+            color: var(--secondary);
+            background-color: transparent;
+            font-size: 0.95rem;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        a:hover {
+            background-color: var(--tertiary);
+            color: var(--primary);
+        }
+    }
 }
 
 #resizer {
@@ -288,8 +335,35 @@ main {
 #collection-card-search {
     display: flex;
     align-items: center;
+
     margin-bottom: 1em;
-    border: 1px solid var(--secondary);
+    padding: 0.5em 0.75em;
+
+    border: 1px solid var(--quaternary);
+    border-radius: 6px;
+    background-color: #fff;
+
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+#collection-card-search:focus-within {
+    border-color: var(--tertiary);
+    box-shadow: 0 0 0 3px rgba(37, 103, 207, 0.2); /* subtle highlight */
+}
+
+#collection-card-search input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    padding: 0.25em;
+    background: transparent;
+    color: var(--text);
+}
+
+#collection-card-search input::placeholder {
+    color: #888;
 }
 
 #collection-card-grid {
