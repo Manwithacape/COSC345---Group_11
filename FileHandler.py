@@ -1,6 +1,4 @@
-## ------ FILE HANDLER CLASS ------ ##
-
-## ------ IMPORTS ------ ##
+# FileHandler.py
 import os
 import tkinter as tk
 import json
@@ -12,10 +10,7 @@ from datetime import datetime
 from PhotoAnalysis import PhotoAnalyzer  # Import the PhotoAnalyzer class
 from db import Database  # Import the Database class
 
-
 class FileHandler:
-   
-
     """Class to handle file operations for the PhotoSIFT application."""
     def __init__(self):
         self.root_dir = os.path.expanduser('~')
@@ -173,7 +168,6 @@ class FileHandler:
             print(f"Error reading JSON from {file_path}: {e}")
             return None
 
-
     def get_and_save_thumbnail(self, image_path, output_path):
         ## Read the image using OpenCV
         image_extention = os.path.splitext(image_path)[1].lower()
@@ -220,8 +214,6 @@ class FileHandler:
             print(f"Error extracting preview from {raw_file_path}: {e}")
             return None
         
-        
-
     ## ------ STATIC MEHTODS ------ ##
     @staticmethod
     def open_file_dialog(selection_type='file'):

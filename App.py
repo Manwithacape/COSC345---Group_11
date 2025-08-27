@@ -1,3 +1,4 @@
+## App.py
 ## PhotoSIFT Application - Main Application File
 ## This file initializes the Eel application and exposes functions for file handling and collection management.
 ## ------ IMPORTS ------ ##
@@ -13,11 +14,9 @@ from PhotoAnalysis import PhotoAnalyzer
 import db
 from db import Camera  # <-- Add this import
 
-
 ## Initialize Helper Classes
 FileHandler = FileHandler()
 db_instance = db.Database()
-
 
 ## ------ EEL EXPOSED FUNCTIONS ------ ##
 ## Create exposed wrapper functions for Eel to call from JavaScript
@@ -27,9 +26,6 @@ def onStart():
     Initialize the application and database, print startup info, and handle errors gracefully.
     """
     print("Frontend (Re)loading...")
-
-    
-
 
 @eel.expose
 def create_collection(collection_name, colletion_description, collection_source):
@@ -46,7 +42,6 @@ def create_collection(collection_name, colletion_description, collection_source)
                                   collection_name=collection_name, 
                                   colletion_description=colletion_description,
                                   collection_source=collection_source)
-
 
 @eel.expose # Function to create a new camera entry in the database
 def create_camera(camera_name, camera_make, camera_model,
@@ -77,7 +72,6 @@ def create_camera(camera_name, camera_make, camera_model,
         photo_path=photo_path
     )
     return {"success": bool(row), "camera": row}
-
 
 @eel.expose #Function used to get all the cameras from the database
 def list_cameras():
