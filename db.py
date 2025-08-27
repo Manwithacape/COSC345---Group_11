@@ -166,6 +166,41 @@ class Database:
         result = self.execute_query(query, params)
         return result[0] if result else None
 
+    def create_full_collection(self, user_ids, collection_name, collection_description, photos_data):
+        """
+        Create a full collection with associated photos and their scores.
+
+        Args:
+            user_ids (list[int]): List of user IDs to associate with the collection.
+            collection_name (str): The name of the collection.
+            collection_description (str): A description of the collection.
+            photos_data (list[dict]): List of photo data dictionaries, each containing:
+                - original_path (str): Path to the original photo.
+                - thumbnail_path (str): Path to the thumbnail image.
+                - scores (dict): Dictionary of metric names to values.
+
+        Returns:
+            dict: The created collection record with associated photos and scores.
+        """
+        # Create the collection for each user
+        collections = []
+        for user_id in user_ids:
+            collection = self.create_collection_record(user_id, collection_name, collection_description)
+            if collection:
+                collections.append(collection)
+
+                # Create photos and their scores
+                for photo in photos_data:
+                    photo_record = self.create_photo_record(
+                        collection['collection_id'],
+                        photo['original_path'],
+                        photo['thumbnail_path']
+                    )
+                    if photo_record and 'scores' in photo:
+                        for metric_name, value in photo['scores'].items():
+                            self.create_score_record(photo_record['photo_id'], metric_name, value)
+
+        return collections
 # ---------------- Generic Base Model ----------------
 class BaseModel:
     """

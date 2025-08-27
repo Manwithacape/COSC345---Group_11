@@ -41,7 +41,9 @@ def create_collection(collection_name, colletion_description, collection_source)
         colletion_description (str): A description of the collection.
         collection_source (str): The source path for the collection.
     """
-    FileHandler.create_collection(collection_name=collection_name, 
+    FileHandler.create_collection(
+                                  user_id=1,  # Assuming a default user_id for now
+                                  collection_name=collection_name, 
                                   colletion_description=colletion_description,
                                   collection_source=collection_source)
 
@@ -143,7 +145,7 @@ def get_image_data_url(image_path):
         print(f"Error loading image {image_path}: {e}")
         return None
 
-## ------ Initialization ------ ##
+## ------ App Initialization ------ ##
 def backend_init():
     """
     Initialize backend components such as the database and print startup information.

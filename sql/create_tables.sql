@@ -25,7 +25,8 @@ CREATE TABLE IF NOT EXISTS collections (
     user_id           BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     name              TEXT NOT NULL,
     description       TEXT,
-    date_created      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    source_path      TEXT NOT NULL,  -- where the photos were imported from
+    date_created      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     thumbnail_path    TEXT NOT NULL
 );
 
@@ -42,8 +43,7 @@ CREATE TABLE IF NOT EXISTS photos (
     date_added        TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_photos_collection_id ON photos(collection_id);
-CREATE UNIQUE INDEX uq_photos_file_path ON photos(file_path);
+CREATE UNIQUE INDEX uq_photos_original_path ON photos(original_path);
 
 
 -- ---------- EXIF Data ----------

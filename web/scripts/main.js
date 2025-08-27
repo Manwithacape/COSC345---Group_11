@@ -63,8 +63,8 @@ function addCollectionCardToGrid(card, gridId = "collection-card-grid") {
 function loadCollectionCardsSequentially(collections, index = 0) {
     if (index >= collections.length) return;
     const col = collections[index];
-    const imgPath = col.preview || null;
-    const card = createCollectionCard(col.name, "images/Icons/General Icons/photo.png", col.created_on);
+    const imgPath = col.thumbnail_path || null; // FIXED: use thumbnail_path
+    const card = createCollectionCard(col.name, "images/Icons/General Icons/photo.png", col.date_created); // FIXED: use date_created
     if (imgPath) {
         eel.get_image_data_url(imgPath)(function(dataUrl) {
             if (dataUrl) {
