@@ -365,7 +365,7 @@ main {
 #collection-card-search input::placeholder {
     color: #888;
 }
-
+/*Grid layout for collection cards */
 #collection-card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(30rem, 1fr));
