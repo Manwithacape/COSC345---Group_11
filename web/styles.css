@@ -429,6 +429,97 @@ main {
         transform: scale(1.02);
     }
 }
+/* ===== Put form and table side by side ===== */
+.camera-content {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;      /* keep tops aligned */
+}
+
+/* ===== Form (card) ===== */
+.camera-selectionForm {
+  flex: 1 1 auto;
+  min-width: 360px;             /* <-- prevent the form from getting too skinny */
+  max-width: 520px;             /* optional cap so it doesn't dominate */
+  border: 1px solid var(--quaternary);
+  padding: 1.25rem;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+
+/* Inputs a touch larger for readability */
+.camera-selectionForm .form-label-input-group input {
+  padding: 0.6rem 0.65rem;
+  border: 1px solid var(--quaternary);
+}
+.camera-selectionForm .form-label-input-group input:focus {
+  border-color: var(--tertiary);
+  box-shadow: 0 0 0 3px rgba(37,103,207,.18);
+  outline: none;
+}
+
+/* Buttons spacing */
+.camera-selectionForm .form-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+/* ===== Table area ===== */
+.camera-list {
+  flex: 2 1 0;
+  min-width: 0;                 /* allow table to shrink before overflowing */
+}
+
+#cameras-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid var(--quaternary);
+}
+#cameras-table caption {
+  caption-side: top;        /* sits above the table */
+  text-align: left;
+  font-weight: 800;
+  padding: .5rem .75rem;    /* same horizontal padding as cells */
+  background: #fff;
+}
+
+#cameras-table th,
+#cameras-table td {
+  border-bottom: 1px solid #eee;
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#cameras-table th {
+  background: #f8f9fa;
+  font-weight: 800;
+}
+
+/* zebra rows */
+#cameras-table tbody tr:nth-child(even) { background: #fafafa; }
+
+/* align numeric-ish columns to the right (Aperture, Shutter, ISO) */
+#cameras-table td:nth-child(6),
+#cameras-table td:nth-child(7),
+#cameras-table td:nth-child(8) { text-align: right; }
+
+/* ===== Responsive: stack on smaller screens ===== */
+@media (max-width: 1100px) {
+  .camera-content {
+    flex-direction: column;
+  }
+  .camera-selectionForm {
+    max-width: 100%;
+  }
+}
+
 
 .duplicate-cluster {
     margin-bottom: 1em;
