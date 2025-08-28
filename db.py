@@ -9,6 +9,8 @@ class Database:
     """
     Handles connections to the PostgreSQL database using environment variables.
 
+    SEE `DB Connection instructions.md` for setup details.
+
     Environment variables (from .env):
         DATABASE_NAME      - Database name (default: photosift)
         DATABASE_USERNAME  - Database username (default: postgres)
