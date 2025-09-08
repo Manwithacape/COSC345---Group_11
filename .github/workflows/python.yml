@@ -36,8 +36,8 @@ jobs:
 
     - name: Ensure docs/conf.py exists
       run: |
-        mkdir -p docs
         if [ ! -f docs/conf.py ]; then
+          rm -rf docs
           sphinx-quickstart docs -q --project "PhotoSIFT" --author "Your Name" --ext-autodoc --sep
         fi
 
