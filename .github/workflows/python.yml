@@ -38,7 +38,7 @@ jobs:
       run: |
         if [ ! -f docs/conf.py ]; then
           rm -rf docs
-          sphinx-quickstart docs -q --project "PhotoSIFT" --author "Your Name" --ext-autodoc --sep
+          sphinx-quickstart docs -q --project "PhotoSIFT" --author "Group11" --ext-autodoc
         fi
 
     - name: Generate API docs from project root
