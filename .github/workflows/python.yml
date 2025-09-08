@@ -9,6 +9,8 @@ on:
 jobs:
   test_and_docs:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
     - name: Checkout code
