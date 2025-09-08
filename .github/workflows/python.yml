@@ -1,4 +1,4 @@
-name: Python Unit Tests
+name: Python Unit Tests and Docs
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ main, testing ]
 
 jobs:
-  test:
+  test_and_docs:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,33 +30,13 @@ jobs:
       run: |
         python -m unittest discover -s tests -p "*_test.py"
 
-  docs:
-    runs-on: ubuntu-latest
-    needs: test
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-
-    - name: Set up Conda environment
-      uses: conda-incubator/setup-miniconda@v3
-      with:
-        environment-file: environment.yml
-        activate-environment: photosift
-        auto-activate: false
-
     - name: Install Sphinx and autodoc
       run: |
         pip install sphinx sphinx-autodoc-typehints
 
-    - name: Initialize Sphinx (if docs/ doesn't exist)
+    - name: Initialize Sphinx (if docs/conf.py doesn't exist)
       run: |
-        if [ ! -d docs ]; then
+        if [ ! -f docs/conf.py ]; then
           sphinx-quickstart docs -q --project "PhotoSIFT" --author "Your Name" --ext-autodoc --sep
         fi
 
