@@ -54,6 +54,16 @@ jobs:
           echo -e "\n.. automodule:: $mod\n   :members:\n   :undoc-members:\n   :show-inheritance:\n" >> "$f"
         done
 
+    - name: Update index.rst with toctree
+      run: |
+        echo "PhotoSIFT API Documentation\n===========================\n\n.. toctree::\n   :maxdepth: 2\n   :caption: Modules\n" > docs/index.rst
+        for f in docs/*.rst; do
+          base=$(basename "$f" .rst)
+          if [ "$base" != "index" ]; then
+            echo "   $base" >> docs/index.rst
+          fi
+        done
+
     - name: Build HTML docs
       run: |
         cd docs
@@ -64,4 +74,3 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: docs/_build
-        publish_branch: gh-pages
