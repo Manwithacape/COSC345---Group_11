@@ -1,0 +1,77 @@
+name: Python Unit Tests
+
+on:
+  push:
+    branches: [ main, testing ]
+  pull_request:
+    branches: [ main, testing ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Set up Conda environment
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        environment-file: environment.yml
+        activate-environment: photosift
+        auto-activate: false
+
+    - name: Discover and run tests
+      run: |
+        python -m unittest discover -s tests -p "*_test.py"
+
+  docs:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Set up Conda environment
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        environment-file: environment.yml
+        activate-environment: photosift
+        auto-activate: false
+
+    - name: Install Sphinx and autodoc
+      run: |
+        pip install sphinx sphinx-autodoc-typehints
+
+    - name: Initialize Sphinx (if docs/ doesn't exist)
+      run: |
+        if [ ! -d docs ]; then
+          sphinx-quickstart docs -q --project "PhotoSIFT" --author "Your Name" --ext-autodoc --sep
+        fi
+
+    - name: Generate API docs from project root
+      run: |
+        sphinx-apidoc -o docs . --force --no-toc --separate
+
+    - name: Build HTML docs
+      run: |
+        cd docs
+        sphinx-build -b html . _build
+
+    - name: Deploy docs to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: docs/_build
+        publish_branch: gh-pages
