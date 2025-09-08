@@ -47,7 +47,7 @@ jobs:
       run: |
         sphinx-apidoc -o docs . --force --no-toc --separate
 
-    - name: Add :members: to all .rst files
+    - name: Add members to all .rst files
       run: |
         for f in docs/*.rst; do
           mod=$(basename "$f" .rst)
