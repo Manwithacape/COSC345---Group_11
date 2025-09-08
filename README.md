@@ -56,7 +56,8 @@ conda activate photosift
 
 Step 4:
  
-Make sure vscode is using the correct interpreter. Bottom right when on a .py file on windows vscode. 
+In vscode use ctrl+shift+p and type `Python: Select Interpreter` and select photosift.
+
 # Group Members
 Daniel Paxton 
 
