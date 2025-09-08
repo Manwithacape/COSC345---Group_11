@@ -1,0 +1,31 @@
+name: Python Unit Tests
+
+on:
+  push:
+    branches: [ main, testing ]
+  pull_request:
+    branches: [ main, testing ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Set up Conda environment
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        environment-file: environment.yml
+        activate-environment: photosift  # use the name from your environment.yml
+        auto-activate-base: false
+
+    - name: Discover and run tests
+      run: |
+        python -m unittest discover -s tests -p "*_test.py"
