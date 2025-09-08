@@ -70,7 +70,8 @@ jobs:
         sphinx-build -b html . _build
 
     - name: Deploy docs to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v4
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: docs/_build
+    uses: peaceiris/actions-gh-pages@v4
+    with:
+      github_token: ${{ secrets.GITHUB_TOKEN }}
+      publish_dir: docs/_build/html
+      publish_branch: gh-pages
