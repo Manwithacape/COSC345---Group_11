@@ -1,4 +1,4 @@
-name: Python Unit Tests and Docs
+name: Python Unit Tests
 
 on:
   push:
