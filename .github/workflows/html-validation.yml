@@ -15,6 +15,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Validate HTML files in web/
-      run: |
-        curl -L -o vnu.jar https://github.com/validator/validator/releases/download/latest/vnu.jar
-        java -jar vnu.jar --errors-only web/
+          run: |
+            curl -L -o vnu.jar https://github.com/validator/validator/releases/download/latest/vnu.jar
+            find web/ -name "*.html" > html_files.txt
+            java -jar vnu.jar --errors-only @html_files.txt
