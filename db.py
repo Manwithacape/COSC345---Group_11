@@ -1,6 +1,7 @@
 # db.py
 import os
 import psycopg2
+from psycopg2 import sql, OperationalError
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 
@@ -9,13 +10,38 @@ load_dotenv()  # loads DB credentials from .env
 
 class Database:
     def __init__(self):
-        self.conn = psycopg2.connect(
-            dbname=os.getenv("DB_NAME", "autocull_db"),
-            user=os.getenv("DB_USER", "postgres"),
-            password=os.getenv("DB_PASS", "admin"),
-            host=os.getenv("DB_HOST", "localhost"),
-            port=os.getenv("DB_PORT", "5432")
-        )
+       
+        dbname = os.getenv("DB_NAME", "autocull_db")
+        user = os.getenv("DB_USER", "postgres")
+        password = os.getenv("DB_PASS", "admin")
+        host = os.getenv("DB_HOST", "localhost")
+        port = os.getenv("DB_PORT", "5432")
+        try:
+            self.conn = psycopg2.connect(
+                dbname=dbname,
+                user=user,
+                password=password,
+                host=host,
+                port=port
+            )
+        except OperationalError as e:
+            if f'database "{dbname}" does not exist' in str(e):
+                # Connect to default database and create the target database
+                conn = psycopg2.connect(dbname="postgres", user=user, password=password, host=host, port=port)
+                conn.autocommit = True
+                with conn.cursor() as cur:
+                    cur.execute(sql.SQL("CREATE DATABASE {};" ).format(sql.Identifier(dbname)))
+                conn.close()
+                # Try connecting again
+                self.conn = psycopg2.connect(
+                    dbname=dbname,
+                    user=user,
+                    password=password,
+                    host=host,
+                    port=port
+                )
+            else:
+                raise
         self.conn.autocommit = True
 
     # ----------------- Helper Methods -----------------
