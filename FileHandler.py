@@ -1,4 +1,18 @@
-# FileHandler.py
+"""
+FileHandler.py
+==============
+PhotoSIFT File Handler
+
+This module provides the FileHandler class for managing file operations,
+database interactions, and image processing for the PhotoSIFT application.
+
+Main features:
+- Collection creation and management
+- Thumbnail extraction and image analysis
+- Integration with database and PhotoAnalyzer
+
+Author: Group 11
+"""
 import os
 import tkinter as tk
 import json

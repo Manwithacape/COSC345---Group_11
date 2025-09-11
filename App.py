@@ -1,4 +1,12 @@
-# app.py
+"""
+some doc string
+"""
+## ------ IMPORTS ------ ##
+import os
+import base64
+import eel
+import os
+import sys
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from gui import Sidebar

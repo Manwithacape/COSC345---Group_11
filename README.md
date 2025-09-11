@@ -33,9 +33,41 @@ to get onto a branch
 commits are now commited to that branch and pushing now pushes the branch to the online origin
 
 I think Daniel is our git guy and will most likely handle merging in branches. And commiting to the stable branch. 
- 
-# Group Members
 
+# Python Environment
+Step 1:
+run: 
+```
+conda --version
+```
+ if that doesnt work make sure conda is installed. Recommended miniconda.
+
+Step 2:
+set up the environment by running: 
+```
+conda env create -f environment.yml
+```
+
+Step 3:
+Run 
+```
+conda activate photosift
+```  
+
+Step 4:
+ 
+In vscode use ctrl+shift+p and type `Python: Select Interpreter` and select photosift.
+
+# Group Members
+Daniel Paxton 
+
+Kevin Wang
+
+Cam
+
+Will
+
+Marick 
 # Organization 
 ## Eel Exposure 
 please only Expose eel function in 'App.py'. Wrapper functions are ok. 
