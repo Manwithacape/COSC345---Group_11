@@ -1,5 +1,6 @@
-# db.py
+
 import os
+import sys
 import psycopg2
 from psycopg2 import sql, OperationalError
 from psycopg2.extras import RealDictCursor
@@ -7,10 +8,13 @@ from dotenv import load_dotenv
 
 load_dotenv()  # loads DB credentials from .env
 
+def resource_path(filename):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, filename)
+    return os.path.join(os.path.dirname(__file__), filename)
 
 class Database:
     def __init__(self):
-       
         dbname = os.getenv("DB_NAME", "autocull_db")
         user = os.getenv("DB_USER", "postgres")
         password = os.getenv("DB_PASS", "admin")
@@ -30,7 +34,7 @@ class Database:
                 conn = psycopg2.connect(dbname="postgres", user=user, password=password, host=host, port=port)
                 conn.autocommit = True
                 with conn.cursor() as cur:
-                    cur.execute(sql.SQL("CREATE DATABASE {};" ).format(sql.Identifier(dbname)))
+                    cur.execute(sql.SQL("CREATE DATABASE {};").format(sql.Identifier(dbname)))
                 conn.close()
                 # Try connecting again
                 self.conn = psycopg2.connect(
@@ -58,9 +62,10 @@ class Database:
     # ----------------- Schema -----------------
     def create_schema(self, schema_file="schema.sql"):
         """Run schema.sql to create tables."""
-        with open(schema_file, "r") as f:
-            sql = f.read()
-        self.execute(sql)
+        schema_path = resource_path(schema_file)
+        with open(schema_path, "r") as f:
+            sql_code = f.read()
+        self.execute(sql_code)
         print("Database schema created.")
 
     # ----------------- Collections -----------------
@@ -85,7 +90,7 @@ class Database:
             query += " WHERE collection_id=%s"
             return self.fetch(query, (collection_id,))
         return self.fetch(query)
-    
+
     def get_all_photos(self):
         return self.fetch("SELECT * FROM photos")
 
@@ -101,7 +106,6 @@ class Database:
         query = "SELECT tag_name, tag_value FROM exif_data WHERE photo_id=%s"
         results = self.fetch(query, (photo_id,))
         return {row["tag_name"]: row["tag_value"] for row in results} if results else {}
-
 
     # ----------------- Scores -----------------
     def add_score(self, photo_id, score_type, value):
@@ -147,7 +151,6 @@ class Database:
         finally:
             cursor.close()
 
-
     def assign_photo_to_near_duplicate_group(self, group_id, photo_id):
         """
         Assign a photo to an existing near-duplicate group.
@@ -168,7 +171,6 @@ class Database:
         finally:
             cursor.close()
 
-
     def get_near_duplicate_groups(self):
         """
         Retrieve all near-duplicate groups with their associated photos.
@@ -184,7 +186,7 @@ class Database:
             """, (group["id"],))
             group["photos"] = photos
         return groups
-    
+
     def get_photos_in_near_duplicate_group(self, group_id):
         """
         Retrieve all photos in a specific near-duplicate group.
@@ -197,7 +199,7 @@ class Database:
             WHERE ndp.group_id=%s
         """
         return self.fetch(query, (group_id,))
-    
+
     def get_near_duplicate_groups_for_photo(self, photo_id):
         """
         Retrieve the near-duplicate group for a specific photo.
@@ -211,7 +213,7 @@ class Database:
         """
         groups = self.fetch(query, (photo_id,))
         return groups[0] if groups else None
-    
+
     def get_groups_for_photo(self, photo_id):
         """
         Get all group IDs that a given photo belongs to.
