@@ -69,8 +69,6 @@ Will
 
 Marick 
 # Organization 
-## Eel Exposure 
-please only Expose eel function in 'App.py'. Wrapper functions are ok. 
 
 ## Function Duplication 
 Please search for a functions before creating a new one.
