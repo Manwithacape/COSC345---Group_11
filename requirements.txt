@@ -1,0 +1,9 @@
+ImageHash
+numpy
+opencv_python
+piexif
+Pillow
+psycopg2
+python-dotenv
+scikit_learn
+scikit-image
