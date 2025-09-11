@@ -44,7 +44,7 @@ pip install pyinstaller
 Step 2: 
 Run 
 ```
-pyinstaller --onefile --windowed app.py
+pyinstaller --onefile --windowed app.py --add-data "schema.sql;." --icon "app.ico"
 ```
 
 Step 3: 
