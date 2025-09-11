@@ -33,7 +33,25 @@ to get onto a branch
 commits are now commited to that branch and pushing now pushes the branch to the online origin
 
 I think Daniel is our git guy and will most likely handle merging in branches. And commiting to the stable branch. 
+# Building 
+Step 1:
+Ensure you have pyinstaller installed. 
+``` 
+pip install pyinstaller
+```
 
+
+Step 2: 
+Run 
+```
+pyinstaller --onefile --windowed app.py
+```
+
+Step 3: 
+Find the executable in:
+```
+.\dist\app.exe
+``` 
 # Python Environment
 Step 1:
 run: 

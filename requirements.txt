@@ -7,3 +7,4 @@ psycopg2
 python-dotenv
 scikit_learn
 scikit-image
+ttkbootstrap
