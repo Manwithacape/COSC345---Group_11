@@ -2,12 +2,16 @@ import tkinter as tk
 from main_viewer import MainViewer
 
 class CollectionsViewer(MainViewer):
-    """Scrollable list of collections. Clicking loads photos."""
+    """Scrollable list of collections"""
 
-    def __init__(self, parent, db, photo_viewer=None, **kwargs):
+    def __init__(self, parent, db, photo_viewer=None, switch_to_photos_callback=None, **kwargs):
+        """
+        :param switch_to_photos_callback: function to call when double-clicking a collection
+        """
         super().__init__(parent, **kwargs)
         self.db = db
         self.photo_viewer = photo_viewer
+        self.switch_to_photos_callback = switch_to_photos_callback
 
         self.collection_labels = []
         self.selected_idx = None
@@ -33,11 +37,12 @@ class CollectionsViewer(MainViewer):
             )
             lbl.collection_id = coll["id"]
             lbl.bind("<Button-1>", lambda e, cid=coll["id"], i=idx: self._on_collection_click(cid, i))
+            lbl.bind("<Double-1>", lambda e, cid=coll["id"]: self._on_collection_double_click(cid))
             lbl.pack(fill="x", pady=2)
             self.collection_labels.append(lbl)
 
     def _on_collection_click(self, collection_id, idx):
-        """Handle selecting a collection and refresh PhotoViewer."""
+        """Handle selecting a collection (single click)."""
         if self.selected_idx is not None and 0 <= self.selected_idx < len(self.collection_labels):
             self.collection_labels[self.selected_idx].config(bg="#2f2f2f")
 
@@ -46,3 +51,13 @@ class CollectionsViewer(MainViewer):
 
         if self.photo_viewer:
             self.photo_viewer.refresh_photos(collection_id)
+
+    def _on_collection_double_click(self, collection_id):
+        """Double-click handler: switch to PhotoViewer for this collection."""
+        if self.photo_viewer:
+            # Refresh PhotoViewer with the selected collection
+            self.photo_viewer.refresh_photos(collection_id)
+        
+        # Call the callback to switch the main viewer
+        if self.switch_to_photos_callback:
+            self.switch_to_photos_callback()  # ensures active_viewer = photo_viewer and layout updates

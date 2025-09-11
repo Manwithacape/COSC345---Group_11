@@ -34,7 +34,14 @@ class AutoCullApp(tk.Tk):
 
         # Default view is PhotoViewer
         self.photo_viewer = PhotoViewer(self, self.db, bg="#141414")
-        self.collections_viewer = CollectionsViewer(self, self.db, bg="#141414")
+        self.collections_viewer = CollectionsViewer(
+            self,
+            self.db,
+            photo_viewer=self.photo_viewer,
+            switch_to_photos_callback=self.switch_to_photos,
+            bg="#141414"
+        )
+
 
         
 
