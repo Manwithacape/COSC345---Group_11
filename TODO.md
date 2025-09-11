@@ -8,13 +8,13 @@
 
 - [ ] Multi-threading - ensure gui is not frozen on import and proto processing
 - [ ] Need progress bars for UX - import, detect duplicates, face searching
-- [ ] Import individual files - currently only does folders
+- [x] Import individual files - currently only does folders
 - [ ] Face detection - save to DB
 - [x] Refactoring to be done for sidebar contents - exif, score, duplicates viewers. Too much code duplication
 - [x] photo_viewer.py & filmstrip_viewer.py to be refactored. Maybe create new dependant file for more code sharing
 - [ ] Multi file selection within photo_viewer.py
 - [ ] Collections management - create collection using selection of files
-- [ ] Collection viewing - load in replacement for photo_viewer.py and show list of collections
+- [x] Collection viewing - load in replacement for photo_viewer.py and show list of collections
 - [ ] ML for photo scores - start with being able to differenciate between good and bad
 - [ ] Create thumbnails on import, save thumbnails to DB, perform operations on thumbnails rather than full images for better performance
 - [ ] RAW file handling - take out thumbnails - use any library
