@@ -142,7 +142,7 @@ class AutoCullApp(tk.Tk):
 
         # Collections
         collections_menu = tk.Menu(menubar, tearoff=0)
-        collections_menu.add_command(label="View Photos", command=self.switch_to_photos)
+        collections_menu.add_command(label="View Photos", command=self.switch_to_photos)    #TODO: make this show all photos
         collections_menu.add_command(label="View Collections", command=self.switch_to_collections)
         menubar.add_cascade(label="Collections", menu=collections_menu)
 
