@@ -1,12 +1,4 @@
-"""
-some doc string
-"""
-## ------ IMPORTS ------ ##
-import os
-import base64
-import eel
-import os
-import sys
+# app.py
 import tkinter as tk
 from tkinter import filedialog
 from FileHandler import FileHandler
