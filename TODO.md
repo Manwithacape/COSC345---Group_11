@@ -10,8 +10,8 @@
 - [ ] Need progress bars for UX - import, detect duplicates, face searching
 - [ ] Import individual files - currently only does folders
 - [ ] Face detection - save to DB
-- [ ] Refactoring to be done for sidebar contents - exif, score, duplicates viewers. Too much code duplication
-- [ ] photo_viewer.py & filmstrip_viewer.py to be refactored. Maybe create new dependant file for more code sharing
+- [x] Refactoring to be done for sidebar contents - exif, score, duplicates viewers. Too much code duplication
+- [x] photo_viewer.py & filmstrip_viewer.py to be refactored. Maybe create new dependant file for more code sharing
 - [ ] Multi file selection within photo_viewer.py
 - [ ] Collections management - create collection using selection of files
 - [ ] Collection viewing - load in replacement for photo_viewer.py and show list of collections
@@ -25,7 +25,7 @@
 - [ ] Image viewer - images double clicked in photo_viewer should be shown as a big image. Filmstrip still available, image nav should also be possible through filmstrip
 - [ ] Image viewer zoom in on click
 - [ ] photo_viewer.py needs slider for scale options in bar @ bottom above filmstrip
-- [ ] Filmstrip needs to be full width of window & collapsable
+- [x] Filmstrip needs to be full width of window & collapsable
 
 ---
 
