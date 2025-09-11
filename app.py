@@ -1,5 +1,6 @@
-import tkinter as tk
-from tkinter import filedialog, messagebox
+import ttkbootstrap as ttk
+from ttkbootstrap.dialogs import Messagebox, Querybox
+from tkinter import filedialog
 from gui import Sidebar
 from db import Database
 from photo_importer import PhotoImporter
@@ -12,12 +13,11 @@ from duplicate_viewer import DuplicateViewer
 from sidebar_buttons import SidebarButtons
 
 
-class AutoCullApp(tk.Tk):
+class AutoCullApp(ttk.Window):
     def __init__(self):
-        super().__init__()
+        super().__init__(themename="darkly")
         self.title("AutoCull")
         self.geometry("1200x800")
-        self.configure(bg="#1e1e1e")
 
         # Database
         self.db = Database()
@@ -33,13 +33,12 @@ class AutoCullApp(tk.Tk):
         self.setup_menubar()
 
         # Default view is PhotoViewer
-        self.photo_viewer = PhotoViewer(self, self.db, bg="#141414")
+        self.photo_viewer = PhotoViewer(self, self.db)
         self.collections_viewer = CollectionsViewer(
             self,
             self.db,
             photo_viewer=self.photo_viewer,
-            switch_to_photos_callback=self.switch_to_photos,
-            bg="#141414"
+            switch_to_photos_callback=self.switch_to_photos
         )
 
 
@@ -58,18 +57,17 @@ class AutoCullApp(tk.Tk):
             self,
             side="left",
             db=self.db,
-            bg="#2f2f2f",
             photo_viewer=self.photo_viewer,
             importer=self.importer
         )
         self.left_sidebar.pack(side="left", fill="y")
 
         # Right sidebar
-        self.right_sidebar = Sidebar(self, side="right", bg="#2f2f2f")
-        self.exif_viewer = ExifViewer(self.right_sidebar, self.db, bg="#2f2f2f")
+        self.right_sidebar = Sidebar(self, side="right")
+        self.exif_viewer = ExifViewer(self.right_sidebar, self.db)
         self.exif_viewer.pack(fill="both", expand=True, padx=5, pady=5)
 
-        self.score_viewer = ScoreViewer(self.right_sidebar, self.db, bg="#2f2f2f")
+        self.score_viewer = ScoreViewer(self.right_sidebar, self.db)
         self.score_viewer.pack(fill="both", expand=True, padx=5, pady=5)
 
         self.filmstrip = FilmstripViewer(
@@ -80,7 +78,7 @@ class AutoCullApp(tk.Tk):
         )
         self.filmstrip.pack(fill="x", side="bottom")
 
-        self.duplicate_viewer = DuplicateViewer(self.right_sidebar, self.db, bg="#2f2f2f")
+        self.duplicate_viewer = DuplicateViewer(self.right_sidebar, self.db)
         self.duplicate_viewer.pack(fill="both", expand=True, padx=5, pady=5)
 
         # Keep layout updated
@@ -121,14 +119,13 @@ class AutoCullApp(tk.Tk):
 
     # ---------- Menubar ----------
     def setup_menubar(self):
-        menubar = tk.Menu(self)
+        menubar = ttk.Menu(self)
 
         # File
-        file_menu = tk.Menu(menubar, tearoff=0)
+        file_menu = ttk.Menu(menubar, tearoff=0)
         file_menu.add_command(label="New Collection", command=lambda: print("New Collection"))
         file_menu.add_command(label="Open Collection...", command=lambda: print("Open"))
         file_menu.add_separator()
-        # Hook menu import to the SidebarButtons version
         file_menu.add_command(label="Import Photos", command=self.sidebar_import_photos)
         file_menu.add_command(label="Export Selection", command=lambda: print("Export"))
         file_menu.add_separator()
@@ -136,17 +133,16 @@ class AutoCullApp(tk.Tk):
         menubar.add_cascade(label="File", menu=file_menu)
 
         # Edit
-        edit_menu = tk.Menu(menubar, tearoff=0)
+        edit_menu = ttk.Menu(menubar, tearoff=0)
         edit_menu.add_command(label="Preferences", command=lambda: print("Preferences"))
         menubar.add_cascade(label="Edit", menu=edit_menu)
 
         # Collections
-        collections_menu = tk.Menu(menubar, tearoff=0)
-        collections_menu.add_command(label="View Photos", command=self.switch_to_photos)    #TODO: make this show all photos
+        collections_menu = ttk.Menu(menubar, tearoff=0)
+        collections_menu.add_command(label="View Photos", command=self.switch_to_photos)
         collections_menu.add_command(label="View Collections", command=self.switch_to_collections)
         menubar.add_cascade(label="Collections", menu=collections_menu)
 
-        # Attach menubar
         self.config(menu=menubar)
 
     # ---------- Import wrapper for menubar ----------

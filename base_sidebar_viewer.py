@@ -1,12 +1,11 @@
-import tkinter as tk
-from tkinter import ttk
+import ttkbootstrap as ttk
 from db import Database
 
 MIN_COLLAPSED_HEIGHT = 30
 DEFAULT_HEIGHT = 300
 GRIP_HEIGHT = 6
 
-class BaseSidebarViewer(tk.Frame):
+class BaseSidebarViewer(ttk.Frame):
     """
     Base class for right-hand sidebar viewers.
     Provides:
@@ -30,25 +29,22 @@ class BaseSidebarViewer(tk.Frame):
         self.configure(height=self.expanded_height)
 
         # ---------- Header ----------
-        self.top_bar = tk.Frame(self, bg="#2f2f2f")
+        self.top_bar = ttk.Frame(self)
         self.top_bar.pack(fill="x")
 
-        self.toggle_btn = tk.Button(
+        self.toggle_btn = ttk.Button(
             self.top_bar,
             text=f"⯆ {self.title}",
-            bg="#2f2f2f",
-            fg="white",
-            font=("Arial", 12, "bold"),
-            relief="flat",
+            bootstyle="secondary",
             command=self.toggle
         )
         self.toggle_btn.pack(pady=2, padx=5, anchor="w")
 
         # ---------- Treeview ----------
-        self.tree_frame = tk.Frame(self)
+        self.tree_frame = ttk.Frame(self)
         self.tree_frame.pack(fill="both", expand=True)
 
-        self.tree_scroll = tk.Scrollbar(self.tree_frame)
+        self.tree_scroll = ttk.Scrollbar(self.tree_frame)
         self.tree_scroll.pack(side="right", fill="y")
 
         self.tree = ttk.Treeview(
@@ -61,12 +57,10 @@ class BaseSidebarViewer(tk.Frame):
         self.tree_scroll.config(command=self.tree.yview)
 
         # ---------- Style ----------
-        style = ttk.Style()
-        style.configure("Treeview", background="#141414", foreground="white", fieldbackground="#141414")
-        style.configure("Treeview.Heading", background="#2f2f2f", foreground="white", font=("Arial", 10, "bold"))
+        # Theme handles styling
 
         # ---------- Resize Grip ----------
-        self.grip = tk.Frame(self, cursor="sb_v_double_arrow", bg="#454545", height=GRIP_HEIGHT)
+        self.grip = ttk.Frame(self, cursor="sb_v_double_arrow", height=GRIP_HEIGHT)
         self.grip.pack(fill="x", side="bottom")
         self.grip.bind("<ButtonPress-1>", self._start_resize)
         self.grip.bind("<B1-Motion>", self._do_resize)

@@ -1,8 +1,8 @@
 # base_viewer.py
-import tkinter as tk
+import ttkbootstrap as ttk
 from PIL import Image, ImageTk
 
-class BaseThumbnailViewer(tk.Frame):
+class BaseThumbnailViewer(ttk.Frame):
     """
     Shared base class for displaying photo thumbnails.
     Handles loading images, keeping references, selection,
@@ -40,9 +40,9 @@ class BaseThumbnailViewer(tk.Frame):
         self.selected_id = photo_id
         for lbl in self.labels:
             if getattr(lbl, "photo_id", None) == photo_id:
-                lbl.config(bd=3, relief="solid", highlightbackground="yellow")
+                lbl.config(relief="solid")
             else:
-                lbl.config(bd=0, relief="flat", highlightbackground=lbl["bg"])
+                lbl.config(relief="flat")
 
         # Notify parent container if available
         self._notify(photo_id)

@@ -1,21 +1,21 @@
 # main_viewer.py
-import tkinter as tk
+import ttkbootstrap as ttk
 from base_viewer import BaseThumbnailViewer
 
-class MainViewer(tk.Frame):
+class MainViewer(ttk.Frame):
     """Reusable scrollable canvas+frame structure with scrollbar."""
 
-    def __init__(self, parent, bg="#141414", **kwargs):
-        super().__init__(parent, bg=bg, **kwargs)
+    def __init__(self, parent, **kwargs):
+        super().__init__(parent, **kwargs)
 
-        self.canvas = tk.Canvas(self, bg=bg, highlightthickness=0)
-        self.scrollbar_y = tk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.canvas = ttk.Canvas(self, highlightthickness=0)
+        self.scrollbar_y = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
         self.canvas.configure(yscrollcommand=self.scrollbar_y.set)
 
         self.scrollbar_y.pack(side="right", fill="y")
         self.canvas.pack(side="left", fill="both", expand=True)
 
-        self.inner_frame = tk.Frame(self.canvas, bg=bg)
+        self.inner_frame = ttk.Frame(self.canvas)
         self.window_id = self.canvas.create_window((0, 0), window=self.inner_frame, anchor="nw")
 
         # Keep scroll region synced

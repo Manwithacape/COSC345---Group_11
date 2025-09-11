@@ -1,4 +1,4 @@
-import tkinter as tk
+import ttkbootstrap as ttk
 from main_viewer import MainViewer
 
 class CollectionsViewer(MainViewer):
@@ -25,15 +25,13 @@ class CollectionsViewer(MainViewer):
 
         collections = self.db.get_collections()
         for idx, coll in enumerate(collections):
-            lbl = tk.Label(
+            lbl = ttk.Label(
                 self.inner_frame,
                 text=coll["name"],
-                bg="#2f2f2f",
-                fg="white",
                 anchor="w",
-                padx=10,
-                pady=5,
+                padding=(10,5),
                 cursor="hand2",
+                bootstyle="secondary"
             )
             lbl.collection_id = coll["id"]
             lbl.bind("<Button-1>", lambda e, cid=coll["id"], i=idx: self._on_collection_click(cid, i))
@@ -44,10 +42,10 @@ class CollectionsViewer(MainViewer):
     def _on_collection_click(self, collection_id, idx):
         """Handle selecting a collection (single click)."""
         if self.selected_idx is not None and 0 <= self.selected_idx < len(self.collection_labels):
-            self.collection_labels[self.selected_idx].config(bg="#2f2f2f")
+            self.collection_labels[self.selected_idx].config(bootstyle="secondary")
 
         self.selected_idx = idx
-        self.collection_labels[idx].config(bg="#454545")  # highlight
+        self.collection_labels[idx].config(bootstyle="dark")  # highlight
 
         if self.photo_viewer:
             self.photo_viewer.refresh_photos(collection_id)

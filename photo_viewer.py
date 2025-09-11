@@ -1,4 +1,4 @@
-import tkinter as tk
+import ttkbootstrap as ttk
 from PIL import Image, ImageTk
 from main_viewer import MainViewer
 from base_viewer import BaseThumbnailViewer
@@ -25,14 +25,12 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
             if not tk_img:
                 continue
             self.thumbs.append(tk_img)
-            lbl = tk.Label(
+            lbl = ttk.Label(
                 self.inner_frame,
                 image=tk_img,
-                bg="#141414",
                 cursor="hand2",
-                bd=2,
-                relief="flat",
-                highlightthickness=0,
+                bootstyle="dark",
+                relief="flat"
             )
             lbl.image = tk_img
             lbl.photo_id = photo["id"]
@@ -50,9 +48,9 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
 
     def _select_idx(self, idx):
         if self.selected_idx is not None and 0 <= self.selected_idx < len(self.labels):
-            self.labels[self.selected_idx].config(highlightthickness=0)
+            self.labels[self.selected_idx].config(relief="flat")
         self.selected_idx = idx
-        self.labels[idx].config(highlightthickness=3)
+        self.labels[idx].config(relief="solid")
 
     def _on_resize(self, event):
         """Reflow thumbnails on resize."""

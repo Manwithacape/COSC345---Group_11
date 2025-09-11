@@ -1,6 +1,7 @@
 # sidebar_buttons.py
-import tkinter as tk
-from tkinter import filedialog, messagebox
+import ttkbootstrap as ttk
+from ttkbootstrap.dialogs import Messagebox, Querybox
+from tkinter import filedialog
 
 class SidebarButtons:
     """Holds logic for sidebar button actions."""
@@ -28,7 +29,7 @@ class SidebarButtons:
                 return
 
             if not self.importer:
-                messagebox.showwarning("Not Available", "Photo importer is not configured.")
+                Messagebox.show_warning("Not Available", "Photo importer is not configured.")
                 return
 
             # Always import into a new collection
@@ -43,23 +44,23 @@ class SidebarButtons:
             # Refresh viewer
             self.photo_viewer.refresh_photos(collection_id)
 
-            messagebox.showinfo("Import Complete", f"Imported {imported_count} photos.")
+            Messagebox.show_info("Import Complete", f"Imported {imported_count} photos.")
 
         except Exception as e:
-            messagebox.showerror("Import Error", str(e))
+            Messagebox.show_error("Import Error", str(e))
 
     # ----------------- Find Duplicates -----------------
     def find_duplicates(self):
         try:
             if not (self.importer and hasattr(self.importer, "duplicates")):
-                messagebox.showwarning("Not Available", "Duplicate detection is not configured.")
+                Messagebox.show_warning("Not Available", "Duplicate detection is not configured.")
                 return
 
             duplicates_detector = self.importer.duplicates
             photo_list = self.db.get_all_photos()  # list of dicts with 'id' and 'file_path'
             duplicates_detector.find_duplicates_batch(photo_list)
 
-            messagebox.showinfo(
+            Messagebox.show_info(
                 "Duplicates Found",
                 "Near-duplicate detection complete."
             )
@@ -68,4 +69,4 @@ class SidebarButtons:
             self.photo_viewer.refresh_photos(None)
 
         except Exception as e:
-            messagebox.showerror("Error", f"Error finding duplicates: {e}")
+            Messagebox.show_error("Error", f"Error finding duplicates: {e}")
