@@ -1,12 +1,10 @@
-# To do:
+# To do
 
-
-## Notes:
+## Notes
 
 ---
 
-
-### Must have:
+### Must have
 
 - [ ] Multi-threading - ensure gui is not frozen on import and proto processing
 - [ ] Need progress bars for UX - import, detect duplicates, face searching
@@ -31,7 +29,7 @@
 
 ---
 
-### Nice to have:
+### Nice to have
 
 - [ ] Histogram
 - [ ] EXIF editor
