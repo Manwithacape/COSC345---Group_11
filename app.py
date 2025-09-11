@@ -164,7 +164,39 @@ class AutoCullApp(ttk.Window):
         self.collections_viewer.refresh_collections()
         self.update_layout()
 
+def show_splash_and_start():
+    import tkinter as tk
+
+    def center_window(window, width, height):
+        window.update_idletasks()
+        screen_width = window.winfo_screenwidth()
+        screen_height = window.winfo_screenheight()
+        x = (screen_width // 2) - (width // 2)
+        y = (screen_height // 2) - (height // 2)
+        window.geometry(f"{width}x{height}+{x}+{y}")
+
+    # Splash screen setup
+    splash = tk.Tk()
+    splash.title("Loading AutoCull...")
+    splash.resizable(False, False)
+    splash.overrideredirect(True)  # Remove window border and controls
+    center_window(splash, 400, 200)
+    splash_label = tk.Label(
+        splash,
+        text="Loading AutoCull...",
+        font=("Segoe UI", 18),
+        pady=40
+    )
+    splash_label.pack(expand=True)
+
+    def start_main_app():
+        splash.destroy()
+        app = AutoCullApp()
+        center_window(app, 1200, 800)
+        app.mainloop()
+
+    splash.after(2000, start_main_app)
+    splash.mainloop()
 
 if __name__ == "__main__":
-    app = AutoCullApp()
-    app.mainloop()
+    show_splash_and_start()
