@@ -1,8 +1,8 @@
-import tkinter as tk
+import ttkbootstrap as tb
 from db import Database
 from PIL import Image, ImageTk
 
-class PhotoViewer(tk.Frame):
+class PhotoViewer(tb.Frame):
     """
     Center photo viewing area with responsive grid layout, clickable thumbnails,
     white border highlight, and keyboard navigation.
@@ -15,14 +15,14 @@ class PhotoViewer(tk.Frame):
         self.selected_idx = None  # track index of selected photo
 
         # Canvas + vertical scrollbar
-        self.canvas = tk.Canvas(self, bg="#141414")
-        self.scrollbar_y = tk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.canvas = tb.Canvas(self, bg="#141414")
+        self.scrollbar_y = tb.Scrollbar(self, orient="vertical", command=self.canvas.yview, bootstyle="dark")
         self.canvas.configure(yscrollcommand=self.scrollbar_y.set)
         self.scrollbar_y.pack(side="right", fill="y")
         self.canvas.pack(side="left", fill="both", expand=True)
 
         # Inner frame inside canvas
-        self.inner_frame = tk.Frame(self.canvas, bg="#141414")
+        self.inner_frame = tb.Frame(self.canvas)
         self.window_id = self.canvas.create_window((0,0), window=self.inner_frame, anchor="nw")
 
         # Update scroll region when inner frame changes
@@ -50,33 +50,32 @@ class PhotoViewer(tk.Frame):
         # Clear previous labels
         for lbl in self.photo_labels:
             lbl.destroy()
+        self.photo_frames = []
         self.photo_labels = []
         self.selected_idx = None
 
         self.photos = self.db.get_photos(collection_id)
 
-        # Create labels
+        # Create frames and labels
         for photo in self.photos:
             try:
                 img = Image.open(photo["file_path"])
                 img.thumbnail((self.thumb_size, self.thumb_size))
                 tk_img = ImageTk.PhotoImage(img)
 
-                lbl = tk.Label(
-                    self.inner_frame,
+                frame = tb.Frame(self.inner_frame, bootstyle="secondary", borderwidth=2, relief="flat")
+                lbl = tb.Label(
+                    frame,
                     image=tk_img,
-                    bg="#141414",
                     cursor="hand2",
-                    bd=2,
                     relief="flat",
-                    highlightthickness=0,
-                    highlightbackground="white"
                 )
                 lbl.image = tk_img  # keep reference
                 lbl.photo_id = photo["id"]  # store photo ID
                 lbl.bind("<Button-1>", lambda e, idx=len(self.photo_labels), pid=photo["id"]: self._on_photo_click(idx, pid))
-
                 lbl.photo_path = photo["file_path"]  # store path for filmstrip
+                lbl.pack(padx=2, pady=2)
+                self.photo_frames.append(frame)
                 self.photo_labels.append(lbl)
             except Exception as e:
                 print(f"Failed to load photo {photo['file_path']}: {e}")
@@ -98,16 +97,17 @@ class PhotoViewer(tk.Frame):
             self.master.duplicate_viewer.update_duplicates(photo_id)    
 
     def _select_photo(self, idx):
+        # Remove highlight from previous selection
         if self.selected_idx is not None:
-            prev_lbl = self.photo_labels[self.selected_idx]
-            prev_lbl.config(highlightthickness=0)
+            prev_frame = self.photo_frames[self.selected_idx]
+            prev_frame.config(bootstyle="secondary", borderwidth=2, relief="flat")
         self.selected_idx = idx
-        selected_lbl = self.photo_labels[idx]
-        selected_lbl.config(highlightthickness=3)
+        selected_frame = self.photo_frames[idx]
+        selected_frame.config(bootstyle="primary", borderwidth=2, relief="flat")
 
         # show selected photo on canvas
         self.canvas.update_idletasks()
-        self.canvas.yview_moveto(max(0, selected_lbl.winfo_y() / self.inner_frame.winfo_height()))
+        self.canvas.yview_moveto(max(0, selected_frame.winfo_y() / self.inner_frame.winfo_height()))
 
     # ---------- Grid Layout ----------
     def _reflow_grid(self):
@@ -120,13 +120,13 @@ class PhotoViewer(tk.Frame):
             return
 
         self.columns = max(1, width // (self.thumb_size + self.padding))
-        for lbl in self.photo_labels:
-            lbl.grid_forget()
+        for frame in getattr(self, "photo_frames", []):
+            frame.grid_forget()
 
-        for idx, lbl in enumerate(self.photo_labels):
+        for idx, frame in enumerate(getattr(self, "photo_frames", [])):
             row = idx // self.columns
             col = idx % self.columns
-            lbl.grid(row=row, column=col, padx=5, pady=5, sticky="nw")
+            frame.grid(row=row, column=col, padx=5, pady=5, sticky="nw")
 
         self.canvas.itemconfig(self.window_id, width=width)
 
