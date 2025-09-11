@@ -1,28 +1,16 @@
-# photo_viewer.py
 import tkinter as tk
 from PIL import Image, ImageTk
+from main_viewer import MainViewer
 from base_viewer import BaseThumbnailViewer
 
-class PhotoViewer(BaseThumbnailViewer):
-    """Main center grid of photos with scrolling + keyboard navigation."""
+class PhotoViewer(BaseThumbnailViewer, MainViewer):
+    """Scrollable grid of photo thumbnails with selection."""
 
     def __init__(self, parent, db, **kwargs):
-        super().__init__(parent, db=db, thumb_size=120, padding=10, **kwargs)
+        BaseThumbnailViewer.__init__(self, parent, db=db, thumb_size=120, padding=10, **kwargs)
+        MainViewer.__init__(self, parent, **kwargs)
+
         self.selected_idx = None
-        self.canvas = tk.Canvas(self, bg="#141414")
-        self.scrollbar_y = tk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
-        self.canvas.configure(yscrollcommand=self.scrollbar_y.set)
-
-        self.scrollbar_y.pack(side="right", fill="y")
-        self.canvas.pack(side="left", fill="both", expand=True)
-
-        self.inner_frame = tk.Frame(self.canvas, bg="#141414")
-        self.window_id = self.canvas.create_window((0, 0), window=self.inner_frame, anchor="nw")
-
-        # Update scroll region
-        self.inner_frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
-        self.canvas.bind("<Configure>", lambda e: self._reflow_grid())
-
         self.thumb_size = 120
         self.padding = 10
         self.columns = 1
@@ -38,8 +26,13 @@ class PhotoViewer(BaseThumbnailViewer):
                 continue
             self.thumbs.append(tk_img)
             lbl = tk.Label(
-                self.inner_frame, image=tk_img, bg="#141414", cursor="hand2",
-                bd=2, relief="flat", highlightthickness=0
+                self.inner_frame,
+                image=tk_img,
+                bg="#141414",
+                cursor="hand2",
+                bd=2,
+                relief="flat",
+                highlightthickness=0,
             )
             lbl.image = tk_img
             lbl.photo_id = photo["id"]
@@ -61,17 +54,22 @@ class PhotoViewer(BaseThumbnailViewer):
         self.selected_idx = idx
         self.labels[idx].config(highlightthickness=3)
 
-    def _reflow_grid(self):
+    def _on_resize(self, event):
+        """Reflow thumbnails on resize."""
         if not self.labels:
             return
         width = self.canvas.winfo_width()
         if width < 50:
-            self.after(50, self._reflow_grid)
+            self.after(50, self._on_resize, event)
             return
         self.columns = max(1, width // (self.thumb_size + self.padding))
+        self._reflow_grid()
+
+    def _reflow_grid(self):
+        if not self.labels:
+            return
         for lbl in self.labels:
             lbl.grid_forget()
         for idx, lbl in enumerate(self.labels):
             row, col = divmod(idx, self.columns)
             lbl.grid(row=row, column=col, padx=5, pady=5, sticky="nw")
-        self.canvas.itemconfig(self.window_id, width=width)

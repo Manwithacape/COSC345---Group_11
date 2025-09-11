@@ -1,10 +1,10 @@
-# app.py
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from gui import Sidebar
 from db import Database
 from photo_importer import PhotoImporter
 from photo_viewer import PhotoViewer
+from collections_viewer import CollectionsViewer
 from filmstrip_viewer import FilmstripViewer
 from exif_viewer import ExifViewer
 from score_viewer import ScoreViewer
@@ -26,12 +26,17 @@ class AutoCullApp(tk.Tk):
         # Importer
         self.importer = PhotoImporter(self.db)
 
+        # Track which central viewer is active
+        self.active_viewer = None
+
         # Setup menubar
         self.setup_menubar()
 
-        # Center photo viewer
+        # Default view is PhotoViewer
         self.photo_viewer = PhotoViewer(self, self.db, bg="#141414")
-        self.photo_viewer.pack(fill="both", expand=True)
+        self.collections_viewer = CollectionsViewer(self, self.db, bg="#141414")
+
+        
 
         # Buttons logic handler
         self.sidebar_buttons = SidebarButtons(
@@ -74,6 +79,8 @@ class AutoCullApp(tk.Tk):
         # Keep layout updated
         self.bind("<Configure>", lambda e: self.update_layout())
         self.update_layout()
+        
+        self.switch_to_photos()
 
     # ---------- Layout ----------
     def update_layout(self):
@@ -92,10 +99,11 @@ class AutoCullApp(tk.Tk):
         self.right_sidebar.place(x=max(0, w - rw), y=0, width=rw, height=h - fh)
         self.right_sidebar.lift()
 
-        # Photo viewer fills between sidebars above filmstrip
-        pv_x = lw
-        pv_width = max(0, w - lw - rw)
-        self.photo_viewer.place(x=pv_x, y=0, width=pv_width, height=h - fh)
+        # Active viewer fills between sidebars above filmstrip
+        if self.active_viewer:
+            pv_x = lw
+            pv_width = max(0, w - lw - rw)
+            self.active_viewer.place(x=pv_x, y=0, width=pv_width, height=h - fh)
 
         # Filmstrip always full width at bottom
         self.filmstrip.place(x=0, y=h - fh, width=w, height=fh)
@@ -125,6 +133,12 @@ class AutoCullApp(tk.Tk):
         edit_menu.add_command(label="Preferences", command=lambda: print("Preferences"))
         menubar.add_cascade(label="Edit", menu=edit_menu)
 
+        # Collections
+        collections_menu = tk.Menu(menubar, tearoff=0)
+        collections_menu.add_command(label="View Photos", command=self.switch_to_photos)
+        collections_menu.add_command(label="View Collections", command=self.switch_to_collections)
+        menubar.add_cascade(label="Collections", menu=collections_menu)
+
         # Attach menubar
         self.config(menu=menubar)
 
@@ -132,6 +146,20 @@ class AutoCullApp(tk.Tk):
     def sidebar_import_photos(self):
         """Call the SidebarButtons import handler (so logic stays centralized)."""
         self.sidebar_buttons.import_files()
+
+    # ---------- Switch views ----------
+    def switch_to_photos(self):
+        if self.active_viewer:
+            self.active_viewer.place_forget()
+        self.active_viewer = self.photo_viewer
+        self.update_layout()
+
+    def switch_to_collections(self):
+        if self.active_viewer:
+            self.active_viewer.place_forget()
+        self.active_viewer = self.collections_viewer
+        self.collections_viewer.refresh_collections()
+        self.update_layout()
 
 
 if __name__ == "__main__":
