@@ -58,20 +58,23 @@ class SidebarButtons:
                 pb = Progressbar(progress_win, mode="indeterminate")
                 pb.pack(fill="x", padx=20, pady=5)
                 pb.start(10)
+                def finish(success, imported_count=None, error=None):
+                    pb.stop()
+                    progress_win.destroy()
+                    if success:
+                        Messagebox.show_info("Import Complete", f"Imported {imported_count} photos.")
+                        self.photo_viewer.refresh_photos(collection_id)
+                    else:
+                        Messagebox.show_error("Import Error", str(error))
                 try:
                     imported_count = self.importer.import_files(
                         list(file_paths), 
                         collection_id,
                         default_styles=["General"]
                     )
-                    pb.stop()
-                    progress_win.destroy()
-                    Messagebox.show_info("Import Complete", f"Imported {imported_count} photos.")
-                    self.photo_viewer.refresh_photos(collection_id)
+                    self.master.after(0, lambda: finish(True, imported_count=imported_count))
                 except Exception as e:
-                    pb.stop()
-                    progress_win.destroy()
-                    Messagebox.show_error("Import Error", str(e))
+                    self.master.after(0, lambda: finish(False, error=e))
 
             threading.Thread(target=do_import, daemon=True).start()
 

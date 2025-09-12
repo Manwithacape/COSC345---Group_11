@@ -29,7 +29,6 @@ class PhotoScorer:
                 with rawpy.imread(file_path) as raw:
                     thumb = raw.extract_thumb()
                     if thumb.format == rawpy.ThumbFormat.JPEG:
-                        import cv2
                         img_array = np.frombuffer(thumb.data, dtype=np.uint8)
                         img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
                     else:
