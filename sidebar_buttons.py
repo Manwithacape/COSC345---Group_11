@@ -23,7 +23,7 @@ class SidebarButtons:
         try:
             file_paths = filedialog.askopenfilenames(
                 title="Select Photos",
-                filetypes=[("Images", "*.jpg *.jpeg *.tif *.tiff")]
+                filetypes=[("Images", "*.jpg *.jpeg *.tif *.tiff *.cr2 *.nef *.arw *.dng *.rw2 *.orf *.raf *.srw *.pef"), ("All Files", "*.*")]
             )
             if not file_paths:
                 return

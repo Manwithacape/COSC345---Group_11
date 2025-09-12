@@ -6,7 +6,7 @@ from photo_scorer import PhotoScorer
 from exif_reader import ExifReader
 
 class PhotoImporter:
-    SUPPORTED_EXTENSIONS = (".jpg", ".jpeg", ".tif", ".tiff")
+    SUPPORTED_EXTENSIONS = (".jpg", ".jpeg", ".tif", ".tiff", '.cr2', '.nef', '.arw', '.dng', '.rw2', '.orf', '.raf', '.srw', '.pef')
 
     def __init__(self, db: Database, near_dup_threshold=5):
         self.db = db

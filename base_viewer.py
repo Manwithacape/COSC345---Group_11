@@ -1,6 +1,8 @@
 # base_viewer.py
 import ttkbootstrap as ttk
 from PIL import Image, ImageTk
+import os
+import rawpy
 
 class BaseThumbnailViewer(ttk.Frame):
     """
@@ -20,9 +22,24 @@ class BaseThumbnailViewer(ttk.Frame):
         self.selected_id = None
 
     def load_thumbnail(self, file_path):
-        """Return ImageTk.PhotoImage thumbnail."""
+        """Return ImageTk.PhotoImage thumbnail. If RAW, extract JPEG thumbnail."""
+        raw_extensions = {'.cr2', '.nef', '.arw', '.dng', '.rw2', '.orf', '.raf', '.srw', '.pef'}
+        ext = os.path.splitext(file_path)[1].lower()
         try:
-            img = Image.open(file_path)
+            if ext in raw_extensions:
+                try:
+                    with rawpy.imread(file_path) as raw:
+                        thumb = raw.extract_thumb()
+                        if thumb.format == rawpy.ThumbFormat.JPEG:
+                            from io import BytesIO
+                            img = Image.open(BytesIO(thumb.data))
+                        else:
+                            img = Image.fromarray(thumb.data)
+                except Exception as re:
+                    print(f"Failed to extract RAW thumbnail for {file_path}: {re}")
+                    return None
+            else:
+                img = Image.open(file_path)
             img.thumbnail((self.thumb_size, self.thumb_size))
             return ImageTk.PhotoImage(img)
         except Exception as e:

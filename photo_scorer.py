@@ -3,6 +3,8 @@ import cv2
 import numpy as np
 from skimage import filters
 from db import Database
+import rawpy
+from io import BytesIO
 
 class PhotoScorer:
     """
@@ -16,8 +18,26 @@ class PhotoScorer:
         """
         Compute a variety of metrics for the image.
         Returns a dictionary of metric_name -> value.
+        If RAW, extract JPEG thumbnail and score that.
         """
-        img = cv2.imread(file_path)
+        import os
+        raw_extensions = {'.cr2', '.nef', '.arw', '.dng', '.rw2', '.orf', '.raf', '.srw', '.pef'}
+        ext = os.path.splitext(file_path)[1].lower()
+        img = None
+        if ext in raw_extensions:
+            try:
+                with rawpy.imread(file_path) as raw:
+                    thumb = raw.extract_thumb()
+                    if thumb.format == rawpy.ThumbFormat.JPEG:
+                        import cv2
+                        img_array = np.frombuffer(thumb.data, dtype=np.uint8)
+                        img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+                    else:
+                        img = thumb.data
+            except Exception as re:
+                print(f"Failed to extract RAW thumbnail for scoring: {file_path}: {re}")
+        if img is None:
+            img = cv2.imread(file_path)
         if img is None:
             raise ValueError(f"Cannot read image: {file_path}")
 
