@@ -16,6 +16,9 @@
 - [ ] Collections management - create collection using selection of files
 - [x] Collection viewing - load in replacement for photo_viewer.py and show list of collections
 - [ ] ML for photo scores - start with being able to differenciate between good and bad
+    - [x] scale the scores and store to normalize them for comparison and merging
+    - [x] average relevent scaled scores to calculate photo quality and store on db
+    - [ ] add a threshold param for displaying images based on quality   
 - [ ] Create thumbnails on import, save thumbnails to DB, perform operations on thumbnails rather than full images for better performance
 - [x] RAW file handling - take out thumbnails - use any library
 - [ ] UI beautification - probably some libraries on the internet?
