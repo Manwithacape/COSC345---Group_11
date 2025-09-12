@@ -102,9 +102,15 @@ class AutoCullApp(ttk.Window):
         self.duplicate_viewer = DuplicateViewer(self.right_sidebar, self.db)
         self.duplicate_viewer.pack(fill="both", expand=True, padx=5, pady=5)
 
-        # Keep layout updated
-        self.bind("<Configure>", lambda e: self.update_layout())
+        # Debounced layout update
+        self._layout_after_id = None
+        self.bind("<Configure>", self._on_configure)
         self.update_layout()
+
+    def _on_configure(self, event):
+        if self._layout_after_id:
+            self.after_cancel(self._layout_after_id)
+        self._layout_after_id = self.after(100, self.update_layout)
         
         self.switch_to_photos()
 

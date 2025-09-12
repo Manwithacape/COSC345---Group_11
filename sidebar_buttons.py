@@ -2,6 +2,7 @@
 import ttkbootstrap as ttk
 from ttkbootstrap.dialogs import Messagebox, Querybox
 from tkinter import filedialog
+import threading
 
 class SidebarButtons:
     """Holds logic for sidebar button actions."""
@@ -20,6 +21,7 @@ class SidebarButtons:
 
     # ----------------- Import -----------------
     def import_files(self):
+        import threading
         try:
             file_paths = filedialog.askopenfilenames(
                 title="Select Photos",
@@ -35,16 +37,43 @@ class SidebarButtons:
             # Always import into a new collection
             collection_id = self.db.add_collection("Imported from Sidebar")
 
-            imported_count = self.importer.import_files(
-                list(file_paths), 
-                collection_id,
-                default_styles=["General"]
-            )
+            def do_import():
+                import time
+                import tkinter as tk
+                from ttkbootstrap import Progressbar
+                progress_win = tk.Toplevel(self.master)
+                progress_win.title("Importing Photos...")
+                progress_win.geometry("300x80")
+                progress_win.transient(self.master)
+                progress_win.grab_set()
+                # Center the progress window
+                progress_win.update_idletasks()
+                screen_width = progress_win.winfo_screenwidth()
+                screen_height = progress_win.winfo_screenheight()
+                x = (screen_width // 2) - (300 // 2)
+                y = (screen_height // 2) - (80 // 2)
+                progress_win.geometry(f"300x80+{x}+{y}")
+                label = ttk.Label(progress_win, text="Importing photos, please wait...")
+                label.pack(pady=10)
+                pb = Progressbar(progress_win, mode="indeterminate")
+                pb.pack(fill="x", padx=20, pady=5)
+                pb.start(10)
+                try:
+                    imported_count = self.importer.import_files(
+                        list(file_paths), 
+                        collection_id,
+                        default_styles=["General"]
+                    )
+                    pb.stop()
+                    progress_win.destroy()
+                    Messagebox.show_info("Import Complete", f"Imported {imported_count} photos.")
+                    self.photo_viewer.refresh_photos(collection_id)
+                except Exception as e:
+                    pb.stop()
+                    progress_win.destroy()
+                    Messagebox.show_error("Import Error", str(e))
 
-            # Refresh viewer
-            self.photo_viewer.refresh_photos(collection_id)
-
-            Messagebox.show_info("Import Complete", f"Imported {imported_count} photos.")
+            threading.Thread(target=do_import, daemon=True).start()
 
         except Exception as e:
             Messagebox.show_error("Import Error", str(e))
