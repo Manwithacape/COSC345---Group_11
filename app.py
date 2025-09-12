@@ -180,7 +180,7 @@ def show_splash_and_start():
     splash.title("Loading AutoCull...")
     splash.resizable(False, False)
     splash.overrideredirect(True)  # Remove window border and controls
-    center_window(splash, 400, 200)
+    center_window(splash, 400, 300)
     splash_label = tk.Label(
         splash,
         text="Loading AutoCull...",
