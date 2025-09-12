@@ -1,3 +1,6 @@
+"""
+defines a base class for sidebar viewers with collapsible headers, scrollable treeviews, and resizable grips.
+"""
 import ttkbootstrap as ttk
 from db import Database
 
@@ -19,6 +22,14 @@ class BaseSidebarViewer(ttk.Frame):
     """
 
     def __init__(self, parent, db: Database, title="Viewer", default_height=DEFAULT_HEIGHT, **kwargs):
+        """
+        initialize the sidebar viewer
+        :param parent: parent Tkinter widget
+        :param db: Database instance for data access
+        :param title: Title for the header bar
+        :param default_height: Default expanded height
+        :param kwargs: additional ttk.Frame parameters
+        """
         super().__init__(parent, **kwargs)
         self.db = db
         self.title = title
