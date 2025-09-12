@@ -6,7 +6,7 @@
 
 ### Must have
 
-- [ ] Multi-threading - ensure gui is not frozen on import and photo processing
+- [x] Multi-threading - ensure gui is not frozen on import and photo processing
 - [ ] Need progress bars for UX - import, detect duplicates, face searching
 - [x] Import individual files - currently only does folders
 - [ ] Face detection - save to DB
