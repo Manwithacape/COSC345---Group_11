@@ -44,6 +44,16 @@ class PhotoScorer:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
+        ## Resize to max dimension of 800 for faster processing | maintain aspect ratio
+        max_dim = 800
+        height, width = gray.shape
+        if max(height, width) > max_dim:
+            scale = max_dim / max(height, width)
+            new_size = (int(width * scale), int(height * scale))
+            gray = cv2.resize(gray, new_size, interpolation=cv2.INTER_AREA)
+            hsv = cv2.resize(hsv, new_size, interpolation=cv2.INTER_AREA)
+            img = cv2.resize(img, new_size, interpolation=cv2.INTER_AREA)
+
         scores = {
             # ---------------- Sharpness / focus ----------------
             "laplacian_var": float(cv2.Laplacian(gray, cv2.CV_64F).var()),
