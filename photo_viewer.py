@@ -40,6 +40,11 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
 
         self._reflow_grid()
 
+        # Auto-select the first photo if any exist
+        if self.labels:
+            self._select_idx(0)
+            self.select_photo(self.labels[0].photo_id)
+
     def _on_photo_click(self, photo_id):
         idx = next((i for i, lbl in enumerate(self.labels) if lbl.photo_id == photo_id), None)
         if idx is not None:
