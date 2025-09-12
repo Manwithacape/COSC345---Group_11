@@ -6,7 +6,7 @@
 
 ### Must have
 
-- [ ] Multi-threading - ensure gui is not frozen on import and proto processing
+- [ ] Multi-threading - ensure gui is not frozen on import and photo processing
 - [ ] Need progress bars for UX - import, detect duplicates, face searching
 - [x] Import individual files - currently only does folders
 - [ ] Face detection - save to DB
@@ -17,7 +17,7 @@
 - [x] Collection viewing - load in replacement for photo_viewer.py and show list of collections
 - [ ] ML for photo scores - start with being able to differenciate between good and bad
 - [ ] Create thumbnails on import, save thumbnails to DB, perform operations on thumbnails rather than full images for better performance
-- [ ] RAW file handling - take out thumbnails - use any library
+- [x] RAW file handling - take out thumbnails - use any library
 - [ ] UI beautification - probably some libraries on the internet?
 - [ ] Make GUI smoother?
 - [ ] Test duplicate detection - maybe run on import? compare each image to prev for better consistency throughout burst
