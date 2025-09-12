@@ -108,11 +108,14 @@ class Database:
         return {row["tag_name"]: row["tag_value"] for row in results} if results else {}
 
     # ----------------- Scores -----------------
-    def add_score(self, photo_id, score_type, value):
-        query = "INSERT INTO scores (photo_id, type, value) VALUES (%s,%s,%s)"
-        self.execute(query, (photo_id, score_type, value))
+    def add_score(self, photo_id, score_type, value, scaled_value):
+        query = "INSERT INTO scores (photo_id, type, value, scaled_value) VALUES (%s,%s,%s,%s)"
+        self.execute(query, (photo_id, score_type, value, scaled_value))
 
     def get_scores(self, photo_id):
+        return self.fetch("SELECT * FROM scores WHERE photo_id=%s", (photo_id,))
+    
+    def get_scaled_scores(self, photo_id):
         return self.fetch("SELECT * FROM scores WHERE photo_id=%s", (photo_id,))
 
     # ----------------- Styles -----------------

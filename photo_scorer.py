@@ -86,6 +86,65 @@ class PhotoScorer:
 
         return scores
 
+
+    def scale_scores(self, scores):
+        """
+        Scale scores to a float between 0 (bad) and 1 (good) based on predefined min/max values.
+        Returns a dictionary of metric_name -> scaled_value.
+        """
+        scaling_params = {
+            "laplacian_var": (0, 1000),
+            "sobel_energy": (0, 1e6),
+            "noise": (0, 50),
+            "brightness_mean": (0, 255),
+            "brightness_median": (0, 255),
+            "saturation_mean": (0, 255),
+            "saturation_std": (0, 128),
+            "contrast_std": (0, 128),
+            "contrast_range": (0, 255),
+            "colorfulness": (0, 100),
+            "entropy": (0, 8),
+            "width": (640, 8000),
+            "height": (480, 6000),
+            "aspect_ratio": (0.5, 2.0),
+        }
+
+        # Define which metrics are "higher is better" (good if high, bad if low)
+        higher_is_better = {
+            "laplacian_var", "sobel_energy", "brightness_mean", "brightness_median",
+            "saturation_mean", "contrast_std", "contrast_range", "colorfulness", "entropy"
+        }
+        # Metrics where "lower is better" (good if low, bad if high)
+        lower_is_better = {
+            "noise", "saturation_std"
+        }
+        # For width, height, aspect_ratio, treat values near the middle of the range as best
+        middle_is_better = {"width", "height", "aspect_ratio"}
+
+        scaled_scores = {}
+        for metric, value in scores.items():
+            if metric in scaling_params:
+                min_val, max_val = scaling_params[metric]
+                if metric in higher_is_better:
+                    # 1 is good (max), 0 is bad (min)
+                    scaled = (value - min_val) / (max_val - min_val)
+                elif metric in lower_is_better:
+                    # 1 is good (min), 0 is bad (max)
+                    scaled = 1.0 - ((value - min_val) / (max_val - min_val))
+                elif metric in middle_is_better:
+                    # Best is middle of range, worst is either extreme
+                    mid_val = (min_val + max_val) / 2.0
+                    dist = abs(value - mid_val) / ((max_val - min_val) / 2.0)
+                    scaled = 1.0 - min(dist, 1.0)  # 1.0 at center, down to 0.0 at edges
+                else:
+                    scaled = 0.5  # Neutral if unknown
+                # Clamp between 0 and 1
+                scaled = max(0.0, min(1.0, float(scaled)))
+                scaled_scores[metric] = scaled
+            else:
+                scaled_scores[metric] = float(value)  # No scaling applied
+
+        return scaled_scores
     def score_and_store(self, photo_id, file_path):
         """
         Compute all metrics and store them in the DB for the given photo_id.
@@ -93,12 +152,13 @@ class PhotoScorer:
         if self.db is None:
             raise ValueError("Database instance not provided.")
         scores = self.score_photo(file_path)
+        scaled_scores = self.scale_scores(scores)
 
-        # Save all metrics
+        # Save all unscaled metrics
         for metric_name, value in scores.items():
-            self.db.add_score(photo_id, metric_name, float(value))
+            self.db.add_score(photo_id, metric_name, float(value), scaled_scores[metric_name])
 
-        return scores
+        return scores, scaled_scores
 
     # ---------------- Metric helpers ----------------
     def _colorfulness(self, img):

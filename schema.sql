@@ -31,7 +31,8 @@ CREATE TABLE IF NOT EXISTS scores (
     id SERIAL PRIMARY KEY,
     photo_id INT REFERENCES photos(id) ON DELETE CASCADE,
     type TEXT,
-    value REAL
+    value REAL,
+    scaled_value REAL CHECK (scaled_value >= 0 AND scaled_value <= 1)
 );
 
 -- ----------------- Styles -----------------

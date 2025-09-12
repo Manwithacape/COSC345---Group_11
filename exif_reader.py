@@ -4,6 +4,7 @@ from PIL import Image
 import piexif
 import os
 import rawpy
+import exifread
 
 class ExifReader:
     """
@@ -18,12 +19,12 @@ class ExifReader:
         ext = os.path.splitext(str(file_path))[1].lower()
         try:
             if ext in raw_extensions:
+                # Use exifread for RAW files
                 try:
-                    with rawpy.imread(str(file_path)) as raw:
-                        raw_exif = raw.metadata
-                        for key in dir(raw_exif):
-                            if not key.startswith('_') and not callable(getattr(raw_exif, key)):
-                                exif_data[key] = getattr(raw_exif, key)
+                    with open(str(file_path), 'rb') as f:
+                        tags = exifread.process_file(f, details=False)
+                    for k, v in tags.items():
+                        exif_data[str(k)] = str(v)
                 except Exception as re:
                     print(f"Failed to read RAW EXIF from {file_path}: {re}")
             else:
