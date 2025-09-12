@@ -2,6 +2,8 @@
 from pathlib import Path
 from PIL import Image
 import piexif
+import os
+import rawpy
 
 class ExifReader:
     """
@@ -11,25 +13,34 @@ class ExifReader:
     @staticmethod
     def read_exif(file_path: Path) -> dict:
         exif_data = {}
+
+        raw_extensions = {'.cr2', '.nef', '.arw', '.dng', '.rw2', '.orf', '.raf', '.srw', '.pef'}
+        ext = os.path.splitext(str(file_path))[1].lower()
         try:
-            img = Image.open(file_path)
-            raw_exif = img.info.get("exif")
-            if not raw_exif:
-                return exif_data
-
-            exif_dict = piexif.load(raw_exif)
-
-            for ifd_name, ifd in exif_dict.items():
-                if not isinstance(ifd, dict):
-                    continue
-                for tag, value in ifd.items():
-                    tag_info = piexif.TAGS.get(ifd_name, {}).get(tag, {"name": str(tag)})
-                    tag_name = tag_info["name"]
-                    exif_data[tag_name] = ExifReader._normalize_value(value)
-
+            if ext in raw_extensions:
+                try:
+                    with rawpy.imread(str(file_path)) as raw:
+                        raw_exif = raw.metadata
+                        for key in dir(raw_exif):
+                            if not key.startswith('_') and not callable(getattr(raw_exif, key)):
+                                exif_data[key] = getattr(raw_exif, key)
+                except Exception as re:
+                    print(f"Failed to read RAW EXIF from {file_path}: {re}")
+            else:
+                img = Image.open(file_path)
+                raw_exif = img.info.get("exif")
+                if not raw_exif:
+                    return exif_data
+                exif_dict = piexif.load(raw_exif)
+                for ifd_name, ifd in exif_dict.items():
+                    if not isinstance(ifd, dict):
+                        continue
+                    for tag, value in ifd.items():
+                        tag_info = piexif.TAGS.get(ifd_name, {}).get(tag, {"name": str(tag)})
+                        tag_name = tag_info["name"]
+                        exif_data[tag_name] = ExifReader._normalize_value(value)
         except Exception as e:
             print(f"Failed to read EXIF from {file_path}: {e}")
-
         return exif_data
 
     @staticmethod
