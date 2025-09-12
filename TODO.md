@@ -3,6 +3,7 @@
 ## Notes
 
 ---
+- [ ] Work flows should only run on main 
 
 ### Must have
 
