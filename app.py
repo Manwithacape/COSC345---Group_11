@@ -1,3 +1,16 @@
+"""
+AutoCull Main Application
+
+This file launches the AutoCull photo culling and scoring GUI.
+Features:
+- Darkly themed interface using ttkbootstrap
+- Sidebar navigation and viewers for photos, collections, EXIF, scores, duplicates
+- Splash screen and window centering
+- Database integration and automatic schema creation
+- Handles RAW and standard image formats
+
+Run this file to start the application.
+"""
 import ttkbootstrap as ttk
 from ttkbootstrap.dialogs import Messagebox, Querybox
 from tkinter import filedialog
@@ -11,11 +24,22 @@ from exif_viewer import ExifViewer
 from score_viewer import ScoreViewer
 from duplicate_viewer import DuplicateViewer
 from sidebar_buttons import SidebarButtons
+import tkinter as tk
 
 
 class AutoCullApp(ttk.Window):
+    """
+    Main application class for AutoCull.
+    Inherits from ttk.Window to utilize ttkbootstrap theming.
+    """
     def __init__(self):
-        super().__init__(themename="darkly")
+        """
+        Initialize the AutoCull application.
+            :return: None
+        """
+
+        ## Create main window
+        super().__init__(themename="darkly") ## Use darkly theme for better aesthetics
         self.title("AutoCull")
         self.geometry("1200x800")
 
@@ -40,9 +64,6 @@ class AutoCullApp(ttk.Window):
             photo_viewer=self.photo_viewer,
             switch_to_photos_callback=self.switch_to_photos
         )
-
-
-        
 
         # Buttons logic handler
         self.sidebar_buttons = SidebarButtons(
@@ -164,18 +185,26 @@ class AutoCullApp(ttk.Window):
         self.collections_viewer.refresh_collections()
         self.update_layout()
 
-def show_splash_and_start():
-    import tkinter as tk
+def center_window(window, width, height):
+    """
+    Center a Tkinter window on the screen.
+    :param window: the Tkinter window to center
+    :param width: desired window width
+    :param height: desired window height
+    """
+    window.update_idletasks()
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+    x = (screen_width // 2) - (width // 2)
+    y = (screen_height // 2) - (height // 2)
+    window.geometry(f"{width}x{height}+{x}+{y}")
 
-    def center_window(window, width, height):
-        window.update_idletasks()
-        screen_width = window.winfo_screenwidth()
-        screen_height = window.winfo_screenheight()
-        x = (screen_width // 2) - (width // 2)
-        y = (screen_height // 2) - (height // 2)
-        window.geometry(f"{width}x{height}+{x}+{y}")
-
-    # Splash screen setup
+# ---------- Splash Screen and App Start ----------
+def create_splash():
+    """
+    Create and display a splash screen.
+    :return: splash screen window
+    """
     splash = tk.Tk()
     splash.title("Loading AutoCull...")
     splash.resizable(False, False)
@@ -188,15 +217,20 @@ def show_splash_and_start():
         pady=40
     )
     splash_label.pack(expand=True)
+    return splash
 
-    def start_main_app():
-        splash.destroy()
-        app = AutoCullApp()
-        center_window(app, 1200, 800)
-        app.mainloop()
-
-    splash.after(2000, start_main_app)
-    splash.mainloop()
+def start_main_app(splash):
+    """
+    Start the main application after closing the splash screen.
+    :param splash: the splash screen window to destroy
+    :return: None
+    """
+    splash.destroy()
+    app = AutoCullApp()
+    center_window(app, 1200, 800)
+    app.mainloop()
 
 if __name__ == "__main__":
-    show_splash_and_start()
+    splash = create_splash()
+    splash.after(2000, lambda: start_main_app(splash))
+    splash.mainloop()
