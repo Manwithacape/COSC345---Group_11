@@ -118,6 +118,10 @@ class Database:
     def get_scaled_scores(self, photo_id):
         return self.fetch("SELECT * FROM scores WHERE photo_id=%s", (photo_id,))
 
+    def add_quality_score(self, photo_id, quality_score):
+        query = "INSERT INTO photo_quality (photo_id, quality_score) VALUES (%s,%s)"
+        self.execute(query, (photo_id, quality_score))
+        
     # ----------------- Styles -----------------
     def add_style(self, name, description=None):
         query = "INSERT INTO styles (name, description) VALUES (%s,%s) ON CONFLICT (name) DO NOTHING RETURNING id"

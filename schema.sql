@@ -35,6 +35,12 @@ CREATE TABLE IF NOT EXISTS scores (
     scaled_value REAL CHECK (scaled_value >= 0 AND scaled_value <= 1)
 );
 
+CREATE TABLE IF NOT EXISTS photo_quality (
+    id SERIAL PRIMARY KEY,
+    photo_id INT REFERENCES photos(id) ON DELETE CASCADE,
+    quality_score REAL
+);
+
 -- ----------------- Styles -----------------
 CREATE TABLE IF NOT EXISTS styles (
     id SERIAL PRIMARY KEY,

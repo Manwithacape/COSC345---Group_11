@@ -86,7 +86,6 @@ class PhotoScorer:
 
         return scores
 
-
     def scale_scores(self, scores):
         """
         Scale scores to a float between 0 (bad) and 1 (good) based on predefined min/max values.
@@ -145,6 +144,7 @@ class PhotoScorer:
                 scaled_scores[metric] = float(value)  # No scaling applied
 
         return scaled_scores
+    
     def score_and_store(self, photo_id, file_path):
         """
         Compute all metrics and store them in the DB for the given photo_id.
@@ -158,7 +158,32 @@ class PhotoScorer:
         for metric_name, value in scores.items():
             self.db.add_score(photo_id, metric_name, float(value), scaled_scores[metric_name])
 
+        # Compute and store overall quality score
+        overall_quality = self.average_quality_score(photo_id, scaled_scores)
         return scores, scaled_scores
+
+    def average_quality_score(self, photo_id, scaled_scores):
+        """
+        Compute an overall quality score as the average of selected scaled metrics.
+        Store this overall quality score in a separate table.
+        """
+        if self.db is None:
+            raise ValueError("Database instance not provided.")
+        
+        # Select metrics to include in overall quality score
+        relevant_metrics = [
+            "laplacian_var", "sobel_energy", "noise", "brightness_mean",
+            "saturation_mean", "contrast_std", "colorfulness", "entropy"
+        ]
+        valid_scores = [scaled_scores[m] for m in relevant_metrics if m in scaled_scores]
+        if not valid_scores:
+            overall_score = 0.0
+        else:
+            overall_score = float(np.mean(valid_scores)) # FOR NOW A SIMPLE AVERAGE OF THE SCALED SCORES. LATER WEIGHT THEM
+
+        # Store overall quality score
+        self.db.add_quality_score(photo_id, overall_score)
+        return overall_score
 
     # ---------------- Metric helpers ----------------
     def _colorfulness(self, img):
