@@ -25,14 +25,18 @@ class Sidebar(ttk.Frame):
         if side == "left":
             self.toggle_btn = ttk.Button(self.toolbar, text="⮜", width=2, command=self.toggle, bootstyle="secondary")
             self.toggle_btn.pack(side="right", padx=4, pady=4)
-            # Button handler
-            self.buttons = SidebarButtons(master, db=db, photo_viewer=photo_viewer, importer=importer)
-            # --- Import Button ---
-            self.import_btn = ttk.Button(self, text="Import Files", command=self.buttons.import_files, bootstyle="info")
-            self.import_btn.pack(padx=10, pady=10, anchor="n")
-            # --- Find Duplicates Button ---
-            self.dup_btn = ttk.Button(self, text="Find Duplicates", command=self.buttons.find_duplicates, bootstyle="warning")
-            self.dup_btn.pack(padx=10, pady=10, anchor="n")
+            
+            
+            # # Button handler
+            # self.buttons = SidebarButtons(master, db=db, photo_viewer=photo_viewer, importer=importer)
+            # # --- Import Button ---
+            # self.import_btn = ttk.Button(self, text="Import Files", command=self.buttons.import_files, bootstyle="info")
+            # self.import_btn.pack(padx=10, pady=10, anchor="n")
+            # # --- Find Duplicates Button ---
+            # self.dup_btn = ttk.Button(self, text="Find Duplicates", command=self.buttons.find_duplicates, bootstyle="warning")
+            # self.dup_btn.pack(padx=10, pady=10, anchor="n")
+            
+            
             self.grip = ttk.Frame(self, cursor="sb_h_double_arrow", width=GRIP_WIDTH)
             self.grip.pack(side="right", fill="y")
             # Add a vertical frame as a right border

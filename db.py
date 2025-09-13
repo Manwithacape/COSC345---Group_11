@@ -239,3 +239,11 @@ class Database:
             WHERE ndp.group_id=%s
         """
         return self.fetch(query, (group_id,))
+
+    def clear_duplicates(self):
+        """Development method: clear all near-duplicate groups and assignments."""
+        self.execute("DELETE FROM near_duplicate_photos")
+        self.execute("DELETE FROM near_duplicate_groups")
+        print("Cleared all near-duplicate groups and assignments.")
+        
+        

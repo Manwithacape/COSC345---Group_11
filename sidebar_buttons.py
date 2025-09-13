@@ -18,6 +18,14 @@ class SidebarButtons:
         self.db = db
         self.photo_viewer = photo_viewer
         self.importer = importer
+        self.buttons = []
+
+    # ----------------- Helper to add button -----------------
+    def add_button(self, sidebar, text, command):
+        btn = ttk.Button(sidebar, text=text, bootstyle="primary", command=command)
+        btn.pack(fill="x", pady=2, padx=5)
+        self.buttons.append(btn)
+        return btn
 
     # ----------------- Import -----------------
     def import_files(self):
@@ -102,3 +110,29 @@ class SidebarButtons:
 
         except Exception as e:
             Messagebox.show_error("Error", f"Error finding duplicates: {e}")
+
+
+    def switch_to_photos(self):
+        """Switch to the PhotoViewer via the master."""
+        if hasattr(self.master, "switch_to_photos"):
+            self.master.switch_to_photos()
+            # Ensure photo_viewer is the active viewer and layout is updated
+            if hasattr(self.master, "update_layout"):
+                self.master.update_layout()
+
+    def switch_to_collections(self):
+        """Switch to the CollectionsViewer via the master."""
+        if hasattr(self.master, "switch_to_collections"):
+            self.master.switch_to_collections()
+            # Ensure collections_viewer is the active viewer and layout is updated
+            if hasattr(self.master, "update_layout"):
+                self.master.update_layout()
+
+    # ----------------- Clear Duplicates (Dev) -----------------
+    def clear_duplicates(self):
+        """Development button: clear all duplicates in DB."""
+        if self.db:
+            self.db.clear_duplicates()
+            Messagebox.show_info("Duplicates Cleared", "All duplicates have been cleared.")
+            if self.photo_viewer:
+                self.photo_viewer.refresh_photos(None)
