@@ -67,6 +67,7 @@ class BaseThumbnailViewer(ttk.Frame):
     def _notify(self, photo_id):
         """Call updates on linked viewers if parent has them."""
         master = self.master
+        # Filmstrip, EXIF, score, duplicate viewers may exist in parent
         if hasattr(master, "exif_viewer") and master.exif_viewer:
             master.exif_viewer.update_content(photo_id)
         if hasattr(master, "score_viewer") and master.score_viewer:

@@ -1,14 +1,15 @@
+# collections_viewer.py
 import ttkbootstrap as ttk
 from main_viewer import MainViewer
 
 class CollectionsViewer(MainViewer):
-    """Scrollable list of collections"""
+    """Scrollable list of collections with selection highlighting."""
 
     def __init__(self, parent, db, photo_viewer=None, switch_to_photos_callback=None, **kwargs):
-        """
-        :param switch_to_photos_callback: function to call when double-clicking a collection
-        """
+        kwargs.pop("photo_viewer", None)
+        kwargs.pop("switch_to_photos_callback", None)
         super().__init__(parent, **kwargs)
+
         self.db = db
         self.photo_viewer = photo_viewer
         self.switch_to_photos_callback = switch_to_photos_callback
@@ -18,7 +19,7 @@ class CollectionsViewer(MainViewer):
         self.refresh_collections()
 
     def refresh_collections(self):
-        """Reload collections list from DB."""
+        """Reload collection list from DB."""
         for lbl in self.collection_labels:
             lbl.destroy()
         self.collection_labels.clear()
@@ -29,7 +30,7 @@ class CollectionsViewer(MainViewer):
                 self.inner_frame,
                 text=coll["name"],
                 anchor="w",
-                padding=(10,5),
+                padding=(10, 5),
                 cursor="hand2",
                 bootstyle="secondary"
             )
@@ -40,22 +41,20 @@ class CollectionsViewer(MainViewer):
             self.collection_labels.append(lbl)
 
     def _on_collection_click(self, collection_id, idx):
-        """Handle selecting a collection (single click)."""
+        """Single-click: highlight collection and refresh PhotoViewer."""
         if self.selected_idx is not None and 0 <= self.selected_idx < len(self.collection_labels):
             self.collection_labels[self.selected_idx].config(bootstyle="secondary")
-
         self.selected_idx = idx
-        self.collection_labels[idx].config(bootstyle="dark")  # highlight
+        self.collection_labels[idx].config(bootstyle="dark")
 
         if self.photo_viewer:
             self.photo_viewer.refresh_photos(collection_id)
 
     def _on_collection_double_click(self, collection_id):
-        """Double-click handler: switch to PhotoViewer for this collection."""
-        if self.photo_viewer:
-            # Refresh PhotoViewer with the selected collection
-            self.photo_viewer.refresh_photos(collection_id)
-        
-        # Call the callback to switch the main viewer
+        """Double-click: refresh PhotoViewer and switch to it safely."""
         if self.switch_to_photos_callback:
-            self.switch_to_photos_callback()  # ensures active_viewer = photo_viewer and layout updates
+            def update_view():
+                if self.photo_viewer:
+                    self.photo_viewer.refresh_photos(collection_id)
+                self.switch_to_photos_callback()
+            self.after(0, update_view)

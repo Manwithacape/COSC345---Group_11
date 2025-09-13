@@ -28,18 +28,8 @@ import tkinter as tk
 
 
 class AutoCullApp(ttk.Window):
-    """
-    Main application class for AutoCull.
-    Inherits from ttk.Window to utilize ttkbootstrap theming.
-    """
     def __init__(self):
-        """
-        Initialize the AutoCull application.
-            :return: None
-        """
-
-        ## Create main window
-        super().__init__(themename="darkly") ## Use darkly theme for better aesthetics
+        super().__init__(themename="darkly")
         self.title("AutoCull")
         self.geometry("1200x800")
 
@@ -56,16 +46,16 @@ class AutoCullApp(ttk.Window):
         # Setup menubar
         self.setup_menubar()
 
-        # Default view is PhotoViewer
+        # ---------- Create viewers first ----------
         self.photo_viewer = PhotoViewer(self, self.db)
         self.collections_viewer = CollectionsViewer(
             self,
             self.db,
             photo_viewer=self.photo_viewer,
-            switch_to_photos_callback=self.switch_to_photos
+            switch_to_photos_callback=lambda: self.after(0, self._switch_to_photos)
         )
 
-        # Buttons logic handler
+        # ---------- Sidebar buttons logic ----------
         self.sidebar_buttons = SidebarButtons(
             master=self,
             db=self.db,
@@ -73,24 +63,21 @@ class AutoCullApp(ttk.Window):
             importer=self.importer
         )
 
-        # Left sidebar (with buttons)
-        self.left_sidebar = Sidebar(
-            self,
-            side="left",
-            db=self.db,
-            photo_viewer=self.photo_viewer,
-            importer=self.importer
-        )
+        # ---------- Left sidebar ----------
+        self.left_sidebar = Sidebar(self, side="left", db=self.db)
+        self.sidebar_buttons.add_button(self.left_sidebar, "View Photos", lambda: self.after(0, self._switch_to_photos))
+        self.sidebar_buttons.add_button(self.left_sidebar, "View Collections", lambda: self.after(0, self._switch_to_collections))
+        self.sidebar_buttons.add_button(self.left_sidebar, "Import Photos", self.sidebar_buttons.import_files)
+        self.sidebar_buttons.add_button(self.left_sidebar, "Find Duplicates", self.sidebar_buttons.find_duplicates)
+        self.sidebar_buttons.add_button(self.left_sidebar, "Clear Duplicates (Dev)", self.sidebar_buttons.clear_duplicates)
         self.left_sidebar.pack(side="left", fill="y")
 
-        # Right sidebar
+        # ---------- Right sidebar & other viewers ----------
         self.right_sidebar = Sidebar(self, side="right")
         self.exif_viewer = ExifViewer(self.right_sidebar, self.db)
         self.exif_viewer.pack(fill="both", expand=True, padx=5, pady=5)
-
         self.score_viewer = ScoreViewer(self.right_sidebar, self.db)
         self.score_viewer.pack(fill="both", expand=True, padx=5, pady=5)
-
         self.filmstrip = FilmstripViewer(
             self,
             self.photo_viewer,
@@ -98,21 +85,21 @@ class AutoCullApp(ttk.Window):
             score_viewer=self.score_viewer
         )
         self.filmstrip.pack(fill="x", side="bottom")
-
         self.duplicate_viewer = DuplicateViewer(self.right_sidebar, self.db)
         self.duplicate_viewer.pack(fill="both", expand=True, padx=5, pady=5)
 
-        # Debounced layout update
+        # ---------- Debounced layout update ----------
         self._layout_after_id = None
         self.bind("<Configure>", self._on_configure)
-        self.update_layout()
 
+        # ---------- Set default active viewer last ----------
+        self._switch_to_photos()
+
+    # ---------- Configure handler ----------
     def _on_configure(self, event):
         if self._layout_after_id:
             self.after_cancel(self._layout_after_id)
         self._layout_after_id = self.after(100, self.update_layout)
-        
-        self.switch_to_photos()
 
     # ---------- Layout ----------
     def update_layout(self):
@@ -166,38 +153,33 @@ class AutoCullApp(ttk.Window):
 
         # Collections
         collections_menu = ttk.Menu(menubar, tearoff=0)
-        collections_menu.add_command(label="View Photos", command=self.switch_to_photos)
-        collections_menu.add_command(label="View Collections", command=self.switch_to_collections)
+        collections_menu.add_command(label="View Photos", command=self._switch_to_photos)
+        collections_menu.add_command(label="View Collections", command=self._switch_to_collections)
         menubar.add_cascade(label="Collections", menu=collections_menu)
 
         self.config(menu=menubar)
 
-    # ---------- Import wrapper for menubar ----------
+    # ---------- Import wrapper ----------
     def sidebar_import_photos(self):
-        """Call the SidebarButtons import handler (so logic stays centralized)."""
         self.sidebar_buttons.import_files()
 
-    # ---------- Switch views ----------
-    def switch_to_photos(self):
+    # ---------- Switch view helpers ----------
+    def _switch_to_photos(self):
         if self.active_viewer:
             self.active_viewer.place_forget()
         self.active_viewer = self.photo_viewer
         self.update_layout()
 
-    def switch_to_collections(self):
+    def _switch_to_collections(self):
         if self.active_viewer:
             self.active_viewer.place_forget()
         self.active_viewer = self.collections_viewer
         self.collections_viewer.refresh_collections()
         self.update_layout()
 
+
+# ---------- Window centering ----------
 def center_window(window, width, height):
-    """
-    Center a Tkinter window on the screen.
-    :param window: the Tkinter window to center
-    :param width: desired window width
-    :param height: desired window height
-    """
     window.update_idletasks()
     screen_width = window.winfo_screenwidth()
     screen_height = window.winfo_screenheight()
@@ -205,16 +187,13 @@ def center_window(window, width, height):
     y = (screen_height // 2) - (height // 2)
     window.geometry(f"{width}x{height}+{x}+{y}")
 
-# ---------- Splash Screen and App Start ----------
+
+# ---------- Splash screen ----------
 def create_splash():
-    """
-    Create and display a splash screen.
-    :return: splash screen window
-    """
     splash = tk.Tk()
     splash.title("Loading AutoCull...")
     splash.resizable(False, False)
-    splash.overrideredirect(True)  # Remove window border and controls
+    splash.overrideredirect(True)
     center_window(splash, 400, 300)
     splash_label = tk.Label(
         splash,
@@ -226,15 +205,11 @@ def create_splash():
     return splash
 
 def start_main_app(splash):
-    """
-    Start the main application after closing the splash screen.
-    :param splash: the splash screen window to destroy
-    :return: None
-    """
     splash.destroy()
     app = AutoCullApp()
     center_window(app, 1200, 800)
     app.mainloop()
+
 
 if __name__ == "__main__":
     splash = create_splash()
