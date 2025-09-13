@@ -3,12 +3,14 @@
 ## Notes
 
 ---
-- [ ] Work flows should only run on main 
+
+- [ ] Work flows should only run on main
 
 ### Must have
 
 - [x] Multi-threading - ensure gui is not frozen on import and photo processing
 - [ ] Need progress bars for UX - import, detect duplicates, face searching
+- [ ] Duplicate detection threshold value adjustment
 - [x] Import individual files - currently only does folders
 - [ ] Face detection - save to DB
 - [x] Refactoring to be done for sidebar contents - exif, score, duplicates viewers. Too much code duplication

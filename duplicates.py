@@ -13,6 +13,7 @@ class NearDuplicateDetector:
     Works efficiently for large photo collections.
     """
 
+    # TODO: Find better threshold value
     def __init__(self, db: Database, threshold=5):
         """
         :param db: Database instance
