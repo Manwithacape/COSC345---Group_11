@@ -83,3 +83,33 @@ dmypy.json
 # Environment variables
 .env
 .env.*
+
+# LaTeX intermediate files
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.idx
+*.ind
+*.lof
+*.lot
+*.out
+*.toc
+*.acn
+*.acr
+*.alg
+*.glg
+*.glo
+*.gls
+*.fls
+*.log
+*.fdb_latexmk
+*.synctex.gz
+*.run.xml
+*.nav
+*.snm
+*.vrb
+
+# Editors
+*.swp
+*~
