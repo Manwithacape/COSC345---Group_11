@@ -246,4 +246,9 @@ class Database:
         self.execute("DELETE FROM near_duplicate_groups")
         print("Cleared all near-duplicate groups and assignments.")
         
-        
+    
+    # ----------------- Queries -----------------
+    def get_first_photo_for_collection(self, collection_id):
+        query = "SELECT * FROM photos WHERE collection_id=%s ORDER BY id LIMIT 1"
+        results = self.fetch(query, (collection_id,))
+        return results[0] if results else None

@@ -21,11 +21,34 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
         self.single_item_active = False
         self.selected_idx = None
         self.db = db
+
+        # NEW: a dedicated container we PACK, and GRID only inside here
+        self.grid_area = ttk.Frame(self.inner_frame)
+        self.grid_area.pack(fill="both", expand=True)
+
         self.refresh_photos()
 
     def refresh_photos(self, collection_id=None):
         """Load photos as thumbnails."""
-        self.clear_thumbnails()
+        # Do NOT mix pack/grid parents: clear only our own label widgets
+        for lbl in self.labels:
+            try:
+                lbl.destroy()
+            except:
+                pass
+        self.labels = []
+        self.thumbs = []
+
+        # Leave single-photo mode if active
+        if getattr(self, "single_photo_viewer", None):
+            self.single_photo_viewer.destroy()
+            self.single_photo_viewer = None
+        self.single_item_active = False
+
+        # Make sure grid_area is visible
+        if not self.grid_area.winfo_ismapped():
+            self.grid_area.pack(fill="both", expand=True)
+
         self.photos = self.db.get_photos(collection_id)
 
         for photo in self.photos:
@@ -34,8 +57,9 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
                 continue
             self.thumbs.append(tk_img)
 
+            # IMPORTANT: parent is grid_area (not inner_frame)
             lbl = ttk.Label(
-                self.inner_frame,
+                self.grid_area,
                 image=tk_img,
                 cursor="hand2",
                 bootstyle="dark",
@@ -45,12 +69,14 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
             lbl.photo_id = photo["id"]
             lbl.photo_path = photo["file_path"]
 
+            # sanity check during dev; remove later if you like
+            assert lbl.master is self.grid_area, f"Thumb parent is {lbl.master}, expected grid_area"
+
             lbl.bind("<Button-1>", lambda e, pid=photo["id"]: self._on_photo_click(pid))
             lbl.bind("<Double-1>", lambda e, path=photo["file_path"]: self._show_single_photo(path))
 
             self.labels.append(lbl)
 
-        self.single_item_active = False
         self._reflow_grid()
 
         # Auto-select first photo
@@ -71,9 +97,7 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
         self.labels[idx].config(relief="solid")
 
     def _on_resize(self, event=None):
-        if self.single_item_active:
-            return
-        if not self.labels:
+        if self.single_item_active or not self.labels:
             return
         width = self.canvas.winfo_width()
         if width < 50:
@@ -95,18 +119,16 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
 
     def _show_single_photo(self, photo_path):
         """Switch from thumbnail grid to single-photo view."""
-        # Remove old single-photo view if it exists
-        if hasattr(self, "single_photo_viewer") and self.single_photo_viewer:
-            self.single_photo_viewer.destroy()
-
-        # Remove all thumbnails
+        # Hide the grid (don't destroy the container)
         for lbl in self.labels:
             if lbl.winfo_exists():
                 lbl.grid_forget()
-        for widget in self.inner_frame.winfo_children():
-            widget.destroy()
+        self.grid_area.pack_forget()
+
+        # Remove old single-photo view if it exists
+        if getattr(self, "single_photo_viewer", None):
+            self.single_photo_viewer.destroy()
 
         self.single_item_active = True
-        # Create new single-photo viewer
         self.single_photo_viewer = SinglePhotoViewer(self.inner_frame, photo_path)
         self.single_photo_viewer.pack(fill="both", expand=True)
