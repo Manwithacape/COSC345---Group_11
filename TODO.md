@@ -15,7 +15,7 @@
 - [ ] Face detection - save to DB
 - [x] Refactoring to be done for sidebar contents - exif, score, duplicates viewers. Too much code duplication
 - [x] photo_viewer.py & filmstrip_viewer.py to be refactored. Maybe create new dependant file for more code sharing
-- [ ] Multi file selection within photo_viewer.py
+- [x] Multi file selection within photo_viewer.py
 - [ ] Collections management - create collection using selection of files
 - [x] Collection viewing - load in replacement for photo_viewer.py and show list of collections
 - [ ] ML for photo scores - start with being able to differenciate between good and bad
