@@ -11,6 +11,7 @@ Features:
 
 Run this file to start the application.
 """
+import os, sys
 import ttkbootstrap as ttk
 from ttkbootstrap.dialogs import Messagebox, Querybox
 from tkinter import filedialog
@@ -25,6 +26,13 @@ from score_viewer import ScoreViewer
 from duplicate_viewer import DuplicateViewer
 from sidebar_buttons import SidebarButtons
 import tkinter as tk
+
+# Pillow for loading .webp logo
+try:
+    from PIL import Image, ImageTk
+    _HAS_PIL = True
+except Exception:
+    _HAS_PIL = False
 
 
 class AutoCullApp(ttk.Window):
@@ -178,7 +186,12 @@ class AutoCullApp(ttk.Window):
         self.update_layout()
 
 
-# ---------- Window centering ----------
+# ---------- Helpers ----------
+def resource_path(filename: str) -> str:
+    base = getattr(sys, "_MEIPASS", os.path.dirname(__file__))
+    return os.path.join(base, filename)
+
+
 def center_window(window, width, height):
     window.update_idletasks()
     screen_width = window.winfo_screenwidth()
@@ -188,30 +201,58 @@ def center_window(window, width, height):
     window.geometry(f"{width}x{height}+{x}+{y}")
 
 
-# ---------- Splash screen ----------
-def create_splash():
-    splash = tk.Tk()
-    splash.title("Loading AutoCull...")
+# ---------- Splash screen as Toplevel over the (hidden) main window ----------
+def create_splash(master):
+    """
+    Create a borderless splash Toplevel on top of the hidden main window.
+    """
+    splash = tk.Toplevel(master)
+    splash.title("Loading AutoCull…")
     splash.resizable(False, False)
     splash.overrideredirect(True)
-    center_window(splash, 400, 300)
-    splash_label = tk.Label(
-        splash,
-        text="Loading AutoCull...",
-        font=("Segoe UI", 18),
-        pady=40
-    )
-    splash_label.pack(expand=True)
-    return splash
 
-def start_main_app(splash):
-    splash.destroy()
-    app = AutoCullApp()
-    center_window(app, 1200, 800)
-    app.mainloop()
+    W, H = 560, 340
+    center_window(splash, W, H)
+
+    container = ttk.Frame(splash, padding=16)
+    container.pack(fill="both", expand=True)
+
+    logo_path = resource_path("logo/autocull_logo.webp")
+    try:
+        if not _HAS_PIL:
+            raise RuntimeError("Pillow not installed; required for .webp")
+        im = Image.open(logo_path).convert("RGBA")
+        im.thumbnail((W - 64, H - 120), Image.LANCZOS)
+        img_obj = ImageTk.PhotoImage(im)
+        img_lbl = ttk.Label(container, image=img_obj)
+        img_lbl.image = img_obj  # prevent GC
+        img_lbl.pack(pady=(12, 12))
+    except Exception as e:
+        ttk.Label(container, text="AutoCull", font=("Segoe UI", 24, "bold")).pack(pady=(32, 8))
+        ttk.Label(container, text=f"Loading… (logo error: {e})").pack(pady=(0, 12))
+
+    ttk.Label(container, text="Loading…", font=("Segoe UI", 11)).pack()
+    return splash
 
 
 if __name__ == "__main__":
-    splash = create_splash()
-    splash.after(2000, lambda: start_main_app(splash))
-    splash.mainloop()
+    # 1) Create the main app (this creates the single Tk root)
+    app = AutoCullApp()
+    app.withdraw()  # keep it hidden while splash shows
+    center_window(app, 1200, 800)
+
+    # 2) Create splash as a Toplevel over the hidden app
+    splash = create_splash(app)
+
+    # 3) After delay, close splash and show the app
+    def _reveal():
+        try:
+            splash.destroy()
+        except Exception:
+            pass
+        app.deiconify()
+
+    splash.after(2000, _reveal)
+
+    # 4) Run the single mainloop on the app (not on the splash)
+    app.mainloop()
