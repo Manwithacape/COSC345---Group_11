@@ -22,7 +22,7 @@
 chawi053@student.otago.ac.nz}
 \and
 \IEEEauthorblockN{Cam Clark}
-\IEEEauthorblockA{\textit{University of Otago 1234567} \\
+\IEEEauthorblockA{\textit{University of Otago 8298806} \\
 claca067@student.otago.ac.nz}
 \and
 \IEEEauthorblockN{Marick Malamala}
@@ -81,12 +81,22 @@ Group 11 adopted an agile development methodology, with two-week sprints and reg
 
 The team utilised Taiga as a project management tool, as per the requirements of the course. This allowed for a centralised means of user-story management, sprint planning, and task assignment.
 
+For development the team used Gitbucket as a version control system, with each team member working on a local repostiory and then pushing changes to the remote.
+
 \subsection{Design Process}
 The design process for AutoCull involved the several stages, including requirements gathering, system architecture design, and user interface design. With certain aspects of the project dictated by the project specifications provided.
 
-Requirements gathering involved consulting with both actively working photographers and those with a keen interest in photography. This allowed for a better understanding of the needs of the target users.
+Requirements gathering involved consulting with both actively working photographers and those with a keen interest in photography. This allowed for a better understanding of the needs of the target users. Key insights from requirement gathering included:
+\begin{itemize}
+    \item Potential users did not want an application to replace the likes of photoshop.
+    \item The photos should not be automatically culled, the user should have the final say, and the applicaiton should not update the local filesystem.
+    \item The use of AI/LLM giving the photographer score and feedback on a collection was well recieved by potential customes.
+\end{itemize}
 
 System architecture design pulled on the prior knowledge of team members, as well as content throughout COSC345. The architecture was designed to be modular and extensible, allowing for future features to be added with minimal disruption to existing functionality.
+With the understanding that we wanted to create a desktop application, the team decided to use Python as the primary programming language, leveraging the Tkinter library for the user interface.
+
+User interface design focused on creating a simple and intuitive interface, with a focus on usability and user experience. Wireframes and mockups were created using Figma, allowing for rapid prototyping and iteration based on feedback from potential users.
 
 \subsection{Implementation}
 
