@@ -10,7 +10,7 @@ Features:
 - Handles RAW and standard image formats
 
 Run this file to start the application.
-""" 
+"""
 import os, sys
 import ttkbootstrap as ttk
 from ttkbootstrap.dialogs import Messagebox, Querybox
@@ -19,6 +19,7 @@ from gui import Sidebar
 from db import Database
 from photo_importer import PhotoImporter
 from photo_viewer import PhotoViewer
+from single_photo_viewer import SinglePhotoViewer   # <-- NEW
 from collections_viewer import CollectionsViewer
 from filmstrip_viewer import FilmstripViewer
 from exif_viewer import ExifViewer
@@ -55,7 +56,7 @@ class AutoCullApp(ttk.Window):
         self.setup_menubar()
 
         # ---------- Create viewers first ----------
-        self.photo_viewer = PhotoViewer(self, self.db)
+        self.photo_viewer = PhotoViewer(self, self.db, open_single_callback=self.open_single_view)  # <-- pass callback
         self.collections_viewer = CollectionsViewer(
             self,
             self.db,
@@ -183,6 +184,14 @@ class AutoCullApp(ttk.Window):
             self.active_viewer.place_forget()
         self.active_viewer = self.collections_viewer
         self.collections_viewer.refresh_collections()
+        self.update_layout()
+
+    # ---------- NEW: open single image in full center pane ----------
+    def open_single_view(self, photo_path: str):
+        if self.active_viewer:
+            self.active_viewer.place_forget()
+        self.single_viewer = SinglePhotoViewer(self, photo_path=photo_path)
+        self.active_viewer = self.single_viewer
         self.update_layout()
 
 

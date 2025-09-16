@@ -5,51 +5,80 @@ from main_viewer import MainViewer
 
 class SinglePhotoViewer(MainViewer):
     """
-    Show a single photo at 1:1 size inside the MainViewer canvas.
-    The inner_frame matches the viewport; scrollbars appear if the image is larger.
+    Shows one photo scaled-to-fit and centered directly on the Canvas.
     """
 
     def __init__(self, parent, photo_path=None, **kwargs):
-        # Remove photo_path from kwargs before calling super
         kwargs.pop("photo_path", None)
         super().__init__(parent, **kwargs)
 
-        self.photo_path = photo_path
-        self.original_image = None
-        self.tk_image = None
-
-        # Image label inside inner_frame
-        self.image_label = ttk.Label(self.inner_frame)
-        self.image_label.pack(anchor="nw")
-
-        # Set flag so MainViewer doesn’t try to reflow grid
+        # enter single-photo mode
         self.single_item_active = True
 
-        # Load image if provided
+        # hide the grid layer and scrollbar in single view
+        try:
+            self.canvas.itemconfigure(self.window_id, state="hidden")
+        except Exception:
+            pass
+        try:
+            self.scrollbar_y.pack_forget()
+        except Exception:
+            pass
+
+        self.canvas.configure(highlightthickness=0, bg="#222")
+
+        # image state
+        self.photo_path = None
+        self._orig_img = None
+        self._img_tk = None
+        self._img_item = None
+
+        # redraw when the canvas resizes
+        self.canvas.bind("<Configure>", self._on_resize)
+
         if photo_path:
             self.load_image(photo_path)
 
-        # Make inner_frame always match canvas size
-        self.canvas.bind("<Configure>", self._resize_inner_frame)
-
-    def _resize_inner_frame(self, event=None):
-        # The inner_frame will be at least as big as the image
-        if self.original_image:
-            width, height = self.original_image.size
-        else:
-            width = self.canvas.winfo_width()
-            height = self.canvas.winfo_height()
-        self.canvas.itemconfig(self.window_id, width=max(self.canvas.winfo_width(), width))
-        self.canvas.itemconfig(self.window_id, height=max(self.canvas.winfo_height(), height))
-
-    def load_image(self, photo_path):
-        """Load the image at 1:1 size."""
+    def load_image(self, photo_path: str):
+        """Load the image and render to fit canvas."""
         try:
             self.photo_path = photo_path
-            self.original_image = Image.open(photo_path)
-            self.tk_image = ImageTk.PhotoImage(self.original_image)
-            self.image_label.config(image=self.tk_image)
-            # Resize inner frame to match image immediately
-            self._resize_inner_frame()
+            self._orig_img = Image.open(photo_path).convert("RGBA")
+            self._render_fit()
         except Exception as e:
-            print(f"Failed to load image {photo_path}: {e}")
+            print(f"[SinglePhotoViewer] Failed to load {photo_path}: {e}")
+
+    def _on_resize(self, _event=None):
+        if self._orig_img is not None:
+            self._render_fit()
+
+    def _render_fit(self):
+        """Scale image to fit canvas while preserving aspect ratio and center it."""
+        cw = max(1, self.canvas.winfo_width())
+        ch = max(1, self.canvas.winfo_height())
+        iw, ih = self._orig_img.size
+
+        scale = min(cw / iw, ch / ih)
+        new_w = max(1, int(iw * scale))
+        new_h = max(1, int(ih * scale))
+
+        img_resized = self._orig_img.resize((new_w, new_h), Image.LANCZOS)
+        self._img_tk = ImageTk.PhotoImage(img_resized)
+
+        if self._img_item is not None:
+            self.canvas.delete(self._img_item)
+
+        cx, cy = cw // 2, ch // 2
+        self._img_item = self.canvas.create_image(cx, cy, image=self._img_tk, anchor="center")
+        self.canvas.tag_raise(self._img_item)
+
+        # no scrolling in fit view
+        self.canvas.config(scrollregion=(0, 0, cw, ch))
+
+    # Optional: if you need to restore grid mode later
+    def restore_grid_layer(self):
+        self.single_item_active = False
+        try:
+            self.canvas.itemconfigure(self.window_id, state="normal")
+        except Exception:
+            pass
