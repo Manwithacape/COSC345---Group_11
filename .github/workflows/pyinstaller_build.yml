@@ -29,7 +29,10 @@ jobs:
           path: dist/app.exe
 
   build-mac:
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        os: [macos-13, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -50,5 +53,5 @@ jobs:
       - name: Upload Mac artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-executable-mac
+          name: app-executable-mac-${{ matrix.os }}
           path: dist/app
