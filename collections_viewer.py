@@ -66,15 +66,22 @@ class CollectionsViewer(MainViewer):
 
         collections = self.db.get_collections() or []
 
+        # Create a single horizontal container frame
+        if hasattr(self, "collections_row"):
+            self.collections_row.destroy()
+        self.collections_row = ttk.Frame(self.inner_frame)
+        self.collections_row.pack(fill="x", pady=10)
+        self.collection_rows.append(self.collections_row)
+
         for idx, coll in enumerate(collections):
-            row = ttk.Frame(self.inner_frame, padding=5, bootstyle="secondary")
-            row.pack(fill="x", pady=2)
-            self.collection_rows.append(row)
+            # Each collection gets its own "card" frame
+            card = ttk.Frame(self.collections_row, padding=10, bootstyle="secondary")
+            card.pack(side="left", padx=8, pady=2)
             self.collection_ids.append(coll["id"])
 
             # THUMBNAIL
-            thumb_lbl = ttk.Label(row)
-            thumb_lbl.pack(side="left")
+            thumb_lbl = ttk.Label(card)
+            thumb_lbl.pack(side="top")
 
             path = self.get_thumbnail(coll)
             if path:
@@ -91,30 +98,15 @@ class CollectionsViewer(MainViewer):
             else:
                 thumb_lbl.configure(text="[No thumbnail]")
 
-            # NAME
-            name_lbl = ttk.Label(row, text=coll["name"], anchor="w", padding=(10, 0))
-            name_lbl.pack(side="left", fill="x", expand=True)
+            # NAME (below or above thumbnail)
+            name_lbl = ttk.Label(card, text=coll["name"], anchor="center", padding=(0, 5))
+            name_lbl.pack(side="top", fill="x")
 
-            # Click bindings (index-based)
-            # What these bindings do is pass the current idx to the handler
-            
-            for w in (row, thumb_lbl, name_lbl):
-                w.bind("<Button-1>", lambda e, i=idx: self._on_collection_click(i))
+            # Click bindings
+            for w in (card, thumb_lbl, name_lbl):
                 w.bind("<Double-1>", lambda e, i=idx: self._on_collection_double_click(i))
-
     
-    def _on_collection_click(self, idx: int):
-        """Single-click: highlight collection and refresh PhotoViewer."""
-        if self.selected_idx is not None and 0 <= self.selected_idx < len(self.collection_rows):
-            self.collection_rows[self.selected_idx].configure(bootstyle="secondary")
-        self.selected_idx = idx
-        self.collection_rows[idx].configure(bootstyle="dark")
-
-        collection_id = self.collection_ids[idx]
-        if self.photo_viewer:
-            self.photo_viewer.refresh_photos(collection_id)
-        print(f"Selected collection ID: {collection_id}")
-
+  
     def _on_collection_double_click(self, idx: int):
         """Double-click: refresh PhotoViewer and switch to it safely."""
         collection_id = self.collection_ids[idx]
