@@ -25,11 +25,11 @@
 - [ ] Create thumbnails on import, save thumbnails to DB, perform operations on thumbnails rather than full images for better performance
 - [x] RAW file handling - take out thumbnails - use any library
 - [x] UI beautification - probably some libraries on the internet?
-- [ ] Make GUI smoother?
+- [x] Make GUI smoother? - seems thats just how tk is ?????
 - [ ] Test duplicate detection - maybe run on import? compare each image to prev for better consistency throughout burst
 - [ ] Show faces in RHS sidebar
 - [ ] Image viewer - images double clicked in photo_viewer should be shown as a big image. Filmstrip still available, image nav should also be possible through filmstrip
-- [ ] Image viewer zoom in on click
+- [x] Image viewer zoom in on click
 - [ ] photo_viewer.py needs slider for scale options in bar @ bottom above filmstrip
 - [x] Filmstrip needs to be full width of window & collapsable
 
