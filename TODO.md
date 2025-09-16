@@ -32,6 +32,7 @@
 - [ ] Image viewer zoom in on click
 - [ ] photo_viewer.py needs slider for scale options in bar @ bottom above filmstrip
 - [x] Filmstrip needs to be full width of window & collapsable
+- [ ] Cam Student ID number on report
 
 ---
 
