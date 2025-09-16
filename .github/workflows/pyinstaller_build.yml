@@ -59,7 +59,7 @@ jobs:
           pip install pyinstaller
 
       - name: Build Mac executable
-        run: pyinstaller --onefile --windowed app.py --add-data "schema.sql:." --icon "app.icns"
+        run: pyinstaller --onefile --windowed app.py --add-data "schema.sql:."
 
       - name: Prepare GitHub Pages content (Mac)
         run: |

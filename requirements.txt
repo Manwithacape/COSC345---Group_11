@@ -3,9 +3,11 @@ numpy
 opencv_python
 piexif
 Pillow
-psycopg2
 python-dotenv
 scikit_learn
 scikit-image
 ttkbootstrap
 rawpy
+psycopg2-binary
+
+
