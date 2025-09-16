@@ -19,13 +19,14 @@ from gui import Sidebar
 from db import Database
 from photo_importer import PhotoImporter
 from photo_viewer import PhotoViewer
-from single_photo_viewer import SinglePhotoViewer   # <-- NEW
+from single_photo_viewer import SinglePhotoViewer
 from collections_viewer import CollectionsViewer
 from filmstrip_viewer import FilmstripViewer
 from exif_viewer import ExifViewer
 from score_viewer import ScoreViewer
 from duplicate_viewer import DuplicateViewer
 from sidebar_buttons import SidebarButtons
+from scrollable_frame import ScrollableFrame
 import tkinter as tk
 
 # Pillow for loading .webp logo
@@ -56,12 +57,14 @@ class AutoCullApp(ttk.Window):
         self.setup_menubar()
 
         # ---------- Create viewers first ----------
-        self.photo_viewer = PhotoViewer(self, self.db, open_single_callback=self.open_single_view)  # <-- pass callback
+        self.photo_viewer = PhotoViewer(
+            self, self.db, open_single_callback=self.open_single_view
+        )
         self.collections_viewer = CollectionsViewer(
             self,
             self.db,
             photo_viewer=self.photo_viewer,
-            switch_to_photos_callback=lambda: self.after(0, self._switch_to_photos)
+            switch_to_photos_callback=lambda: self.after(0, self._switch_to_photos),
         )
 
         # ---------- Sidebar buttons logic ----------
@@ -69,33 +72,53 @@ class AutoCullApp(ttk.Window):
             master=self,
             db=self.db,
             photo_viewer=self.photo_viewer,
-            importer=self.importer
+            importer=self.importer,
         )
 
         # ---------- Left sidebar ----------
         self.left_sidebar = Sidebar(self, side="left", db=self.db)
-        self.sidebar_buttons.add_button(self.left_sidebar, "View Photos", lambda: self.after(0, self._switch_to_photos))
-        self.sidebar_buttons.add_button(self.left_sidebar, "View Collections", lambda: self.after(0, self._switch_to_collections))
-        self.sidebar_buttons.add_button(self.left_sidebar, "Import Photos", self.sidebar_buttons.import_files)
-        self.sidebar_buttons.add_button(self.left_sidebar, "Find Duplicates", self.sidebar_buttons.find_duplicates)
-        self.sidebar_buttons.add_button(self.left_sidebar, "Clear Duplicates (Dev)", self.sidebar_buttons.clear_duplicates)
+        self.sidebar_buttons.add_button(
+            self.left_sidebar, "View Photos", lambda: self.after(0, self._switch_to_photos)
+        )
+        self.sidebar_buttons.add_button(
+            self.left_sidebar, "View Collections", lambda: self.after(0, self._switch_to_collections)
+        )
+        self.sidebar_buttons.add_button(
+            self.left_sidebar, "Import Photos", self.sidebar_buttons.import_files
+        )
+        self.sidebar_buttons.add_button(
+            self.left_sidebar, "Find Duplicates", self.sidebar_buttons.find_duplicates
+        )
+        self.sidebar_buttons.add_button(
+            self.left_sidebar, "Clear Duplicates (Dev)", self.sidebar_buttons.clear_duplicates
+        )
         self.left_sidebar.pack(side="left", fill="y")
 
-        # ---------- Right sidebar & other viewers ----------
+        # ---------- Right sidebar & other viewers (scrollable) ----------
         self.right_sidebar = Sidebar(self, side="right")
-        self.exif_viewer = ExifViewer(self.right_sidebar, self.db)
-        self.exif_viewer.pack(fill="both", expand=True, padx=5, pady=5)
-        self.score_viewer = ScoreViewer(self.right_sidebar, self.db)
-        self.score_viewer.pack(fill="both", expand=True, padx=5, pady=5)
+
+        # wrap sidebar content in a scrollable frame
+        self.right_scroll = ScrollableFrame(self.right_sidebar)
+        self.right_scroll.pack(fill="both", expand=True)
+
+        # put panels inside the scrollable body (stacked)
+        self.exif_viewer = ExifViewer(self.right_scroll.body, self.db)
+        self.exif_viewer.pack(fill="x", padx=5, pady=5)
+
+        self.score_viewer = ScoreViewer(self.right_scroll.body, self.db)
+        self.score_viewer.pack(fill="x", padx=5, pady=5)
+
+        self.duplicate_viewer = DuplicateViewer(self.right_scroll.body, self.db)
+        self.duplicate_viewer.pack(fill="x", padx=5, pady=5)
+
+        # filmstrip stays at bottom of the main window
         self.filmstrip = FilmstripViewer(
             self,
             self.photo_viewer,
             exif_viewer=self.exif_viewer,
-            score_viewer=self.score_viewer
+            score_viewer=self.score_viewer,
         )
         self.filmstrip.pack(fill="x", side="bottom")
-        self.duplicate_viewer = DuplicateViewer(self.right_sidebar, self.db)
-        self.duplicate_viewer.pack(fill="both", expand=True, padx=5, pady=5)
 
         # ---------- Debounced layout update ----------
         self._layout_after_id = None
@@ -137,8 +160,12 @@ class AutoCullApp(ttk.Window):
         self.filmstrip.place(x=0, y=h - fh, width=w, height=fh)
 
         # Update toggle icons
-        self.left_sidebar.toggle_btn.config(text="⮞" if self.left_sidebar.collapsed else "⮜")
-        self.right_sidebar.toggle_btn.config(text="⮜" if self.right_sidebar.collapsed else "⮞")
+        self.left_sidebar.toggle_btn.config(
+            text="⮞" if self.left_sidebar.collapsed else "⮜"
+        )
+        self.right_sidebar.toggle_btn.config(
+            text="⮜" if self.right_sidebar.collapsed else "⮞"
+        )
 
     # ---------- Menubar ----------
     def setup_menubar(self):
