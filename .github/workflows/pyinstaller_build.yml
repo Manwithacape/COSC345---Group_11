@@ -22,25 +22,11 @@ jobs:
       - name: Build Windows executable
         run: pyinstaller --onefile --windowed app.py --add-data "schema.sql;." --icon "app.ico"
 
-      - name: Prepare GitHub Pages content (Windows)
-        run: |
-          mkdir -p gh-pages
-          cp dist/app.exe gh-pages/
-          echo ^<html^>^<body^>^<h1^>Download AutoCull^</h1^>^<a href='app.exe'^>Download for Windows^</a^>^</body^>^</html^> > gh-pages/index.html
-
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-executable-windows
           path: dist/app.exe
-
-      - name: Deploy to GitHub Pages (Windows)
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: gh-pages
-          publish_branch: gh-pages
-          keep_files: true
 
   build-mac:
     runs-on: macos-latest
@@ -61,28 +47,8 @@ jobs:
       - name: Build Mac executable
         run: pyinstaller --onefile --windowed app.py --add-data "schema.sql:."
 
-      - name: Prepare GitHub Pages content (Mac)
-        run: |
-          mkdir -p gh-pages
-          cp dist/app gh-pages/app-mac
-          if [ -f gh-pages/index.html ]; then
-            # Append Mac link if index.html exists
-            echo "<br><a href='app-mac'>Download for Mac</a>" >> gh-pages/index.html
-          else
-            # Create index.html if it doesn't exist
-            echo "<html><body><h1>Download AutoCull</h1><a href='app-mac'>Download for Mac</a></body></html>" > gh-pages/index.html
-          fi
-
       - name: Upload Mac artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-executable-mac
           path: dist/app
-
-      - name: Deploy to GitHub Pages (Mac)
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: gh-pages
-          publish_branch: gh-pages
-          keep_files: true
