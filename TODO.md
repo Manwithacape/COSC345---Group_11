@@ -24,7 +24,7 @@
     - [ ] add a threshold param for displaying images based on quality   
 - [ ] Create thumbnails on import, save thumbnails to DB, perform operations on thumbnails rather than full images for better performance
 - [x] RAW file handling - take out thumbnails - use any library
-- [ ] UI beautification - probably some libraries on the internet?
+- [x] UI beautification - probably some libraries on the internet?
 - [ ] Make GUI smoother?
 - [ ] Test duplicate detection - maybe run on import? compare each image to prev for better consistency throughout burst
 - [ ] Show faces in RHS sidebar
