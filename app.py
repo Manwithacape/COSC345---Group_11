@@ -10,7 +10,7 @@ Features:
 - Handles RAW and standard image formats
 
 Run this file to start the application.
-"""
+""" 
 import os, sys
 import ttkbootstrap as ttk
 from ttkbootstrap.dialogs import Messagebox, Querybox
