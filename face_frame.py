@@ -27,7 +27,7 @@ class FaceFrame(tk.Frame):
         self.photo_image = ImageTk.PhotoImage(self.image)
         self.label = tk.Label(self, image=self.photo_image)
 
-        self.label.pack()
+        self.label.pack(fill="x", expand=True)
     
     def crop_face(self):
         """
@@ -38,4 +38,8 @@ class FaceFrame(tk.Frame):
         """
         image = Image.open(self.photo_path)
         cropped_image = image.crop(self.bounding_box) # (left, upper, right, lower)
+
+        # Resize the cropped image to 200x200 for consistent display
+        cropped_image = cropped_image.resize((200, 200))
+
         return cropped_image
