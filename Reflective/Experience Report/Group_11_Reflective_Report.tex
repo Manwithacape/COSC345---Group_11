@@ -75,6 +75,7 @@ The objectives and features of AutoCull include:
     \item Streamlining the post-processing workflow to save time and effort for photographers.
 \end{itemize}
 
+Although objectives and features of the project are rather vague, this is largely due to the nature of the project itself. The project is intended to be a practical exercise in software engineering, and as such, the focus is on the development process rather than the specific features of the application. The option to take any objective further than the minimum requirements is left to the discretion of the group, allowing for adjustments to be made throughout the project as the team gains a better understanding both scope and technical feasibility.
 
 \section{Development Process}
 As COSC345 is a paper with a far greater focus on practical experience than theoretical knowledge, the development process is largely self-directed, with groups expected to manage their own time and resources to complete the project within the semester timeframe. This section aims to detail the development process undertaken by Group 11.
@@ -88,6 +89,8 @@ In practice, the agile methodology adopted by the team could have been followed 
 
 Additionally, stand-up meetings were generally productive provided that an agenda was followed, however this was not always the case. There are instances where meetings would proceed with no clear direction, leading to unproductive discussions and a lack of productive outcomes. This could have been mitigated by having a more structured approach to meetings, with either a clear agenda or objective set prior to the meeting.
 
+If the team were to undertake a similar project in the future, the development methodology would likely be similar, with a few key changes. The team would aim to follow the agile methodology more strictly, with a greater focus on accurate task estimation and structured meetings. Additionally, the team would aim to incorporate more frequent retrospectives, allowing for continuous improvement of the development process throughout the project.
+
 \subsection{Team Roles and Responsibilities}
 At the beginning of the project, the team operated under a decentralised, emergent leadership style. Where roles are not formally assigned, and individuals were expected to step up and lead tasks as needed. This model offered flexibility and the potential for shared ownership, allowing different members to contribute leadership depending on their personal expertise.
 
@@ -99,7 +102,7 @@ This restructuring brought greater clarity and efficiency. The division of labou
 
 One limitation, however, was that the project lead emerged through self-appointment rather than consensus, and their relative lack of experience occasionally impacted decision-making. The experience demonstrated that while decentralised leadership can be valuable, software projects often require a clearly defined leader — ideally one selected with regard to competence and team buy-in — to keep the group aligned, especially under time constraints.
 
-For development the team used Gitbucket as a version control system, with each team member working on a local repostiory and then pushing changes to the remote.
+Given an opportunity to work in this particular team again, the team would likely adopt a similar hierarchical structure from the outset, rather than expecting leadership to emerge organically. This would provide the necessary clarity and direction for this particular team to function effectively. Had such a structure been in place from the beginning, it is likely that the project would quite easily be on track to be completed early, and with additional features implemented by the final deliverable.
 
 \subsection{Design Process}
 The design process for AutoCull involved the several stages, including requirements gathering, system architecture design, and user interface design. With certain aspects of the project dictated by the project specifications provided.
@@ -108,12 +111,14 @@ Requirements gathering involved consulting with both actively working photograph
 \begin{itemize}
     \item Potential users did not want an application to replace the likes of photoshop.
     \item The photos should not be automatically culled, the user should have the final say, and the applicaiton should not update the local filesystem.
-    \item The use of AI/LLM giving the photographer score and feedback on a collection was well recieved by potential customes.
+    \item The use of AI/LLM giving the photographer score and feedback on a collection was well recieved by the target audience.
 \end{itemize}
 
 System architecture design pulled on the prior knowledge of team members, as well as content throughout COSC345. The architecture was designed to be modular and extensible, allowing for future features to be added with minimal disruption to existing functionality.
 
 The gathering of requirements through approaching actual users was a particularly valuable exercise, likely among the most valuable of the entire project. It provided a real-world context to the project, and allowed for a better understanding of the needs of the target users. This was particularly important given the niche nature of the application, as it ensured that the features developed were relevant and useful to photographers this application is meant for.
+
+One aspect of the design process where the team performed quite well is the documentation of design decisions. This is particularly important when working in teams, allowing for team members to be quickly brought up to speed on both the application design and changes made throughout the project. Although this team did not experience the turnover of members, it is comforting to know that the documentation is in place should this occur. However, it is unfortunate that this documentation was not referenced more often throughout the project, as it would have likely prevented instances where components required reworking due to misunderstandings regarding the intended design. 
 
 User interface design was approached through extensive research into existing post processing applications, as well as general UI/UX design principles. The goal was to create an interface that was both intuitive and efficient, allowing the target users to quickly learn the application through implementing familiar design patterns shared by other popular photography applications.
 
@@ -121,6 +126,8 @@ While there was initially some friction within the team regarding design decisio
 With the understanding that we wanted to create a desktop application, the team decided to use Python as the primary programming language, leveraging the Tkinter library for the user interface.
 
 User interface design focused on creating a simple and intuitive interface, with a focus on usability and user experience. Wireframes and mockups were created using Figma, allowing for rapid prototyping and iteration based on feedback from potential users. This was a particularly effective approach to the problem as it allowed for quick and easy changes to be made to the mockups while obtaining user feedback.
+
+Upon reflection, the design process could have been improved by involving potential users earlier in the process, and having the entire team present for both the gathering of requirements and the user interface design. This would have allowed for a more cohesive design, with less misunderstandings and miscommunications between team members. It should be noted that this could possibly also be worked on through higher quality documentation of design decisions, allowing for team members to be on the same page regarding the design of the application. This would have prevented instances where components required reworking due to misunderstandings regarding the intended design. 
 
 \subsection{Implementation}
 While the tech stack was detailed during the design process, the actual implementation of the project differed from this initially. The start of the implementation process saw inadequate planning and task allocation put into practice. Leading to team members working on tasks they were not best suited for, and important decisions being made without the input of all team members. 
@@ -133,12 +140,23 @@ This resulted in a lack of integration between different parts of the applicatio
 
 While the initial stages of implementation were somewhat disorganised, the restructuring of the team into a more traditional hierarchical model led to a more structured approach to implementation. The division of the team into front-end and back-end pairs allowed for tasks to be completed in parallel, and the project lead provided much-needed direction to the project.
 
+\subsection{Version Control}
+One notable topic in every software engineering course offered at the University of Otago is version control. The importance of version control in software development cannot be overstated. It allows for collaboration between team members, tracking of changes, and the ability to revert to previous versions of the codebase if necessary.
+
+For development, the team used both Gitbucket and GitHub for version control, while this provides the unintended benefit of redundancy in the case one service may go down, the decision to use both services was made to allow for the use of GitHub Actions for continuous integration and deployment, while also adhering to the course requirement of using Gitbucket.
+
+Good practice in the use of version control is something that the team was well aware of, and was put into practice throughout the project. The use of feature branches allowed for team members to work on specific features without affecting the main codebase, and pull requests were used to review and merge changes. This ensured that the main codebase remained stable, and that changes were thoroughly reviewed before being integrated.
+
+The use of version control is something that team was already relatively well versed in, and was put into practice effectively. It is unlikely that any changes would be made to the use of version control if the team were to undertake a similar project in the future. Given the option however, it is unlikely GitBucket would be used again.
+
 \subsection{Testing and Quality Assurance}
 It is a well known fact that test driven development is a highly effective software development practice. While this is something that the team was well aware of, it was not put into practice until the later stages of the project. While this is something that could be seen as a shortcoming of the team, it was convenient that fewer man hours were spent on tests which would have been discarded due to the significant changes made to the codebase throughout the project. 
 
 If this were to be done again, the team would likely work towards ensuring that best test driven development practices are followed from the beginning of the project. Although it worked out better to not do this in the context of this project, it could easily be argued that this was the result of poor planning to begin with, which led to the need for significant changes to the codebase.
 
 Where implemented correctly, tests should be written before the actual implementation of a feature. With features being properly planned out before any code is written. This would allow for a more structured approach to development, and would likely lead to a more cohesive codebase, which would not require significant changes to be made later in the project.
+
+Testing is something the team has identified as a key area for improvement, and is something that will be focused on in future projects. The importance of testing in software development cannot be overstated, and the team is well aware of the cost in both time and effort that could have been saved, had proper testing and planning been put into practice from the beginning of the project.
 
 \section{Lessons Learned}
 The undertaking of this project has been a valuable learning experience for all team members involved. The practical experience gained thus far at week 9 of the project has been invaluable. The experience of working in a team, managing a project, and developing a software application has provided insights that cannot be gained through theoretical knowledge alone. The importance of good software engineering practices, such as version control, testing, and documentation, has been reinforced through the practical application of theoretical knowledge. 
