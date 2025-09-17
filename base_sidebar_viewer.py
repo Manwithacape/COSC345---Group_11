@@ -45,11 +45,11 @@ class BaseSidebarViewer(ttk.Frame):
 
         self.toggle_btn = ttk.Button(
             self.top_bar,
-            text=f"⯆ {self.title}",
+            text=f"{self.title} ⯆",
             bootstyle="secondary",
             command=self.toggle
         )
-        self.toggle_btn.pack(pady=2, padx=5, anchor="w")
+        self.toggle_btn.pack(pady=0, padx=0, fill="x", anchor="w")
 
         # ---------- Treeview ----------
         self.tree_frame = ttk.Frame(self)
@@ -91,14 +91,14 @@ class BaseSidebarViewer(ttk.Frame):
             self.configure(height=self.expanded_height)
             self.tree_frame.pack(fill="both", expand=True)
             self.grip.pack(fill="x", side="bottom")
-            self.toggle_btn.config(text=f"⯆ {self.title}")
+            self.toggle_btn.config(text=f"{self.title} ⯆")
             self.collapsed = False
         else:
             self.expanded_height = self.winfo_height()
             self.tree_frame.pack_forget()
             self.grip.pack_forget()
             self.configure(height=MIN_COLLAPSED_HEIGHT)
-            self.toggle_btn.config(text=f"⯈ {self.title}")
+            self.toggle_btn.config(text=f"{self.title}⯈")
             self.collapsed = True
 
     # ----------------- Resize -----------------

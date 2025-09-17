@@ -1,4 +1,5 @@
 import tkinter as tk
+import ttkbootstrap as ttk
 from face_frame import FaceFrame
 
 class FacesFrame(tk.Frame):
@@ -22,12 +23,13 @@ class FacesFrame(tk.Frame):
         self.toggled = True # Faces are shown by default
         
         # make a collapse/expand button
-        self.toggle_btn = tk.Button(
+        self.toggle_btn = ttk.Button(
             self,
-            text="Hide Faces ⯆",
-            command=self.toggle_faces
+            text="Faces ⯆",
+            command=self.toggle_faces,
+            bootstyle="secondary"
         )
-        self.toggle_btn.pack(side="top", pady=5)
+        self.toggle_btn.pack(side="top", pady=5, fill="x")
 
     def update_faces(self, photo_id):
         """
