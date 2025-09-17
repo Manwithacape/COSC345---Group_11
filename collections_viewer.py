@@ -18,6 +18,7 @@ class CollectionsViewer(MainViewer):
         self.photo_viewer = photo_viewer
         self.switch_to_photos_callback = switch_to_photos_callback
 
+
         self.collection_rows = []
         self.collection_ids = []
         self._thumbnail_cache = {}  # {collection_id: PhotoImage}
@@ -69,17 +70,21 @@ class CollectionsViewer(MainViewer):
         # Create a single horizontal container frame
         if hasattr(self, "collections_row"):
             self.collections_row.destroy()
+            
         self.collections_row = ttk.Frame(self.inner_frame)
         self.collections_row.pack(fill="x", pady=10)
-        self.collection_rows.append(self.collections_row)
+        
+        
 
         for idx, coll in enumerate(collections):
-            # Each collection gets its own "card" frame
+            if idx > 0 and idx % 5 == 0:
+                self.collections_row = ttk.Frame(self.inner_frame)
+                self.collections_row.pack(fill="x", pady=10)
+                self.collection_rows.append(self.collections_row)
+
             card = ttk.Frame(self.collections_row, padding=10, bootstyle="secondary")
             card.pack(side="left", padx=8, pady=2)
             self.collection_ids.append(coll["id"])
-
-            # THUMBNAIL
             thumb_lbl = ttk.Label(card)
             thumb_lbl.pack(side="top")
 
@@ -93,18 +98,20 @@ class CollectionsViewer(MainViewer):
                     thumb_lbl.configure(image=ph)
                     thumb_lbl.image = ph  # keep reference to avoid GC
                 except Exception as e:
-                    print(f"[thumb] Error loading '{path}' for coll {coll['id']}: {e}")
-                    thumb_lbl.configure(text="[Error loading thumbnail]")
+                        print(f"[thumb] Error loading '{path}' for coll {coll['id']}: {e}")
+                        thumb_lbl.configure(text="[Error loading thumbnail]")
             else:
                 thumb_lbl.configure(text="[No thumbnail]")
 
-            # NAME (below or above thumbnail)
+                # NAME (below or above thumbnail)
             name_lbl = ttk.Label(card, text=coll["name"], anchor="center", padding=(0, 5))
             name_lbl.pack(side="top", fill="x")
 
-            # Click bindings
+                # Click bindings
             for w in (card, thumb_lbl, name_lbl):
                 w.bind("<Double-1>", lambda e, i=idx: self._on_collection_double_click(i))
+            
+            
     
   
     def _on_collection_double_click(self, idx: int):
