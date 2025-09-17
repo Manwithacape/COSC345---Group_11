@@ -27,6 +27,7 @@ from score_viewer import ScoreViewer
 from duplicate_viewer import DuplicateViewer
 from sidebar_buttons import SidebarButtons
 from scrollable_frame import ScrollableFrame
+from faces_frame import FacesFrame
 import tkinter as tk
 
 # Pillow for loading .webp logo
@@ -102,6 +103,9 @@ class AutoCullApp(ttk.Window):
         self.right_scroll.pack(fill="both", expand=True)
 
         # put panels inside the scrollable body (stacked)
+        self.faces_viewer = FacesFrame(self.right_scroll.body, None, self.db)
+        self.faces_viewer.pack(fill="x", padx=5, pady=5)
+
         self.exif_viewer = ExifViewer(self.right_scroll.body, self.db)
         self.exif_viewer.pack(fill="x", padx=5, pady=5)
 
