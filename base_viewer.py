@@ -76,3 +76,5 @@ class BaseThumbnailViewer(ttk.Frame):
             master.filmstrip.update_highlight(photo_id)
         if hasattr(master, "duplicate_viewer") and master.duplicate_viewer:
             master.duplicate_viewer.update_content(photo_id)
+        if hasattr(master, "faces_viewer") and master.faces_viewer:
+            master.faces_viewer.update_faces(photo_id)

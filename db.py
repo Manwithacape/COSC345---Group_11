@@ -84,6 +84,25 @@ class Database:
         """
         return self.fetch(query, (collection_id, file_path, file_name, status))[0]["id"]
 
+    def create_face(self, photo_id: int, bbox):
+        query = """
+        INSERT INTO faces (photo_id, x1, y1, x2, y2)
+        VALUES (%s, %s, %s, %s, %s) RETURNING id
+        """
+        return self.fetch(query, (photo_id, bbox[0], bbox[1], bbox[2], bbox[3]))[0]["id"]
+
+    def get_faces(self, photo_id: int):
+        """
+        Retrieve all faces associated with a given photo, including the photo's file path.
+        """
+        query = """
+            SELECT f.*, p.file_path
+            FROM faces f
+            JOIN photos p ON f.photo_id = p.id
+            WHERE f.photo_id=%s
+        """
+        return self.fetch(query, (photo_id,))
+    
     def get_photos(self, collection_id=None):
         query = "SELECT * FROM photos"
         if collection_id:

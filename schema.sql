@@ -41,6 +41,16 @@ CREATE TABLE IF NOT EXISTS photo_quality (
     quality_score REAL
 );
 
+CREATE TABLE IF NOT EXISTS faces (
+    id SERIAL PRIMARY KEY,
+    photo_id INT REFERENCES photos(id) ON DELETE CASCADE,
+    
+    x1 INT,
+    y1 INT,
+    x2 INT,
+    y2 INT
+);
+
 -- ----------------- Styles -----------------
 CREATE TABLE IF NOT EXISTS styles (
     id SERIAL PRIMARY KEY,
