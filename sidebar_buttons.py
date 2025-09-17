@@ -30,6 +30,8 @@ class SidebarButtons:
     # ----------------- Import -----------------
     def import_files(self):
         import threading
+        import tkinter as tk
+
         try:
             file_paths = filedialog.askopenfilenames(
                 title="Select Photos",
@@ -42,8 +44,14 @@ class SidebarButtons:
                 Messagebox.show_warning("Not Available", "Photo importer is not configured.")
                 return
 
-            # Always import into a new collection
-            collection_id = self.db.add_collection("Imported from Sidebar")
+            # Input box for collection name
+            collection_name = ttk.Querybox.get_string("Enter collection name:")
+            if not collection_name:
+                Messagebox.show_warning("No Name", "Collection name is required")
+                return
+            collection_id = self.db.add_collection(collection_name)
+            
+            
 
             def do_import():
                 import time
