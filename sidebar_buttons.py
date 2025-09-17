@@ -3,6 +3,7 @@ import ttkbootstrap as ttk
 from ttkbootstrap.dialogs import Messagebox, Querybox
 from tkinter import filedialog
 import threading
+from progress_dialog import ProgressDialog 
 
 class SidebarButtons:
     """Holds logic for sidebar button actions."""
@@ -45,7 +46,7 @@ class SidebarButtons:
                 return
 
             # Input box for collection name
-            collection_name = ttk.Querybox.get_string("Enter collection name:")
+            collection_name = Querybox.get_string("Enter collection name:")
             if not collection_name:
                 Messagebox.show_warning("No Name", "Collection name is required")
                 return
@@ -57,26 +58,10 @@ class SidebarButtons:
                 import time
                 import tkinter as tk
                 from ttkbootstrap import Progressbar
-                progress_win = tk.Toplevel(self.master)
-                progress_win.title("Importing Photos...")
-                progress_win.geometry("300x80")
-                progress_win.transient(self.master)
-                progress_win.grab_set()
-                # Center the progress window
-                progress_win.update_idletasks()
-                screen_width = progress_win.winfo_screenwidth()
-                screen_height = progress_win.winfo_screenheight()
-                x = (screen_width // 2) - (300 // 2)
-                y = (screen_height // 2) - (80 // 2)
-                progress_win.geometry(f"300x80+{x}+{y}")
-                label = ttk.Label(progress_win, text="Importing photos, please wait...")
-                label.pack(pady=10)
-                pb = Progressbar(progress_win, mode="indeterminate")
-                pb.pack(fill="x", padx=20, pady=5)
-                pb.start(10)
+                dialog = ProgressDialog(self.master, title="Importing Photos", message="Importing photos, please wait...")
+                dialog.start()
                 def finish(success, imported_count=None, error=None):
-                    pb.stop()
-                    progress_win.destroy()
+                    self.master.after(0, lambda: dialog.finish(success = True, imported_count = imported_count))
                     if success:
                         Messagebox.show_info("Import Complete", f"Imported {imported_count} photos.")
                         self.photo_viewer.refresh_photos(collection_id)
@@ -103,19 +88,26 @@ class SidebarButtons:
             if not (self.importer and hasattr(self.importer, "duplicates")):
                 Messagebox.show_warning("Not Available", "Duplicate detection is not configured.")
                 return
+            
+            dialog = ProgressDialog(self.master, title="Finding Duplicates", message="Analyzing images...")
 
-            duplicates_detector = self.importer.duplicates
-            photo_list = self.db.get_all_photos()  # list of dicts with 'id' and 'file_path'
-            duplicates_detector.find_duplicates_batch(photo_list)
+            def task():
+                try:
+                    duplicates_detector = self.importer.duplicates
+                    photo_list = self.db.get_all_photos()  # list of dicts with 'id' and 'file_path'
+                    duplicates_detector.find_duplicates_batch(photo_list)
 
-            Messagebox.show_info(
-                "Duplicates Found",
-                "Near-duplicate detection complete."
-            )
-
-            # Refresh viewer
-            self.photo_viewer.refresh_photos(None)
-
+                    self.master.after(0, lambda: [
+                        dialog.finish(success = True),
+                        Messagebox.show_info("Duplicates Found", "Near-duplicate detection complete."),
+                        self.photo_viewer.refresh_photos(None)  # Refresh to show duplicates
+                    ])
+                except Exception as e:
+                    self.master.after(0, lambda: [
+                        dialog.finish(success = False),
+                        Messagebox.show_error("Error", f"Error finding duplicates: {e}")
+                    ])
+            threading.Thread(target=task, daemon=True).start()
         except Exception as e:
             Messagebox.show_error("Error", f"Error finding duplicates: {e}")
 
