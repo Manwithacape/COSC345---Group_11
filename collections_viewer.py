@@ -73,6 +73,7 @@ class CollectionsViewer(MainViewer):
             
         self.collections_row = ttk.Frame(self.inner_frame)
         self.collections_row.pack(fill="x", pady=10)
+        self.collection_rows.append(self.collections_row)
         
         
 

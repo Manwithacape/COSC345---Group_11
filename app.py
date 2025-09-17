@@ -92,7 +92,16 @@ class AutoCullApp(ttk.Window):
         self.sidebar_buttons.add_button(
             self.left_sidebar, "Clear Duplicates (Dev)", self.sidebar_buttons.clear_duplicates
         )
+        
+        self.sidebar_buttons.add_button(
+            self.left_sidebar, "Return", self.sidebar_buttons.return_button
+        )
+        # self.sidebar_buttons.add_button(
+        #     self.left_sidebar
+        # )
         self.left_sidebar.pack(side="left", fill="y")
+        
+        
 
         # ---------- Right sidebar & other viewers (scrollable) ----------
         self.right_sidebar = Sidebar(self, side="right")
@@ -132,6 +141,15 @@ class AutoCullApp(ttk.Window):
         if self._layout_after_id:
             self.after_cancel(self._layout_after_id)
         self._layout_after_id = self.after(100, self.update_layout)
+        
+        
+    # ---------- Go Back Logic --------------
+    def go_back(self):
+        if hasattr(self, "prev_viewer") and self.prev_viewer:
+            if self.active_viewer:
+                self.active_viewer.place_forget()
+            self.active_viewer = self.prev_viewer
+            self.update_layout()
 
     # ---------- Layout ----------
     def update_layout(self):
@@ -201,12 +219,14 @@ class AutoCullApp(ttk.Window):
 
     # ---------- Switch view helpers ----------
     def _switch_to_photos(self):
+        self.prev_viewer = self.active_viewer
         if self.active_viewer:
             self.active_viewer.place_forget()
         self.active_viewer = self.photo_viewer
         self.update_layout()
 
     def _switch_to_collections(self):
+        self.prev_viewer = self.active_viewer
         if self.active_viewer:
             self.active_viewer.place_forget()
         self.active_viewer = self.collections_viewer
@@ -215,6 +235,7 @@ class AutoCullApp(ttk.Window):
 
     # ---------- NEW: open single image in full center pane ----------
     def open_single_view(self, photo_path: str):
+        self.prev_viewer = self.active_viewer
         if self.active_viewer:
             self.active_viewer.place_forget()
         self.single_viewer = SinglePhotoViewer(self, photo_path=photo_path)

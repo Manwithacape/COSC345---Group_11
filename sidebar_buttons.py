@@ -144,3 +144,13 @@ class SidebarButtons:
             Messagebox.show_info("Duplicates Cleared", "All duplicates have been cleared.")
             if self.photo_viewer:
                 self.photo_viewer.refresh_photos(None)
+
+    # ------------------- Go Back Button ----------------
+    def return_button(self):
+        """Button for going back to the previous page"""
+        if hasattr(self.master, "go_back"):
+            self.master.go_back()
+            
+            
+            
+        
