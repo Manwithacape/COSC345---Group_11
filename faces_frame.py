@@ -48,6 +48,10 @@ class FacesFrame(tk.Frame):
             return
         
         self.face_data = self.db.get_faces(self.photo_id) # x1, y1, x2, y2, photo_path
+
+        if not self.face_data:
+            return
+        
         photo_path = self.face_data[0]['file_path']
         bounding_boxes = [(face['x1'], face['y1'], face['x2'], face['y2']) for face in self.face_data]
 
