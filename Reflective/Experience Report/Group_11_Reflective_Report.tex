@@ -46,13 +46,13 @@ This document is intended to detail the experience of Group 11 throughout the de
 \end{abstract}
 
 \begin{IEEEkeywords}
-TODO: keywords
+Agile, Photo Management, Software Engineering, Teamwork
 \end{IEEEkeywords}
 
 \section{COSC345 Introduction}
 COSC345 is a 300-level software engineering course offered at the University of Otago. The course aims to provide students with practical experience in the field of software engineering and delivery, and is designed as a capstone course for both computer science and software engineering students.
 
-This allows for the application of theoretical knowledge gained in previous papers, as well as the development of soft skills such as teamwork, communication and project management. The application of good software engineering practices is also a key learning outcome of the course, with students gaining a better understanding of why these practices are important in industry.
+This allows for the application of theoretical knowledge gained in previous papers, as well as the development of soft skills such as teamwork, communication and project management. The application of good software engineering practices is also a key learning outcome of the course, with students gaining a better understanding of why these practices are important in a real-world setting.
 
 The course is structured around a single project completed in groups of 4–6 students over the course of a semester. The project was to be marketed as either ed-tech or med-tech, have database persistance and incorporate AI.
 
@@ -60,7 +60,7 @@ The project is largely self-directed, with groups expected to attend a weekly me
 
 
 \section{Project Overview}
-Professional digital photography is data intensive. A single photoshoot can quickly amount to hundreds or even thousands of digital images, many of which are similar or near-duplicates. Manually culling these near-identical images can be time-consuming and tedious but is a necessity in the post-processing workflow of editing and delivery. 
+Professional digital photography is data intensive. A single photoshoot can quickly amount to hundreds or even thousands of digital images, many of which are similar or near-duplicates. Manually culling these near-identical images can be time-consuming and tedious but is a critical stage in the post-processing workflow of editing and delivery. 
 
 AutoCull is a desktop application which makes use of ML/AI algorithms to assist a photographer in culling large quantities of photos. In addition to culling, the application provides feedback to the photographer on the objective quality of their photos, providing a quick and easy way to identify their strong and weak images. This feedback can help photographers improve their skills over time, as well as providing a second opinion on the quality of their work.
 
@@ -83,11 +83,11 @@ As COSC345 is a paper with a far greater focus on practical experience than theo
 \subsection{Project Management}
 Group 11 adopted an agile development methodology, with two-week sprints and regular stand-up meetings. This allowed for team members to put agile methodologies into practice, further cementing the theoretical knowledge gained in previous papers.
 
-The team utilised Taiga as a project management tool, as per the requirements of the course. This allowed for centralised management of user-stories, sprint planning, and task assignment.
+The team utilised Taiga as a project management tool, as per the requirements of the course. This allowed for a centralised means of user-story management, sprint planning, and task assignment.
 
 In practice, the agile methodology adopted by the team could have been followed more strictly. The act of breaking down sprints into user stories for the project planning stage was generally well executed. However, the the estimation of task sizes was often inaccurate, leading to sprints being either over- or under-committed. This is almost certainly due to the lack of experience of team members in estimating task sizes, and is an area which could be improved with more practice.
 
-Additionally, stand-up meetings were generally product, provided that an agenda was followed, however this was not always the case. There are instances where meetings would proceed with no clear direction, leading to unproductive discussions and a lack of productive outcomes. This could have been mitigated by having a more structured approach to meetings, with either a clear agenda or objective set prior to the meeting.
+Additionally, stand-up meetings were generally productive provided that an agenda was followed, however this was not always the case. There are instances where meetings would proceed with no clear direction, leading to unproductive discussions and a lack of productive outcomes. This could have been mitigated by having a more structured approach to meetings, with either a clear agenda or objective set prior to the meeting.
 
 If the team were to undertake a similar project in the future, the development methodology would likely be similar, with a few key changes. The team would aim to follow the agile methodology more strictly, with a greater focus on accurate task estimation and structured meetings. Additionally, the team would aim to incorporate more frequent retrospectives, allowing for continuous improvement of the development process throughout the project.
 
@@ -96,7 +96,7 @@ At the beginning of the project, the team operated under a decentralised, emerge
 
 However, the lack of a clear project lead created ambiguity. Without a central point of accountability, the team struggled to establish direction, set priorities, and coordinate effectively. While this approach was able to better encourage both participation and inclusivity, it often led to team members looking to others to take charge, resulting in delays and inefficiencies, especially where decisive action was required.
 
-Upon recognising these shortfalls in management structure, the team opted to transition to a more traditional hierarchical model as presented in COSC345 lectures. The team was divided into two pairs, each responsible for the front-end (Cam and Will) and back-end (Kevin and Marick) development  respectively, and a designated project lead (Daniel). This structure provided clearer accountability and a more defined chain of command, while still maintaining opportunities for collaboration and shared input.
+Upon recognising these shortfalls in management structure, the team opted to transition to a more traditional hierarchical model as presented in COSC345 lectures. The team was divided into two pairs, each responsible for the front-end and back-end development respectively, and a designated project lead. This structure provided clearer accountability and a more defined chain of command, while still maintaining opportunities for collaboration and shared input.
 
 This restructuring brought greater clarity and efficiency. The division of labour allowed tasks to progress in parallel, and the project lead provided much-needed direction to the project. Compared to the initial emergent model, this approach was more effective as it ensured both structure and flexibility. 
 
@@ -156,7 +156,9 @@ If this were to be done again, the team would likely work towards ensuring that 
 
 Where implemented correctly, tests should be written before the actual implementation of a feature. With features being properly planned out before any code is written. This would allow for a more structured approach to development, and would likely lead to a more cohesive codebase, which would not require significant changes to be made later in the project.
 
-STATIC ANALYSIS
+In addition to manual and automated testing, Group 11 experimented with static analysis tools to improve code quality. The team primarily used \texttt{pylint} and \texttt{flake8} for Python code linting. These tools highlighted areas of improvement in naming conventions, documentation, and adherence to PEP8 style guidelines. While not all warnings were critical, they encouraged the team to maintain a cleaner and more readable codebase. In particular, the process helped identify missing docstrings, unused variables, and instances of duplicated logic, which were subsequently refactored.
+
+Overall, static analysis complemented testing by catching issues earlier in the development cycle, before they could manifest at runtime. If more time had been available, the team would have integrated these tools into a continuous integration pipeline, ensuring that code quality standards were automatically enforced on every commit.
 
 Testing is something the team has identified as a key area for improvement, and is something that will be focused on in future projects. The importance of testing in software development cannot be overstated, and the team is well aware of the cost in both time and effort that could have been saved, had proper testing and planning been put into practice from the beginning of the project.
 
@@ -169,21 +171,39 @@ Plenty of lessons have been learned throughout the course of developing AutoCull
 
 \section{Individual Contributions}
 \subsection{Will Challis}
-
+\begin{itemize}
+    \item Introduction
+    \item Project Overview
+\end{itemize}
 \subsection{Cam Clark}
-Wrote the introduction, project overview introduction and project overview objectives and features.
-
-Helped Kevin edit and proofread the report. 
+\begin{itemize}
+    \item Version Control
+    \item Implementation
+\end{itemize}
 \subsection{Marick Malamala}
-
+\begin{itemize}
+    \item Project Management
+    \item Team Roles and Responsibilities
+\end{itemize}
 \subsection{Daniel Paxton}
-
+\begin{itemize}
+    \item Testing and Quality Assurance
+    \item Objectives and Features
+\end{itemize}
 \subsection{Kevin Wang}
-
+\begin{itemize}
+    \item Report structure
+    \item Design Process
+\end{itemize}
 
 \section{Conclusions}
+The development of this application throughout the course has been both challenging and rewarding for the members of Group 11. The project proved to be an opportunity to put into practice the theory learned throughout time at university. While also highlighting the complexities of teamwork, communication, and technical decision-making.
 
+Although the project encountered some setbacks during the earlier stages of development, they were an important learning opportunity for all team members. The fact that the team was able to identify these issues, and make changes accordingly shows that learnings have been put into practice right from the start.
 
+Important lessons for the team include the importance of clear communication, structured project management, and adherence to good software engineering practices. Most of these things were applied to a reasonable extent, however, there will always be room for improvement.
+
+Although not yet complete, the project is well on its way to delivering a functional photo management application that meets COSC345 requirements. More significantly, the process has equipped each team member with practical experience in project management, collaborative development, and the application of professional software engineering practices—skills that will carry forward into both future academic work and industry practice.
 
 
 \begin{thebibliography}{00}
