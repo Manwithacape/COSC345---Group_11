@@ -68,6 +68,12 @@ class AutoCullApp(ttk.Window):
             switch_to_photos_callback=lambda: self.after(0, self._switch_to_photos),
         )
 
+        # ---------- Back button (hidden by default) ----------
+        self.back_btn = ttk.Button(
+            self, text="⮜ Back", bootstyle="secondary", command=self._switch_to_photos
+        )
+        self.back_btn.place_forget()
+
         # ---------- Sidebar buttons logic ----------
         self.sidebar_buttons = SidebarButtons(
             master=self,
@@ -79,36 +85,30 @@ class AutoCullApp(ttk.Window):
         # ---------- Left sidebar ----------
         self.left_sidebar = Sidebar(self, side="left", db=self.db)
         self.sidebar_buttons.add_button(
-            self.left_sidebar, "View Photos", lambda: self.after(0, self._switch_to_photos)
+            self.left_sidebar.body, "View Photos", lambda: self.after(0, self._switch_to_photos)
         )
         self.sidebar_buttons.add_button(
-            self.left_sidebar, "View Collections", lambda: self.after(0, self._switch_to_collections)
+            self.left_sidebar.body, "View Collections", lambda: self.after(0, self._switch_to_collections)
         )
         self.sidebar_buttons.add_button(
-            self.left_sidebar, "Import Photos", self.sidebar_buttons.import_files
+            self.left_sidebar.body, "Import Photos", self.sidebar_buttons.import_files
         )
         self.sidebar_buttons.add_button(
-            self.left_sidebar, "Find Duplicates", self.sidebar_buttons.find_duplicates
+            self.left_sidebar.body, "Find Duplicates", self.sidebar_buttons.find_duplicates
         )
         self.sidebar_buttons.add_button(
-            self.left_sidebar, "Clear Duplicates (Dev)", self.sidebar_buttons.clear_duplicates
+            self.left_sidebar.body, "Clear Duplicates (Dev)", self.sidebar_buttons.clear_duplicates
         )
-        
         self.sidebar_buttons.add_button(
-            self.left_sidebar, "Return", self.sidebar_buttons.return_button
+            self.left_sidebar.body, "Return", self.sidebar_buttons.return_button
         )
-        # self.sidebar_buttons.add_button(
-        #     self.left_sidebar
-        # )
         self.left_sidebar.pack(side="left", fill="y")
-        
-        
 
         # ---------- Right sidebar & other viewers (scrollable) ----------
         self.right_sidebar = Sidebar(self, side="right")
 
-        # wrap sidebar content in a scrollable frame
-        self.right_scroll = ScrollableFrame(self.right_sidebar)
+        # wrap sidebar content in a scrollable frame (attach to .body)
+        self.right_scroll = ScrollableFrame(self.right_sidebar.body)
         self.right_scroll.pack(fill="both", expand=True)
 
         # put panels inside the scrollable body (stacked)
@@ -145,8 +145,7 @@ class AutoCullApp(ttk.Window):
         if self._layout_after_id:
             self.after_cancel(self._layout_after_id)
         self._layout_after_id = self.after(100, self.update_layout)
-        
-        
+
     # ---------- Go Back Logic --------------
     def go_back(self):
         if hasattr(self, "prev_viewer") and self.prev_viewer:
@@ -189,6 +188,13 @@ class AutoCullApp(ttk.Window):
             text="⮜" if self.right_sidebar.collapsed else "⮞"
         )
 
+        # Show/hide and place Back button depending on active view
+        if isinstance(self.active_viewer, SinglePhotoViewer):
+            self.back_btn.place(x=lw + 10, y=10)
+            self.back_btn.lift() 
+        else:
+            self.back_btn.place_forget()
+
     # ---------- Menubar ----------
     def setup_menubar(self):
         menubar = ttk.Menu(self)
@@ -227,6 +233,7 @@ class AutoCullApp(ttk.Window):
         if self.active_viewer:
             self.active_viewer.place_forget()
         self.active_viewer = self.photo_viewer
+        self.back_btn.place_forget()  # hide if visible
         self.update_layout()
 
     def _switch_to_collections(self):
@@ -234,6 +241,7 @@ class AutoCullApp(ttk.Window):
         if self.active_viewer:
             self.active_viewer.place_forget()
         self.active_viewer = self.collections_viewer
+        self.back_btn.place_forget()  # hide if visible
         self.collections_viewer.refresh_collections()
         self.update_layout()
 
