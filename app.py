@@ -68,6 +68,12 @@ class AutoCullApp(ttk.Window):
             switch_to_photos_callback=lambda: self.after(0, self._switch_to_photos),
         )
 
+        # ---------- Back button (hidden by default) ----------
+        self.back_btn = ttk.Button(
+            self, text="⮜ Back", bootstyle="secondary", command=self._switch_to_photos
+        )
+        self.back_btn.place_forget()
+
         # ---------- Sidebar buttons logic ----------
         self.sidebar_buttons = SidebarButtons(
             master=self,
@@ -182,6 +188,13 @@ class AutoCullApp(ttk.Window):
             text="⮜" if self.right_sidebar.collapsed else "⮞"
         )
 
+        # Show/hide and place Back button depending on active view
+        if isinstance(self.active_viewer, SinglePhotoViewer):
+            self.back_btn.place(x=lw + 10, y=10)
+            self.back_btn.lift() 
+        else:
+            self.back_btn.place_forget()
+
     # ---------- Menubar ----------
     def setup_menubar(self):
         menubar = ttk.Menu(self)
@@ -220,6 +233,7 @@ class AutoCullApp(ttk.Window):
         if self.active_viewer:
             self.active_viewer.place_forget()
         self.active_viewer = self.photo_viewer
+        self.back_btn.place_forget()  # hide if visible
         self.update_layout()
 
     def _switch_to_collections(self):
@@ -227,6 +241,7 @@ class AutoCullApp(ttk.Window):
         if self.active_viewer:
             self.active_viewer.place_forget()
         self.active_viewer = self.collections_viewer
+        self.back_btn.place_forget()  # hide if visible
         self.collections_viewer.refresh_collections()
         self.update_layout()
 
