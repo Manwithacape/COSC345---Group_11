@@ -54,7 +54,7 @@ COSC345 is a 300-level software engineering course offered at the University of 
 
 This allows for the application of theoretical knowledge gained in previous papers, as well as the development of soft skills such as teamwork, communication and project management. The application of good software engineering practices is also a key learning outcome of the course, with students gaining a better understanding of why these practices are important in a real-world setting.
 
-The course is structured around a single project completed in groups of 4–6 students over the course of a semester. The project was to be marketed as either ed-tech or med-tech, have database persistance and incorporate AI.
+The course is structured around a single project completed in groups of 4–6 students over the course of a semester. The project is to be marketed as either ed-tech or med-tech, have database persistance and incorporate AI.
 
 The project is largely self-directed, with groups expected to attend a weekly mentoring session with a course mentor; meeting times outside of this are to be organised by the group themselves.
 
@@ -109,16 +109,16 @@ The design process for AutoCull involved the several stages, including requireme
 
 Requirements gathering involved consulting with both actively working photographers and those with a keen interest in photography. This allowed for a better understanding of the needs of the target users. Key insights from requirement gathering included:
 \begin{itemize}
-    \item Potential users did not want an application to replace the likes of photoshop.
-    \item The photos should not be automatically culled, the user should have the final say, and the applicaiton should not update the local filesystem.
-    \item The use of AI/LLM giving the photographer score and feedback on a collection was well recieved by the target audience.
+    \item Potential users did not want an application to replace the likes of Photoshop.
+    \item The photos should not be automatically culled, the user should have the final say, and the application should not update the local filesystem.
+    \item The use of AI/LLM giving the photographer score and feedback on a collection was well received by the target audience.
 \end{itemize}
 
 System architecture design pulled on the prior knowledge of team members, as well as content throughout COSC345. The architecture was designed to be modular and extensible, allowing for future features to be added with minimal disruption to existing functionality.
 
 The gathering of requirements through approaching actual users was a particularly valuable exercise, likely among the most valuable of the entire project. It provided a real-world context to the project, and allowed for a better understanding of the needs of the target users. This was particularly important given the niche nature of the application, as it ensured that the features developed were relevant and useful to photographers this application is meant for.
 
-One aspect of the design process where the team performed quite well is the documentation of design decisions. This is particularly important when working in teams, allowing for team members to be quickly brought up to speed on both the application design and changes made throughout the project. Although this team did not experience the turnover of members, it is comforting to know that the documentation is in place should this occur. However, it is unfortunate that this documentation was not referenced more often throughout the project, as it would have likely prevented instances where components required reworking due to misunderstandings regarding the intended design. 
+One aspect of the design process where the team performed quite well is the documentation of design decisions. This is particularly important when working in teams, allowing for team members to be quickly brought up to speed on both the application design and changes made throughout the project. Although this team did not experience a turnover of members, it is comforting to know that the documentation is in place should this occur. However, it is unfortunate that this documentation was not referenced more often throughout the project, as it would have likely prevented instances where components required reworking due to misunderstandings regarding the intended design. 
 
 User interface design was approached through extensive research into existing post processing applications, as well as general UI/UX design principles. The goal was to create an interface that was both intuitive and efficient, allowing the target users to quickly learn the application through implementing familiar design patterns shared by other popular photography applications.
 
@@ -130,7 +130,7 @@ User interface design focused on creating a simple and intuitive interface, with
 Upon reflection, the design process could have been improved by involving potential users earlier in the process, and having the entire team present for both the gathering of requirements and the user interface design. This would have allowed for a more cohesive design, with less misunderstandings and miscommunications between team members. It should be noted that this could possibly also be worked on through higher quality documentation of design decisions, allowing for team members to be on the same page regarding the design of the application. This would have prevented instances where components required reworking due to misunderstandings regarding the intended design. 
 
 \subsection{Implementation}
-While the tech stack was detailed during the design process, the actual implementation of the project differed from this initially. The start of the implementation process saw inadequate planning and task allocation put into practice. Leading to team members working on tasks they were not best suited for, and important decisions being made without the input of all team members. 
+While the tech stack was detailed during the design process, the actual implementation initially differed from the proposed design. The start of the implementation process saw inadequate planning and task allocation put into practice. Leading to team members working on tasks they were not best suited for, and important decisions being made without the input of all team members.
 
 One area where this was particularly evident was in the prototyping of the GUI. The proposed technical stack included the use of PyQt for the GUI, however this was almost immediately changed to PyEel after a team member determined that PyQt was too complex for the scope of the project. This decision was made without the input of all team members, and ultimately led to a full rework of the GUI when it was later decided that Tkinter would be a more suitable choice for the application. This could have been mitigated by having a more structured approach to decision making, with all team members being involved in important decisions. Additionally, the lack of experience of some team members with certain technologies led to suboptimal choices being made, making this project a particularly valuable learning experience for all team members.
 
@@ -141,7 +141,7 @@ This resulted in a lack of integration between different parts of the applicatio
 While the initial stages of implementation were somewhat disorganised, the restructuring of the team into a more traditional hierarchical model led to a more structured approach to implementation. The division of the team into front-end and back-end pairs allowed for tasks to be completed in parallel, and the project lead provided much-needed direction to the project.
 
 \subsection{Version Control}
-One notable topic in every software engineering course offered at the University of Otago is version control. The importance of version control in software development cannot be overstated. It allows for collaboration between team members, tracking of changes, and the ability to revert to previous versions of the codebase if necessary.
+One notable topic in every software engineering course offered at the University of Otago is version control. It allows for collaboration between team members, tracking of changes, and the ability to revert to previous versions of the codebase if necessary.
 
 For development, the team used both Gitbucket and GitHub for version control, while this provides the unintended benefit of redundancy in the case one service may go down, the decision to use both services was made to allow for the use of GitHub Actions for continuous integration and deployment, while also adhering to the course requirement of using Gitbucket.
 
@@ -150,7 +150,7 @@ Good practice in the use of version control is something that the team was well 
 The use of version control is something that team was already relatively well versed in, and was put into practice effectively. It is unlikely that any changes would be made to the use of version control if the team were to undertake a similar project in the future. Given the option however, it is unlikely GitBucket would be used again.
 
 \subsection{Testing and Quality Assurance}
-It is a well known fact that test driven development is a highly effective software development practice. While this is something that the team was well aware of, it was not put into practice until the later stages of the project. While this is something that could be seen as a shortcoming of the team, it was convenient that fewer man hours were spent on tests which would have been discarded due to the significant changes made to the codebase throughout the project. 
+It is a well known fact that test driven development is a highly effective software development practice. Although this is something that the team was well aware of, it was not put into practice until the later stages of the project. While this is something that could be seen as a shortcoming of the team, it was convenient that less time was spent on tests which would have been discarded due to the significant changes made to the codebase throughout the project.
 
 If this were to be done again, the team would likely work towards ensuring that best test driven development practices are followed from the beginning of the project. Although it worked out better to not do this in the context of this project, it could easily be argued that this was the result of poor planning to begin with, which led to the need for significant changes to the codebase.
 
@@ -163,7 +163,7 @@ Overall, static analysis complemented testing by catching issues earlier in the 
 Testing is something the team has identified as a key area for improvement, and is something that will be focused on in future projects. The importance of testing in software development cannot be overstated, and the team is well aware of the cost in both time and effort that could have been saved, had proper testing and planning been put into practice from the beginning of the project.
 
 \section{Lessons Learned}
-The undertaking of this project has been a valuable learning experience for all team members involved. The practical experience gained thus far at week 9 of the project has been invaluable. The experience of working in a team, managing a project, and developing a software application has provided insights that cannot be gained through theoretical knowledge alone. The importance of good software engineering practices, such as version control, testing, and documentation, has been reinforced through the practical application of theoretical knowledge. 
+The undertaking of this project has been a valuable learning experience for all team members involved. The practical experience gained thus far at week nine of the project has been invaluable. The experience of working in a team, managing a project, and developing a software application has provided insights that cannot be gained through theoretical knowledge alone. The importance of good software engineering practices, such as version control, testing, and documentation, has been reinforced through the practical application of theoretical knowledge. 
 
 Additionally, it has been a worthwhile exercise for the team to make mistakes, understand where things went wrong, and learn from these mistakes. While these mistakes were often not trivial, and rather time consuming to rectify, they showed that getting things correct from the start prevents a lot of wasted effort later on. This has been a particularly valuable lesson for all team members, and is something that will be taken forward into future projects.
 
@@ -203,6 +203,6 @@ Although the project encountered some setbacks during the earlier stages of deve
 
 Important lessons for the team include the importance of clear communication, structured project management, and adherence to good software engineering practices. Most of these things were applied to a reasonable extent, however, there will always be room for improvement.
 
-Although not yet complete, the project is well on its way to delivering a functional photo management application that meets COSC345 requirements. More significantly, the process has equipped each team member with practical experience in project management, collaborative development, and the application of professional software engineering practices—skills that will carry forward into both future academic work and industry practice.
+Although not yet complete, the project is well on its way to delivering a functional photo management application that meets COSC345 requirements. More importantly, the process has equipped each team member with practical experience in project management, collaborative development, and the application of professional software engineering practices–skills that will carry forward into both future academic work and industry practice.
 
 \end{document}
