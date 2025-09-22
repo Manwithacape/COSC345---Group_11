@@ -71,19 +71,35 @@ class NearDuplicateDetector:
             try:
                 if label == -1:
                     # Noise: create single-photo group
-                    group_id = self.db.add_near_duplicate_group(method="phash")
+                    existing_groups = self.db.get_groups_for_photo(photo_id)
+                    if existing_groups:
+                        group_id = existing_groups[0]["group_id"]
+                    else:
+                        group_id = self.db.add_near_duplicate_group(method="phash")
                     self.db.assign_photo_to_near_duplicate_group(group_id, photo_id)
-                    self._log(f"[DEBUG] photo_id={photo_id} -> new group_id={group_id} (noise)")
+                    # self._log(f"[DEBUG] photo_id={photo_id} -> new group_id={group_id} (noise)")
                 else:
                     # Clustered: reuse group_id per cluster
                     if label not in cluster_map:
-                        group_id = self.db.add_near_duplicate_group(method="phash")
-                        cluster_map[label] = group_id
-                        self._log(f"[DEBUG] Created cluster group_id={group_id} for label={label}")
-                    else:
-                        group_id = cluster_map[label]
+                        # Check if any photo in this cluster already has a group
+                        cluster_photos = [pid for pid, lbl in zip(photo_ids, labels) if lbl == label]
+                        existing_group_id = None
+                        for pid in cluster_photos:
+                            groups = self.db.get_groups_for_photo(pid)
+                            if groups:
+                                existing_group_id = groups[0]["group_id"]
+                                break
 
+                        if existing_group_id:
+                            group_id = existing_group_id
+                        else:
+                            group_id = self.db.add_near_duplicate_group(method="phash")
+                            
+                        cluster_map[label] = group_id
+                        # self._log(f"[DEBUG] Created cluster group_id={group_id} for label={label}")
+                 
+                    group_id = cluster_map[label]
                     self.db.assign_photo_to_near_duplicate_group(group_id, photo_id)
-                    self._log(f"[DEBUG] photo_id={photo_id} -> group_id={group_id}")
+                    # self._log(f"[DEBUG] photo_id={photo_id} -> group_id={group_id}")
             except Exception as e:
                 self._log(f"[ERROR] Failed to assign photo_id={photo_id} to group: {e}")
