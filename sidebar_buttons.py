@@ -1,6 +1,6 @@
 # sidebar_buttons.py
 import ttkbootstrap as ttk
-from ttkbootstrap.dialogs import Messagebox, Querybox
+from ttkbootstrap.dialogs import Querybox
 from tkinter import filedialog
 import threading
 from progress_dialog import ProgressDialog 
@@ -10,7 +10,7 @@ class SidebarButtons:
 
     def __init__(self, master, db=None, photo_viewer=None, importer=None):
         """
-        :param master: Main application instance (tk.Tk)
+        :param master: Main application instance (tk.Tk or ttk.Window) with show_centered_info()
         :param db: Database instance
         :param photo_viewer: Photo viewer widget
         :param importer: PhotoImporter instance
@@ -30,46 +30,46 @@ class SidebarButtons:
 
     # ----------------- Import -----------------
     def import_files(self):
-        import threading
         import tkinter as tk
 
         try:
             file_paths = filedialog.askopenfilenames(
                 title="Select Photos",
-                filetypes=[("Images", "*.jpg *.jpeg *.tif *.tiff *.cr2 *.nef *.arw *.dng *.rw2 *.orf *.raf *.srw *.pef"), ("All Files", "*.*")]
+                filetypes=[("Images", "*.jpg *.jpeg *.tif *.tiff *.cr2 *.nef *.arw *.dng *.rw2 *.orf *.raf *.srw *.pef"),
+                           ("All Files", "*.*")]
             )
             if not file_paths:
                 return
 
             if not self.importer:
-                Messagebox.show_warning("Not Available", "Photo importer is not configured.")
+                self.master.show_centered_info("Not Available", "Photo importer is not configured.")
                 return
 
             # Input box for collection name
             collection_name = Querybox.get_string("Enter collection name:")
             if not collection_name:
-                Messagebox.show_warning("No Name", "Collection name is required")
+                self.master.show_centered_info("No Name", "Collection name is required.")
                 return
+
             collection_id = self.db.add_collection(collection_name)
-            
-            
 
             def do_import():
-                import time
-                import tkinter as tk
-                from ttkbootstrap import Progressbar
                 dialog = ProgressDialog(self.master, title="Importing Photos", message="Importing photos, please wait...")
                 dialog.start()
+
                 def finish(success, imported_count=None, error=None):
-                    self.master.after(0, lambda: dialog.finish(success = True, imported_count = imported_count))
+                    # Always finish/close progress dialog
+                    dialog.finish(success=success, imported_count=imported_count)
                     if success:
-                        Messagebox.show_info("Import Complete", f"Imported {imported_count} photos.")
-                        self.photo_viewer.refresh_photos(collection_id)
+                        self.master.show_centered_info("Import Complete", f"Imported {imported_count} photos.")
+                        if self.photo_viewer:
+                            self.photo_viewer.refresh_photos(collection_id)
                     else:
-                        Messagebox.show_error("Import Error", str(error))
+                        self.master.show_centered_info("Import Error", str(error))
+
                 try:
                     imported_count = self.importer.import_files(
-                        list(file_paths), 
+                        list(file_paths),
                         collection_id,
                         default_styles=["General"]
                     )
@@ -80,16 +80,17 @@ class SidebarButtons:
             threading.Thread(target=do_import, daemon=True).start()
 
         except Exception as e:
-            Messagebox.show_error("Import Error", str(e))
+            self.master.show_centered_info("Import Error", str(e))
 
     # ----------------- Find Duplicates -----------------
     def find_duplicates(self):
         try:
             if not (self.importer and hasattr(self.importer, "duplicates")):
-                Messagebox.show_warning("Not Available", "Duplicate detection is not configured.")
+                self.master.show_centered_info("Not Available", "Duplicate detection is not configured.")
                 return
-            
+
             dialog = ProgressDialog(self.master, title="Finding Duplicates", message="Analyzing images...")
+            dialog.start()
 
             def task():
                 try:
@@ -97,26 +98,26 @@ class SidebarButtons:
                     photo_list = self.db.get_all_photos()  # list of dicts with 'id' and 'file_path'
                     duplicates_detector.find_duplicates_batch(photo_list)
 
-                    self.master.after(0, lambda: [
-                        dialog.finish(success = True),
-                        Messagebox.show_info("Duplicates Found", "Near-duplicate detection complete."),
-                        self.photo_viewer.refresh_photos(None)  # Refresh to show duplicates
-                    ])
+                    self.master.after(0, lambda: (
+                        dialog.finish(success=True),
+                        self.master.show_centered_info("Duplicates Found", "Near-duplicate detection complete."),
+                        self.photo_viewer.refresh_photos(None) if self.photo_viewer else None
+                    ))
                 except Exception as e:
-                    self.master.after(0, lambda: [
-                        dialog.finish(success = False),
-                        Messagebox.show_error("Error", f"Error finding duplicates: {e}")
-                    ])
-            threading.Thread(target=task, daemon=True).start()
-        except Exception as e:
-            Messagebox.show_error("Error", f"Error finding duplicates: {e}")
+                    self.master.after(0, lambda: (
+                        dialog.finish(success=False),
+                        self.master.show_centered_info("Error", f"Error finding duplicates: {e}")
+                    ))
 
+            threading.Thread(target=task, daemon=True).start()
+
+        except Exception as e:
+            self.master.show_centered_info("Error", f"Error finding duplicates: {e}")
 
     def switch_to_photos(self):
         """Switch to the PhotoViewer via the master."""
         if hasattr(self.master, "switch_to_photos"):
             self.master.switch_to_photos()
-            # Ensure photo_viewer is the active viewer and layout is updated
             if hasattr(self.master, "update_layout"):
                 self.master.update_layout()
 
@@ -124,7 +125,6 @@ class SidebarButtons:
         """Switch to the CollectionsViewer via the master."""
         if hasattr(self.master, "switch_to_collections"):
             self.master.switch_to_collections()
-            # Ensure collections_viewer is the active viewer and layout is updated
             if hasattr(self.master, "update_layout"):
                 self.master.update_layout()
 
@@ -133,7 +133,7 @@ class SidebarButtons:
         """Development button: clear all duplicates in DB."""
         if self.db:
             self.db.clear_duplicates()
-            Messagebox.show_info("Duplicates Cleared", "All duplicates have been cleared.")
+            self.master.show_centered_info("Duplicates Cleared", "All duplicates have been cleared.")
             if self.photo_viewer:
                 self.photo_viewer.refresh_photos(None)
 
@@ -142,7 +142,3 @@ class SidebarButtons:
         """Button for going back to the previous page"""
         if hasattr(self.master, "go_back"):
             self.master.go_back()
-            
-            
-            
-        
