@@ -112,7 +112,13 @@ class CollectionsViewer(MainViewer):
             for w in (card, thumb_lbl, name_lbl):
                 w.bind("<Double-1>", lambda e, i=idx: self._on_collection_double_click(i))
             
-            
+    
+    def display_feedback(self):
+        # need to add a container that sits at the bottom of the collection 
+        # that users can see for the collection, then link it to the weights and make the llm
+        llm_frame = ttk.Frame(self.inner_frame)
+        
+        pass
     
   
     def _on_collection_double_click(self, idx: int):
