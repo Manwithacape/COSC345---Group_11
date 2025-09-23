@@ -1,9 +1,14 @@
 # photo_viewer.py
 import ttkbootstrap as ttk
+from tkinter.scrolledtext import ScrolledText
 from main_viewer import MainViewer
 from base_viewer import BaseThumbnailViewer
 from PIL import Image, ImageTk, ImageDraw, ImageFont
 from photo_analyzer import PhotoAnalyzer
+from llm_feedback import make_paragraph
+import threading, concurrent.futures
+
+
 
 class PhotoViewer(BaseThumbnailViewer, MainViewer):
     """Scrollable grid of photo thumbnails with single-photo preview support."""
@@ -28,7 +33,23 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
         # dedicated container for the grid
         self.grid_area = ttk.Frame(self.inner_frame)
         self.grid_area.pack(fill="both", expand=True)
-
+        
+        controls = ttk.Frame(self)
+        controls.pack(side="bottom", fill="x")
+        
+        ttk.Label(controls, text="LLM Feedback", bootstyle="secondary").pack(side="left", padx=8)
+        
+        self.feedback_box = ScrolledText(self, height=10, wrap="word")
+        self.feedback_box.pack(side="bottom", fill="x")
+        
+        def _set_feedback(text: str):
+            self.feedback_box.configure(state="normal")
+            self.feedback_box.delete("1.0", "end")
+            self.feedback_box.insert("1.0", text)
+            self.feedback_box.configure(state="disabled")
+        self._set_feedback = _set_feedback # keep a handle around
+        
+        ttk.Button(controls, text="Generate feedback", command=self.generate_feedback_for_current).pack(side="right", padx=8)
         self.refresh_photos()
 
     def add_score_overlay(self, image, rank, score):
@@ -51,6 +72,7 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
 
     def refresh_photos(self, collection_id=None):
         """Load photos as thumbnails."""
+        self.current_collection_id = collection_id
         for lbl in self.labels:
             try:
                 lbl.destroy()
@@ -146,3 +168,85 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
         """Ask the app to switch the center pane to a full SinglePhotoViewer."""
         if callable(self.open_single_callback):
             self.open_single_callback(photo_path)
+            
+    # --------LLM Helper Methods-------
+    
+    def _collection_facts(self, collection_id):
+        c = self.db.get_collection(collection_id)  # title, date_range, location, etc.
+        photos = self.db.get_photos(collection_id)
+        return {
+            "collection": {
+                "id": collection_id,
+                "title": c.get("title"),
+                "date_range": c.get("date_range"),
+                "location": c.get("location"),
+                "count": len(photos),
+                "avg_quality": sum(self.db.get_quality_score(p["id"]) or 0 for p in photos)/max(len(photos),1),
+            }
+        } 
+    def _photo_facts(self, photo_row):
+    # Keep it small + explicit. Only the values you want paraphrased.
+        metrics = self.db.get_photo_metrics(photo_row["id"])  # your analyzer/exif/score fields
+        return {
+            "photo": {
+                "id": photo_row["id"],
+                "file": photo_row["file_path"].split("/")[-1],
+                "score": self.db.get_quality_score(photo_row["id"]),
+                "sharpness": metrics.get("sharpness"),
+                "exposure": metrics.get("exposure_bias"),
+                "noise": metrics.get("noise"),
+                "faces_detected": metrics.get("faces"),
+                "camera": metrics.get("camera_model"),
+                "lens": metrics.get("lens_model"),
+                # …any other fields you *trust* and want to show
+            }
+        }
+    
+    def generate_feedback_for_current(self):
+        """Called by the 'Generate feedback' button."""
+        sel = getattr(self, "selected_idx", None)
+        if not self.photos:
+            self._set_feedback("No photos loaded.")
+            return
+
+        collection_id = getattr(self, "current_collection_id", None)
+        if collection_id is None:
+            self._set_feedback("No collection selected.")
+            return
+        user_prompt_collection = (
+            "Summarise this collection's strengths and what to cull/keep, "
+            "referencing only the provided facts."
+        )
+        user_prompt_photo = (
+            "Write 2–3 sentences of constructive feedback referencing only the provided metrics."
+        )
+        
+    
+    # Run off the UI thread
+        def work():
+            try:
+                # 1) Collection paragraph (once)
+                col_para = make_paragraph(
+                    self._collection_facts(collection_id),
+                    user_prompt_collection
+                )
+                out = ["— Collection —", col_para, ""]
+
+                # 2) Per-photo paragraphs (limit concurrency so you don’t hit rate limits)
+                with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
+                    futures = []
+                    for p in self.photos:
+                        facts = self._photo_facts(p)
+                        futures.append(pool.submit(make_paragraph, facts, user_prompt_photo))
+                    for p, fut in zip(self.photos, futures):
+                        para = fut.result()
+                        out.append(f"— {p['file_path'].split('/')[-1]} —")
+                        out.append(para)
+                        out.append("")
+
+                # Push to UI
+                self.after(0, lambda: self._set_feedback("\n".join(out)))
+            except Exception as e:
+                self.after(0, lambda e=e: self._set_feedback(f"LLM error: {e}"))
+
+        threading.Thread(target=work, daemon=True).start()
