@@ -49,6 +49,8 @@ CREATE TABLE IF NOT EXISTS faces (
     y1 INT,
     x2 INT,
     y2 INT
+);
+
 -- ----------------- Embeddings -----------------
 CREATE TABLE IF NOT EXISTS embeddings (
     id SERIAL PRIMARY KEY,
