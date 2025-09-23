@@ -41,6 +41,13 @@ CREATE TABLE IF NOT EXISTS photo_quality (
     quality_score REAL
 );
 
+-- ----------------- Embeddings -----------------
+CREATE TABLE IF NOT EXISTS embeddings (
+    id SERIAL PRIMARY KEY,
+    photo_id INT REFERENCES photos(id) ON DELETE CASCADE,
+    embedding REAL[]  -- Array of floats representing the embedding vector
+);
+
 -- ----------------- Styles -----------------
 CREATE TABLE IF NOT EXISTS styles (
     id SERIAL PRIMARY KEY,

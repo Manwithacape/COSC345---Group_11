@@ -4,15 +4,20 @@ from PIL import Image
 import numpy as np
 from tqdm import tqdm
 
-from photo_scorer import PhotoScorer
 from db import Database
 
 class PhotoAnalyzer:
     """
-    Unified photo analyzer:
-    - Ectracts low-level quality metrics from PhotoScorer
+    PhotoAnalyzr handles higher level photo analysis:
     - Extracts deep embeddings using CLIP
-    - Stores everything in DB for later ML/search/ranking
+    - Embeddings can be used for:
+        - clustering/grouping photos
+        - search by similarity
+        - training data for high-level ML models
+        - duplicate detection 
+    - Stores embeddings in DB
+    - Provides clustering and ranking tools
+    NOTE: Quality scoring is handled by PhotoScorer and importer
     """
 
     def __init__(self, db: Database = None, device: str = None):
@@ -22,36 +27,8 @@ class PhotoAnalyzer:
         # Load CLIP model
         self.model, self.process = clip.load("ViT-B/32", device=self.device)
 
-        # PhotoScorer for low-level metrics
-        self.photo_scorer = PhotoScorer(db = db)
-
-    # --------------- Analyze Single Photo -----------------
-    def analyze_photo(self, photo_id, file_path):
-        """
-        Analyze a single photo:
-        - Extract low-level quality metrics and store in DB
-        - Extract CLIP embedding and store in DB
-        Returns dict of results
-        """
-        if self.db is None:
-            raise ValueError("Database instance not provided.")
-
-        # 1. Low-level quality metrics
-        scores, scaled_scores = self.photo_scorer.score_and_store(photo_id, file_path)
-
-        # 2. CLIP embedding
-        embedding = self._extract_embedding(file_path)
-
-        if self.db:
-            self.db.add_embedding(photo_id, embedding.tolist())
-
-        return {
-            "scores": scores,
-            "scaled_scores": scaled_scores,
-            "embedding": embedding
-        }
-
-    def _extract_embedding(self, file_path):
+    # --------------------- Embeddings -------------------------
+    def extract_embedding(self, file_path):
         """Extracts a semantic embedding vector using CLIP."""
         img = Image.open(file_path).convert("RGB")
         img_preprocessed = self.process(img).unsqueeze(0).to(self.device)
@@ -61,13 +38,27 @@ class PhotoAnalyzer:
             features /= features.norm(dim=-1, keepdim=True) # nomarlize
 
         return features.cpu().numpy().flatten()
+
+    def analyze_photo(self, photo_id, file_path):
+        """
+        Analyze a single photo:
+        - Extract CLIP embedding and store in DB
+        (Scores already handled at import time)
+        """
+        if self.db is None:
+            raise ValueError("Database instance not provided.")
+        
+        embedding = self.extract_embedding(file_path)
+        self.db.add_embedding(photo_id, embedding.tolist())
+
+        return {"embedding": embedding}
     
     # --------------- Analyze Collection of Photos -----------------
     def analyze_collection(self, photo_list):
         """
         Analyze a list of photos
         Stores results in DB
-        returns dict: photo_id -> results
+        returns dict: photo_id -> embedding
         """
 
         results = {}
@@ -101,7 +92,9 @@ class PhotoAnalyzer:
             return {}
 
         embeddings_np = np.array(embeddings)
-        clustering = DBSCAN(eps=eps, min_samples=min_samples, metric="cosine").fit(embeddings)
+        clustering = DBSCAN(
+            eps=eps, min_samples=min_samples, metric="cosine"
+        ).fit(embeddings_np)
         labels = clustering.labels_
 
         clusters = {}
