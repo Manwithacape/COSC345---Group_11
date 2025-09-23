@@ -67,12 +67,16 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
 
         self.photos = self.db.get_photos(collection_id)
 
-        # Compute ranking
+        # Compute rankings
         ranked = self.photo_analyzer.rank_by_quality([p["id"] for p in self.photos])
-
         rank_map = {pid: idx + 1 for idx, (pid, _) in enumerate(ranked)}
 
-        for photo in self.photos:
+        ranked_photos = sorted(
+            self.photos,
+            key=lambda p: rank_map.get(p["id"], float('inf'))
+        )
+
+        for photo in ranked_photos:
             tk_img = self.load_thumbnail(photo["file_path"])
             if not tk_img:
                 continue
