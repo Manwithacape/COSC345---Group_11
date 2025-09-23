@@ -21,20 +21,25 @@
 - [ ] ML for photo scores - start with being able to differenciate between good and bad
     - [x] scale the scores and store to normalize them for comparison and merging
     - [x] average relevent scaled scores to calculate photo quality and store on db
-    - [ ] add a threshold param for displaying images based on quality   
+    - [ ] add a threshold param for displaying images based on quality
 - [ ] Create thumbnails on import, save thumbnails to DB, perform operations on thumbnails rather than full images for better performance
 - [x] RAW file handling - take out thumbnails - use any library
 - [x] UI beautification - probably some libraries on the internet?
 - [x] Make GUI smoother? - seems thats just how tk is ?????
 - [ ] Test duplicate detection - maybe run on import? compare each image to prev for better consistency throughout burst
-- [ ] Show faces in RHS sidebar
-- [ ] Image viewer - images double clicked in photo_viewer should be shown as a big image. Filmstrip still available, image nav should also be possible through filmstrip
+- [x] Show faces in RHS sidebar
+- [x] Image viewer - images double clicked in photo_viewer should be shown as a big image. Filmstrip still available, image nav should also be possible through filmstrip
 - [x] Image viewer zoom in on click
 - [ ] photo_viewer.py needs slider for scale options in bar @ bottom above filmstrip
 - [x] Filmstrip needs to be full width of window & collapsable
 - [x] Cam Student ID number on report
 - [ ] Static analysis fixes
-- [ ] 
+- [ ] Face detection accuracy needs improvment - Issue #13
+- [ ] Scale options for viewing image thumbnails - Issue #15
+- [ ] Sidebar faces flexible grid layout? - Issue #14
+- [ ] Image thumbnail view portrait/landscape/differing aspect ratio handling - Issue #16
+- [ ] Full image view only works on some images when multiple are imported? - Issue #17
+- [ ] Highlight suggested culls based on score
 
 ---
 
