@@ -4,6 +4,7 @@ from db import Database
 from duplicates import NearDuplicateDetector
 from photo_scorer import PhotoScorer
 from exif_reader import ExifReader
+from photo_analyzer import PhotoAnalyzer
 
 class PhotoImporter:
     SUPPORTED_EXTENSIONS = (".jpg", ".jpeg", ".tif", ".tiff", '.cr2', '.nef', '.arw', '.dng', '.rw2', '.orf', '.raf', '.srw', '.pef')
@@ -43,6 +44,9 @@ class PhotoImporter:
             file_path=str(file),
             file_name=file.name
         )
+
+        # Automatically analyze new photo
+        self.analyzer.analyze_photo(photo_id, file_path=str(file))
 
         # Store EXIF in DB
         for key, value in exif.items():

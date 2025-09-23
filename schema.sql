@@ -49,6 +49,11 @@ CREATE TABLE IF NOT EXISTS faces (
     y1 INT,
     x2 INT,
     y2 INT
+-- ----------------- Embeddings -----------------
+CREATE TABLE IF NOT EXISTS embeddings (
+    id SERIAL PRIMARY KEY,
+    photo_id INT REFERENCES photos(id) ON DELETE CASCADE,
+    embedding REAL[]  -- Array of floats representing the embedding vector
 );
 
 -- ----------------- Styles -----------------

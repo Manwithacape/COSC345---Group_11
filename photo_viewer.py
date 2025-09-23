@@ -2,7 +2,8 @@
 import ttkbootstrap as ttk
 from main_viewer import MainViewer
 from base_viewer import BaseThumbnailViewer
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageDraw, ImageFont
+from photo_analyzer import PhotoAnalyzer
 
 class PhotoViewer(BaseThumbnailViewer, MainViewer):
     """Scrollable grid of photo thumbnails with single-photo preview support."""
@@ -22,12 +23,31 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
         self.single_item_active = False
         self.selected_idx = None
         self.db = db
+        self.photo_analyzer = PhotoAnalyzer(db)
 
         # dedicated container for the grid
         self.grid_area = ttk.Frame(self.inner_frame)
         self.grid_area.pack(fill="both", expand=True)
 
         self.refresh_photos()
+
+    def add_score_overlay(self, image, rank, score):
+        try:
+            score = float(score)
+        except Exception:
+            score = 0.0
+            
+        draw = ImageDraw.Draw(image)
+        font = ImageFont.load_default()
+
+        text_rank = f"#{rank}"
+        draw.rectangle([0, 0, 60, 30], fill="black")
+        draw.text((5, 5), text_rank, fill="white", font=font)
+
+        text_score = f"{score:.2f}"
+        draw.text((5, 15), text_score, fill="white", font=font)
+        
+        return image
 
     def refresh_photos(self, collection_id=None):
         """Load photos as thumbnails."""
@@ -47,10 +67,24 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
 
         self.photos = self.db.get_photos(collection_id)
 
+        # Compute ranking
+        ranked = self.photo_analyzer.rank_by_quality([p["id"] for p in self.photos])
+
+        rank_map = {pid: idx + 1 for idx, (pid, _) in enumerate(ranked)}
+
         for photo in self.photos:
             tk_img = self.load_thumbnail(photo["file_path"])
             if not tk_img:
                 continue
+
+            score = self.db.get_quality_score(photo["id"])
+            rank = rank_map.get(photo["id"], "-")
+
+            if score is not None:
+                pil_img = Image.open(photo["file_path"]).resize((self.thumb_size, self.thumb_size))
+                pil_img = self.add_score_overlay(pil_img, rank, score)
+                tk_img = ImageTk.PhotoImage(pil_img)
+
             self.thumbs.append(tk_img)
 
             lbl = ttk.Label(

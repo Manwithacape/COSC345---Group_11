@@ -126,6 +126,15 @@ class Database:
         results = self.fetch(query, (photo_id,))
         return {row["tag_name"]: row["tag_value"] for row in results} if results else {}
 
+    # ----------------- Embeddings -----------------
+    def add_embedding(self, photo_id, embedding):
+        """Store a CLIP embedding vector for a photo."""
+        query = "INSERT INTO embeddings (photo_id, embedding) VALUES (%s, %s)"
+        self.execute(query, (photo_id, embedding))
+
+    def get_embedding(self, photo_id):
+        return self.fetch("SELECT embedding FROM embeddings WHERE photo_id=%s", (photo_id,))
+
     # ----------------- Scores -----------------
     def add_score(self, photo_id, score_type, value, scaled_value):
         query = "INSERT INTO scores (photo_id, type, value, scaled_value) VALUES (%s,%s,%s,%s)"
@@ -140,7 +149,12 @@ class Database:
     def add_quality_score(self, photo_id, quality_score):
         query = "INSERT INTO photo_quality (photo_id, quality_score) VALUES (%s,%s)"
         self.execute(query, (photo_id, quality_score))
-        
+
+    def get_quality_score(self, photo_id):
+        row = self.fetch("SELECT quality_score FROM photo_quality WHERE photo_id=%s", (photo_id,))
+        if row:
+            return row[0]["quality_score"]
+        return None        
     # ----------------- Styles -----------------
     def add_style(self, name, description=None):
         query = "INSERT INTO styles (name, description) VALUES (%s,%s) ON CONFLICT (name) DO NOTHING RETURNING id"
