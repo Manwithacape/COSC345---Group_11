@@ -75,7 +75,14 @@ class Database:
 
     def get_collections(self):
         return self.fetch("SELECT * FROM collections ORDER BY created_at DESC")
-
+    
+    def get_collection(self, collection_id):
+        query = """
+            SELECT * 
+            FROM collections
+            WHERE collection_id='%s'"""
+        return self 
+        
     # ----------------- Photos -----------------
     def add_photo(self, collection_id: int, file_path: str, file_name: str, status="undecided"):
         query = """
@@ -109,6 +116,8 @@ class Database:
             query += " WHERE collection_id=%s"
             return self.fetch(query, (collection_id,))
         return self.fetch(query)
+    
+    
 
     def get_all_photos(self):
         return self.fetch("SELECT * FROM photos")

@@ -23,14 +23,16 @@ def _pack_facts(facts: Dict[str, Any]) -> str:
     import json
     return "<facts>\n" + json.dumps(facts, indent=2, ensure_ascii=False) + "\n</facts>"
 
-def make_paragraph(facts: Dict[str, Any], user_prompt: str) -> str:
+def make_paragraph(user_prompt: str, facts: Dict[str, Any]) -> str:
     """
     Returns a short paragraph that paraphrases only the provided facts.
+
+    NOTE: Parameter order is (user_prompt, facts) to match callers.
     """
     contents = (
         _SYSTEM
         + "\n\nTask: "
-        + user_prompt.strip()
+        + user_prompt
         + "\n\n"
         + _pack_facts(facts)
     )
@@ -47,4 +49,4 @@ def make_paragraph(facts: Dict[str, Any], user_prompt: str) -> str:
     )
     # Prefer parsed (schema-validated) text; fall back to raw
     parsed = getattr(resp, "parsed", None)
-    return (parsed.paragraph if parsed else resp.text).strip()
+    return (parsed.paragraph if parsed else resp.text)
