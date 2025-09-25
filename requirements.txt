@@ -9,5 +9,6 @@ scikit-image
 ttkbootstrap
 rawpy
 psycopg2-binary
+google-genai
 
 
