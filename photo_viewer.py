@@ -9,7 +9,6 @@ from llm_feedback import make_paragraph
 import threading
 
 
-
 class PhotoViewer(BaseThumbnailViewer, MainViewer):
     """Scrollable grid of photo thumbnails with single-photo preview support."""
 
@@ -33,23 +32,54 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
         # dedicated container for the grid
         self.grid_area = ttk.Frame(self.inner_frame)
         self.grid_area.pack(fill="both", expand=True)
-        
-        controls = ttk.Frame(self)
-        controls.pack(side="bottom", fill="x")
-        
-        ttk.Label(controls, text="LLM Feedback", bootstyle="secondary").pack(side="left", padx=8)
-        
-        self.feedback_box = ScrolledText(self, height=10, wrap="word")
-        self.feedback_box.pack(side="bottom", fill="x")
-        
+
+        # --- FLOATING LLM Feedback card: overlay bottom-left of viewer ---
+        self.feedback_card = ttk.Labelframe(
+            self,  # parent is the viewer itself (not grid_area)
+            text="LLM Feedback",
+            bootstyle="info",
+            padding=10,
+        )
+
+        self.feedback_box = ScrolledText(
+            self.feedback_card,
+            height=6,
+            wrap="word",
+        )
+        self.feedback_box.configure(
+            bg="#1e1e1e",
+            fg="#ffffff",
+            insertbackground="#ffffff",
+            relief="flat",
+            padx=10,
+            pady=10,
+        )
+        self.feedback_box.grid(row=0, column=0, sticky="nsew", padx=(0, 8), pady=(0, 8))
+
+        self.gen_btn = ttk.Button(
+            self.feedback_card,
+            text="Generate feedback",
+            bootstyle="primary",
+            command=self.generate_feedback_for_current,
+        )
+        self.gen_btn.grid(row=1, column=0, sticky="w", pady=(4, 0))
+
+        self.feedback_card.columnconfigure(0, weight=1)
+        self.feedback_card.rowconfigure(0, weight=1)
+
+        # Pin to bottom-left (in front of thumbnails) and keep it there
+        # width can be adjusted; height follows content
+        self.feedback_card.place(relx=0.0, rely=1.0, x=12, y=-12, anchor="sw", width=360)
+        self.feedback_card.lift()
+
         def _set_feedback(text: str):
             self.feedback_box.configure(state="normal")
             self.feedback_box.delete("1.0", "end")
             self.feedback_box.insert("1.0", text)
             self.feedback_box.configure(state="disabled")
-        self._set_feedback = _set_feedback # keep a handle around
-        
-        ttk.Button(controls, text="Generate feedback", command=self.generate_feedback_for_current).pack(side="right", padx=8)
+        self._set_feedback = _set_feedback
+        # --- end floating card ---
+
         self.refresh_photos()
 
     def add_score_overlay(self, image, rank, score):
@@ -57,7 +87,7 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
             score = float(score)
         except Exception:
             score = 0.0
-            
+
         draw = ImageDraw.Draw(image)
         font = ImageFont.load_default()
 
@@ -67,7 +97,7 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
 
         text_score = f"{score:.2f}"
         draw.text((5, 15), text_score, fill="white", font=font)
-        
+
         return image
 
     def refresh_photos(self, collection_id=None):
@@ -95,7 +125,7 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
 
         ranked_photos = sorted(
             self.photos,
-            key=lambda p: rank_map.get(p["id"], float('inf'))
+            key=lambda p: rank_map.get(p["id"], float("inf"))
         )
 
         for photo in ranked_photos:
@@ -168,11 +198,14 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
                 row, col = divmod(idx, self.columns)
                 lbl.grid(row=row, column=col, padx=5, pady=5, sticky="nw")
 
+        # keep feedback floating above
+        self.feedback_card.lift()
+
     def _show_single_photo(self, photo_path):
         """Ask the app to switch the center pane to a full SinglePhotoViewer."""
         if callable(self.open_single_callback):
             self.open_single_callback(photo_path)
-            
+
     # --------LLM Helper Methods-------
 
     def _photo_facts(self):
@@ -197,12 +230,10 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
         }
 
         for p in photos:
-            # `p` may be a dict (p["id"]) or an object (p.id)
             pid = p.get("id") if isinstance(p, dict) else getattr(p, "id", None)
             if pid is None:
                 continue
 
-            # Be defensive around DB access
             try:
                 exif = self.db.get_exif(pid)
             except Exception:
@@ -212,7 +243,6 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
                 if hasattr(self.db, "get_scores") and callable(self.db.get_scores):
                     scores = self.db.get_scores(pid)
                 else:
-                    # Fallback if only a single quality score exists
                     scores = {"quality": self.db.get_quality_score(pid)}
             except Exception:
                 scores = None
@@ -224,8 +254,7 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
             })
 
         return facts
-    
-    
+
     def generate_feedback_for_current(self):
         """Called by the 'Generate feedback' button."""
         sel = getattr(self, "selected_idx", None)
@@ -244,19 +273,14 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
             "If a detail is missing, state 'insufficient data' rather than assuming. "
             "Do not invent camera settings, locations, or subjects."
         )
-    
-        
-    
-    # Run off the UI thread
+
         def work():
             try:
-                # 1) Collection paragraph (once)
                 col_para = make_paragraph(
                     user_prompt_collection,
                     self._photo_facts()
                 )
                 out = ["— Collection —", col_para, ""]
-                # Push to UI
                 self.after(0, lambda: self._set_feedback("\n".join(out)))
             except Exception as e:
                 self.after(0, lambda e=e: self._set_feedback(f"LLM error: {e}"))
