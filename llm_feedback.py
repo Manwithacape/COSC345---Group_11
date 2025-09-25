@@ -1,6 +1,9 @@
 # File that the llm comes from for the paragraph in the collection
 # llm_feedback.py
+import os
 from typing import Dict, Any
+
+from dotenv import load_dotenv
 from pydantic import BaseModel
 from google import genai
 
@@ -10,8 +13,26 @@ MODEL = "gemini-2.5-flash"
 class Paragraph(BaseModel):
     paragraph: str
 
-# Singleton client (reads GEMINI_API_KEY from env)
-_client = genai.Client()
+# Load .env so the Gemini key can be provided outside source control.
+load_dotenv()
+
+
+def _build_client() -> genai.Client:
+    """Return a configured Gemini client or raise for missing credentials."""
+    api_key = (
+        os.getenv("GEMINI_API_KEY")
+        or os.getenv("GOOGLE_API_KEY")
+        or os.getenv("GENAI_API_KEY")
+    )
+    if not api_key:
+        raise RuntimeError(
+            "Missing Gemini API key. Set GEMINI_API_KEY (or GOOGLE_API_KEY) in your environment."
+        )
+    return genai.Client(api_key=api_key)
+
+
+# Singleton client (reads GEMINI_API_KEY / GOOGLE_API_KEY from env)
+_client = _build_client()
 
 _SYSTEM = (
     "You are a photography assistant. Only use facts explicitly provided in <facts>...</facts>. "
