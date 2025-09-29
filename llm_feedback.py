@@ -36,7 +36,8 @@ _client = _build_client()
 
 _SYSTEM = (
     "You are a photography assistant. Only use facts explicitly provided in <facts>...</facts>. "
-    "If a detail isn't present, omit it (do not invent it). Write one concise paragraph."
+    """If a detail isn't present, omit it (do not invent it). 
+    Write one concise paragraph about the collection only refering to the above facts and what could possibly be improved."""
 )
 
 def _pack_facts(facts: Dict[str, Any]) -> str:
