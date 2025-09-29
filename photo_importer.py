@@ -13,6 +13,7 @@ class PhotoImporter:
         self.db = db
         self.duplicates = NearDuplicateDetector(db, threshold=near_dup_threshold)
         self.scorer = PhotoScorer(db)
+        self.photo_analyzer = PhotoAnalyzer(db)
 
     def import_files(self, file_paths: list[str], collection_id: int, default_styles=None):
         imported_count = 0
@@ -46,7 +47,7 @@ class PhotoImporter:
         )
 
         # Automatically analyze new photo
-        self.analyzer.analyze_photo(photo_id, file_path=str(file))
+        self.photo_analyzer.analyze_photo(photo_id, file_path=str(file))
 
         # Store EXIF in DB
         for key, value in exif.items():
