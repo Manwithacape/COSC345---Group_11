@@ -21,27 +21,56 @@ class BaseThumbnailViewer(ttk.Frame):
         self.photos = []     # DB rows or metadata dicts
         self.selected_id = None
 
-    def load_thumbnail(self, file_path):
-        """Return ImageTk.PhotoImage thumbnail. If RAW, extract JPEG thumbnail."""
+    def _open_image(self, file_path):
+        """Open an image path and return a PIL Image. Handles common RAWs via rawpy."""
         raw_extensions = {'.cr2', '.nef', '.arw', '.dng', '.rw2', '.orf', '.raf', '.srw', '.pef'}
         ext = os.path.splitext(file_path)[1].lower()
+        if ext in raw_extensions:
+            with rawpy.imread(file_path) as raw:
+                thumb = raw.extract_thumb()
+                if thumb.format == rawpy.ThumbFormat.JPEG:
+                    from io import BytesIO
+                    return Image.open(BytesIO(thumb.data))
+                return Image.fromarray(thumb.data)
+        return Image.open(file_path)
+
+    def create_uniform_thumbnail_pil(self, file_path, bg_color=(30, 30, 30)):
+        """
+        Create a square, letterboxed thumbnail as a PIL.Image with side = self.thumb_size.
+        Preserves aspect ratio (no stretching) and centers on a background.
+        Returns None on error.
+        """
         try:
-            if ext in raw_extensions:
-                try:
-                    with rawpy.imread(file_path) as raw:
-                        thumb = raw.extract_thumb()
-                        if thumb.format == rawpy.ThumbFormat.JPEG:
-                            from io import BytesIO
-                            img = Image.open(BytesIO(thumb.data))
-                        else:
-                            img = Image.fromarray(thumb.data)
-                except Exception as re:
-                    print(f"Failed to extract RAW thumbnail for {file_path}: {re}")
-                    return None
+            img = self._open_image(file_path)
+            # Ensure RGB (avoid issues with palette/LA modes)
+            if img.mode not in ("RGB", "RGBA"):
+                img = img.convert("RGB")
+
+            # Scale to fit within the square
+            size = int(self.thumb_size)
+            img_copy = img.copy()
+            img_copy.thumbnail((size, size), Image.LANCZOS)
+
+            # Create square canvas and paste centered
+            canvas = Image.new("RGB", (size, size), color=bg_color)
+            x = (size - img_copy.width) // 2
+            y = (size - img_copy.height) // 2
+            if img_copy.mode == "RGBA":
+                canvas.paste(img_copy, (x, y), mask=img_copy.split()[-1])
             else:
-                img = Image.open(file_path)
-            img.thumbnail((self.thumb_size, self.thumb_size))
-            return ImageTk.PhotoImage(img)
+                canvas.paste(img_copy, (x, y))
+            return canvas
+        except Exception as e:
+            print(f"Failed to create uniform thumbnail for {file_path}: {e}")
+            return None
+
+    def load_thumbnail(self, file_path):
+        """Return ImageTk.PhotoImage uniform square thumbnail for display."""
+        try:
+            pil_thumb = self.create_uniform_thumbnail_pil(file_path)
+            if pil_thumb is None:
+                return None
+            return ImageTk.PhotoImage(pil_thumb)
         except Exception as e:
             print(f"Failed to load thumbnail for {file_path}: {e}")
             return None

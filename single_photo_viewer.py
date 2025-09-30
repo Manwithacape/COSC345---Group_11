@@ -57,12 +57,13 @@ class SinglePhotoViewer(MainViewer):
         cw = max(1, self.canvas.winfo_width())
         ch = max(1, self.canvas.winfo_height())
         iw, ih = self._orig_img.size
-
+ 
         scale = min(cw / iw, ch / ih)
         new_w = max(1, int(iw * scale))
         new_h = max(1, int(ih * scale))
-
+ 
         img_resized = self._orig_img.resize((new_w, new_h), Image.LANCZOS)
+        self._img_tk = ImageTk.PhotoImage(img_resized)
         self._img_tk = ImageTk.PhotoImage(img_resized)
 
         if self._img_item is not None:

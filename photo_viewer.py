@@ -1,5 +1,6 @@
 # photo_viewer.py
 import ttkbootstrap as ttk
+import tkinter as tk
 from tkinter.scrolledtext import ScrolledText
 from main_viewer import MainViewer
 from base_viewer import BaseThumbnailViewer
@@ -29,7 +30,23 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
         self.db = db
         self.photo_analyzer = PhotoAnalyzer(db)
 
-        # dedicated container for the grid
+        # toolbar for controls (e.g., thumbnail size)
+        self.toolbar = ttk.Frame(self.inner_frame)
+        self.toolbar.pack(fill="x", side="top")
+
+        ttk.Label(self.toolbar, text="Thumbnails:").pack(side="left", padx=(4, 6))
+        self.size_var = tk.StringVar(value="Medium")
+        self.size_combo = ttk.Combobox(
+            self.toolbar,
+            textvariable=self.size_var,
+            values=["Small", "Medium", "Large"],
+            state="readonly",
+            width=8,
+        )
+        self.size_combo.pack(side="left")
+        self.size_combo.bind("<<ComboboxSelected>>", lambda e: self._on_size_change())
+
+        # dedicated container for the grid below toolbar
         self.grid_area = ttk.Frame(self.inner_frame)
         self.grid_area.pack(fill="both", expand=True)
 
@@ -129,17 +146,18 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
         )
 
         for photo in ranked_photos:
-            tk_img = self.load_thumbnail(photo["file_path"])
+            # Start from a uniform, letterboxed PIL thumbnail
+            pil_thumb = self.create_uniform_thumbnail_pil(photo["file_path"]) or None
+            if pil_thumb is None:
+                tk_img = None
+            else:
+                score = self.db.get_quality_score(photo["id"])
+                rank = rank_map.get(photo["id"], "-")
+                if score is not None:
+                    pil_thumb = self.add_score_overlay(pil_thumb, rank, score)
+                tk_img = ImageTk.PhotoImage(pil_thumb)
             if not tk_img:
                 continue
-
-            score = self.db.get_quality_score(photo["id"])
-            rank = rank_map.get(photo["id"], "-")
-
-            if score is not None:
-                pil_img = Image.open(photo["file_path"]).resize((self.thumb_size, self.thumb_size))
-                pil_img = self.add_score_overlay(pil_img, rank, score)
-                tk_img = ImageTk.PhotoImage(pil_img)
 
             self.thumbs.append(tk_img)
 
@@ -186,6 +204,17 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
             return
         self.columns = max(1, width // (self.thumb_size + self.padding))
         self._reflow_grid()
+
+    def _on_size_change(self):
+        """Handle toolbar size change and refresh grid."""
+        size_map = {"Small": 80, "Medium": 120, "Large": 180}
+        new_size = size_map.get(self.size_var.get(), 120)
+        if new_size != self.thumb_size:
+            self.thumb_size = new_size
+            # Rebuild thumbnails at new size
+            self.refresh_photos(getattr(self, "current_collection_id", None))
+            # Recompute columns with new size
+            self.after(0, self._on_resize)
 
     def _reflow_grid(self):
         if not self.labels or self.single_item_active:
