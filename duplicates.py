@@ -14,7 +14,7 @@ class NearDuplicateDetector:
     """
 
     # TODO: Find better threshold value
-    def __init__(self, db: Database, threshold=5):
+    def __init__(self, db: Database, threshold=10):
         """
         :param db: Database instance
         :param threshold: maximum Hamming distance to consider photos as duplicates

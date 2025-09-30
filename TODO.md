@@ -28,7 +28,7 @@
 - [x] Image viewer zoom in on click
 - [x] Filmstrip needs to be full width of window & collapsable
 - [x] Cam Student ID number on report
-- [ ] Duplicate detection threshold value adjustment
+- [x] Duplicate detection threshold value adjustment
 - [ ] Face detection - save to DB
 - [ ] Test duplicate detection - maybe run on import? compare each image to prev for better consistency throughout burst
 - [ ] Create thumbnails on import, save thumbnails to DB, perform operations on thumbnails rather than full images for better performance
