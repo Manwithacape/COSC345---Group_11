@@ -46,7 +46,7 @@
 - [ ] Set thresholds for good photo
 - [ ] Thumbnail highlighting based on photo goodness
 - [ ] Show suggested photos for deletion/keeping
-- [ ] photo_viewer.py needs slider for scale options in bar @ bottom above filmstrip
+- [ ] photo_viewer.py need scale options
 
 ---
 
