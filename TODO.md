@@ -34,9 +34,9 @@
 - [ ] Create thumbnails on import, save thumbnails to DB, perform operations on thumbnails rather than full images for better performance
 - [ ] Static analysis fixes
 - [ ] Face detection accuracy needs improvment - Issue #13
-- [ ] Scale options for viewing image thumbnails - Issue #15
+- [x] Scale options for viewing image thumbnails - Issue #15
 - [ ] Sidebar faces flexible grid layout? - Issue #14
-- [ ] Image thumbnail view portrait/landscape/differing aspect ratio handling - Issue #16
+- [x] Image thumbnail view portrait/landscape/differing aspect ratio handling - Issue #16
 - [ ] Full image view only works on some images when multiple are imported? - Issue #17
 - [ ] Highlight suggested culls based on score
 - [ ] Import validation
