@@ -146,6 +146,7 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
         )
 
         for photo in ranked_photos:
+            photo_id = photo["id"]
             # Start from a uniform, letterboxed PIL thumbnail
             pil_thumb = self.create_uniform_thumbnail_pil(photo["file_path"]) or None
             if pil_thumb is None:
@@ -173,7 +174,10 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
             lbl.photo_path = photo["file_path"]
 
             lbl.bind("<Button-1>", lambda e, pid=photo["id"]: self._on_photo_click(pid))
-            lbl.bind("<Double-1>", lambda e, path=photo["file_path"]: self._show_single_photo(path))
+            lbl.bind(
+                "<Double-1>",
+                lambda e, path=photo["file_path"], pid=photo["id"]: self._show_single_photo(path, pid)
+            )
 
             self.labels.append(lbl)
 
@@ -230,10 +234,10 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
         # keep feedback floating above
         self.feedback_card.lift()
 
-    def _show_single_photo(self, photo_path):
+    def _show_single_photo(self, photo_path, photo_id):
         """Ask the app to switch the center pane to a full SinglePhotoViewer."""
         if callable(self.open_single_callback):
-            self.open_single_callback(photo_path)
+            self.open_single_callback(photo_path, photo_id)
 
     # --------LLM Helper Methods-------
 

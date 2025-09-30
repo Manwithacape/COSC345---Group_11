@@ -3,6 +3,9 @@ import ttkbootstrap as ttk
 from PIL import Image, ImageTk
 from main_viewer import MainViewer
 from tkinter.scrolledtext import ScrolledText  # NEW
+from llm_feedback import make_paragraph
+import threading
+
 
 class SinglePhotoViewer(MainViewer):
     """
@@ -10,9 +13,12 @@ class SinglePhotoViewer(MainViewer):
     with an LLM feedback box pinned at the bottom-left.
     """
 
-    def __init__(self, parent, photo_path=None, **kwargs):
+    def __init__(self, parent, db, photo_path=None, photo_id=None, **kwargs):
         kwargs.pop("photo_path", None)
         super().__init__(parent, **kwargs)
+
+        self.db = db
+        self.photo_id = photo_id
 
         # enter single-photo mode
         self.single_item_active = True
@@ -64,7 +70,7 @@ class SinglePhotoViewer(MainViewer):
             self.feedback_card,
             text="Generate feedback",
             bootstyle="primary",
-            command=lambda: self.feedback_box.focus_set(),  # placeholder
+            command=self.generate_feedback_for_current,
         )
         self.gen_btn.grid(row=1, column=0, sticky="w", pady=(4, 0))
 
@@ -74,6 +80,13 @@ class SinglePhotoViewer(MainViewer):
         self.feedback_card.place(relx=0.0, rely=1.0, x=12, y=-12, anchor="sw", width=360)
         self.feedback_card.lift()
         # ------------------------------------------------------------
+
+        def _set_feedback(text: str):
+            self.feedback_box.configure(state="normal")
+            self.feedback_box.delete("1.0", "end")
+            self.feedback_box.insert("1.0", text)
+            self.feedback_box.configure(state="disabled")
+        self._set_feedback = _set_feedback
 
         if photo_path:
             self.load_image(photo_path)
@@ -126,3 +139,77 @@ class SinglePhotoViewer(MainViewer):
             self.canvas.itemconfigure(self.window_id, state="normal")
         except Exception:
             pass
+        
+    # -----------LLM Helper Methods-----------
+    # --------LLM Helper Methods-------
+
+    def _photo_facts(self):
+        """
+        Build a minimal, explicit facts object for the LLM.
+        Shape:
+        {
+            "collection_id": <id or None>,
+            "count": <int>,
+            "photos": [
+                {"id": <int>, "exif": {...} or None, "scores": {...} or None}
+            ]
+        }
+        """
+        collection_id = getattr(self, "current_collection_id", None)
+        pid = self.photo_id
+        facts = {
+            "collection_id": collection_id,
+            "count": 1 if pid is not None else 0,
+            "photos": [],
+        }
+
+        if pid is not None:
+            try:
+                exif = self.db.get_exif(pid)
+            except Exception:
+                exif = None
+
+            try:
+                if hasattr(self.db, "get_scores") and callable(self.db.get_scores):
+                    scores = self.db.get_scores(pid)
+                else:
+                    scores = {"quality": self.db.get_quality_score(pid)}
+            except Exception:
+                scores = None
+
+            facts["photos"].append({
+                "id": pid,
+                "exif": exif,
+                "scores": scores,
+            })
+
+        return facts
+
+    def generate_feedback_for_current(self):
+        """Called by the 'Generate feedback' button."""
+        if self.photo_id is None and not self.photo_path:
+            self._set_feedback("No photo loaded.")
+            return
+
+        collection_id = getattr(self, "current_collection_id", None)
+
+        user_prompt_photo = (
+            "Write a short paragraph (3–5 sentences) assessing the selected photo. "
+            "If constructive feedback can be given do so, act as if you are a photography teacher."
+            "Use only the provided facts (EXIF + numeric scores). "
+            "If a detail is missing, state 'insufficient data' rather than assuming. "
+            "Do not invent camera settings, locations, or subjects."
+        )
+
+        def work():
+            try:
+                para = make_paragraph(
+                    user_prompt_photo,
+                    self._photo_facts()
+                )
+                out = [para, ""]
+                self.after(0, lambda: self._set_feedback("\n".join(out)))
+            except Exception as e:
+                self.after(0, lambda e=e: self._set_feedback(f"LLM error: {e}"))
+
+        threading.Thread(target=work, daemon=True).start()
