@@ -2,10 +2,12 @@
 import ttkbootstrap as ttk
 from PIL import Image, ImageTk
 from main_viewer import MainViewer
+from tkinter.scrolledtext import ScrolledText  # NEW
 
 class SinglePhotoViewer(MainViewer):
     """
-    Shows one photo scaled-to-fit and centered directly on the Canvas.
+    Shows one photo scaled-to-fit and centered directly on the Canvas,
+    with an LLM feedback box pinned at the bottom-left.
     """
 
     def __init__(self, parent, photo_path=None, **kwargs):
@@ -36,6 +38,43 @@ class SinglePhotoViewer(MainViewer):
         # redraw when the canvas resizes
         self.canvas.bind("<Configure>", self._on_resize)
 
+        # ---------- LLM FEEDBACK BOX (bottom-left overlay) ----------
+        self.feedback_card = ttk.Labelframe(
+            self,
+            text="LLM Feedback",
+            bootstyle="info",
+            padding=10,
+        )
+        self.feedback_box = ScrolledText(
+            self.feedback_card,
+            height=6,
+            wrap="word",
+        )
+        self.feedback_box.configure(
+            bg="#1e1e1e",
+            fg="#ffffff",
+            insertbackground="#ffffff",
+            relief="flat",
+            padx=10,
+            pady=10,
+        )
+        self.feedback_box.grid(row=0, column=0, sticky="nsew", padx=(0, 8), pady=(0, 8))
+
+        self.gen_btn = ttk.Button(
+            self.feedback_card,
+            text="Generate feedback",
+            bootstyle="primary",
+            command=lambda: self.feedback_box.focus_set(),  # placeholder
+        )
+        self.gen_btn.grid(row=1, column=0, sticky="w", pady=(4, 0))
+
+        self.feedback_card.columnconfigure(0, weight=1)
+        self.feedback_card.rowconfigure(0, weight=1)
+
+        self.feedback_card.place(relx=0.0, rely=1.0, x=12, y=-12, anchor="sw", width=360)
+        self.feedback_card.lift()
+        # ------------------------------------------------------------
+
         if photo_path:
             self.load_image(photo_path)
 
@@ -51,19 +90,23 @@ class SinglePhotoViewer(MainViewer):
     def _on_resize(self, _event=None):
         if self._orig_img is not None:
             self._render_fit()
+        # keep feedback card on top
+        try:
+            self.feedback_card.lift()
+        except Exception:
+            pass
 
     def _render_fit(self):
         """Scale image to fit canvas while preserving aspect ratio and center it."""
         cw = max(1, self.canvas.winfo_width())
         ch = max(1, self.canvas.winfo_height())
         iw, ih = self._orig_img.size
- 
+
         scale = min(cw / iw, ch / ih)
         new_w = max(1, int(iw * scale))
         new_h = max(1, int(ih * scale))
- 
+
         img_resized = self._orig_img.resize((new_w, new_h), Image.LANCZOS)
-        self._img_tk = ImageTk.PhotoImage(img_resized)
         self._img_tk = ImageTk.PhotoImage(img_resized)
 
         if self._img_item is not None:
@@ -76,8 +119,8 @@ class SinglePhotoViewer(MainViewer):
         # no scrolling in fit view
         self.canvas.config(scrollregion=(0, 0, cw, ch))
 
-    # Optional: if you need to restore grid mode later
     def restore_grid_layer(self):
+        """Optional: restore grid mode."""
         self.single_item_active = False
         try:
             self.canvas.itemconfigure(self.window_id, state="normal")
