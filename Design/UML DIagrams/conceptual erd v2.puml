@@ -1,0 +1,108 @@
+@startuml
+skinparam style strict
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+hide methods
+hide stereotypes
+
+entity User {
+  * userID <<PK>>
+  --
+  name
+  preferences
+}
+
+entity Collection {
+  * collectionID <<PK>>
+  --
+  userID <<FK>>
+  name
+  dateCreated
+}
+
+entity Photo {
+  * photoID <<PK>>
+  --
+  collectionID <<FK>>
+  filePath
+  dateAdded
+}
+
+entity ExifData {
+  * exifID <<PK>>
+  --
+  photoID <<FK>>
+  thumbnailID <<FK>>
+  make
+  model
+  lensModel
+  focalLength
+  exposureTime
+  fNumber
+  isoSpeedRatings
+  dateTimeOriginal
+  gpsLatitude
+  gpsLongitude
+}
+
+entity Thumbnail {
+  * thumbnailID <<PK>>
+  --
+  imagePath
+}
+
+entity Score {
+  * scoreID <<PK>>
+  --
+  photoID <<FK>>
+  metricName
+  value
+}
+
+entity Face {
+  * faceID <<PK>>
+  --
+  photoID <<FK>>
+  boundingBox
+}
+
+entity ImageComment {
+  * imageCommentID <<PK>>
+  --
+  photoID <<FK>>
+  content
+}
+
+entity CollectionComment {
+  * collectionCommentID <<PK>>
+  --
+  collectionID <<FK>>
+  content
+}
+
+entity NearDuplicateGroup {
+  * groupID <<PK>>
+  --
+  createdAt
+}
+
+entity NearDuplicatePhoto {
+  * groupID <<FK>>
+  * photoID <<FK>>
+  --
+  <<PK(groupID, photoID)>>
+}
+
+' ---------- Relationships ----------
+User ||--o{ Collection
+Collection ||--o{ Photo 
+Photo ||--|| Thumbnail : has
+Photo ||--|| ExifData : has
+Photo ||--o{ Score
+Photo ||--o{ Face
+Photo ||--o{ ImageComment
+Collection ||--o{ CollectionComment
+NearDuplicateGroup ||--o{ NearDuplicatePhoto
+Photo ||--o{ NearDuplicatePhoto
+
+@enduml

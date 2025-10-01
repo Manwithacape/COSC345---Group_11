@@ -1,0 +1,93 @@
+@startuml
+skinparam style strict
+skinparam ArrowColor black
+skinparam ActorBorderColor black
+skinparam ParticipantBorderColor black
+skinparam ParticipantBackgroundColor #F9F9F9
+skinparam SequenceMessageAlign center
+
+actor User
+
+participant "AutoCullApp (GUI)\n(app.py)" as APP
+participant "Splash (Toplevel)\n(app.create_splash)" as SPLASH
+participant "SidebarButtons\n(sidebar_buttons.py)" as SB_BTN
+participant "File dialog" as DLG
+participant "PhotoImporter\n(photo_importer.py)" as IMPORTER
+participant "ExifReader\n(exif_reader.py)" as EXIF_R
+participant "Database\n(db.py)" as DB
+participant "PhotoScorer\n(photo_scorer.py)" as SCORER
+participant "NearDuplicateDetector\n(duplicates.py)" as DUP
+participant "PhotoViewer\n(photo_viewer.py)" as PV
+participant "FilmstripViewer\n(filmstrip_viewer.py)" as FS
+participant "ExifViewer\n(exif_viewer.py)" as EV
+participant "ScoreViewer\n(score_viewer.py)" as SV
+participant "DuplicateViewer\n(duplicate_viewer.py)" as DV
+participant "CollectionsViewer\n(collections_viewer.py)" as CM
+participant "SinglePhotoViewer\n(single_photo_viewer.py)" as SPV
+participant "FacesFrame\n(faces_frame.py)" as FF
+
+== Startup ==
+APP -> DB : create_schema()
+APP -> SPLASH : create_splash(app)\n(show logo/top-level)
+SPLASH -> APP : (splash shown)
+APP -> APP : create viewers:\nPhotoViewer, CollectionsViewer,\nFilmstripViewer, ExifViewer,\nScoreViewer, DuplicateViewer,\nFacesFrame, SidebarButtons
+APP -> APP : bind <Configure> -> update_layout()
+SPLASH -> APP : after delay -> destroy splash
+APP <-- SPLASH : reveal main window
+
+== User -> Import photos ==
+User -> SB_BTN : clicks "Import Photos" button
+SB_BTN -> DLG : askopenfilenames()
+DLG --> SB_BTN : selected file paths
+SB_BTN -> DB : add_collection("Imported from Sidebar")
+SB_BTN -> IMPORTER : import_files(file_paths, collection_id)
+loop for each image
+    IMPORTER -> EXIF_R : ExifReader.read_exif(file_path)
+    EXIF_R --> IMPORTER : exif dict
+    IMPORTER -> DB : add_photo(collection_id, file_path, file_name)\n(return photo_id)
+    IMPORTER -> DB : add_exif(photo_id, tag, value) [for each EXIF tag]
+    IMPORTER -> SCORER : score_and_store(photo_id, file_path)
+    SCORER -> DB : add_score(photo_id, metric, value) [multiple metrics]
+    IMPORTER -> DUP : process_photo(photo_id, file_path)
+    DUP -> DB : add_near_duplicate_group(...) / assign_photo_to_near_duplicate_group(...)
+end
+IMPORTER --> SB_BTN : import_files returns (imported_count)
+SB_BTN -> APP : after import -> photo_viewer.refresh_photos(collection_id)
+PV -> DB : get_photos(collection_id)
+DB --> PV : photo rows
+PV -> FS : FilmstripViewer.refresh_thumbs() (rebuild filmstrip)
+FS -> PV : (uses photo labels/photo paths to create thumbs)
+
+== User clicks filmstrip thumbnail ==
+User -> FS : click thumbnail (photo_id)
+FS -> PV : on_photo_click(photo_id)  (main viewer scroll/select)
+FS -> EV : exif_viewer.update_exif(photo_id)
+FS -> SV : score_viewer.update_scores(photo_id)
+FS -> DV : duplicate_viewer.update_duplicates(photo_id)
+FS -> FS : update highlight & auto-scroll
+
+== User asks to find duplicates (batch) ==
+User -> SB_BTN : clicks "Find Duplicates"
+SB_BTN -> DB : get_all_photos()  (list of {id,file_path})
+DB --> SB_BTN : photo_list
+SB_BTN -> DUP : find_duplicates_batch(photo_list)
+DUP -> DB : add_near_duplicate_group(...) / assign_photo_to_near_duplicate_group(...)
+DUP --> SB_BTN : finished
+SB_BTN -> PV : refresh_photos(None)  (refresh all)
+
+== Switch to Collections view ==
+User -> APP : click "View Collections"
+APP -> CM : switch_to_collections()
+CM -> DB : fetch collections / photos for UI
+DB --> CM : collection rows
+CM --> APP : collection view populated
+APP -> APP : update_layout()
+
+== Open single photo view ==
+User -> PV : double-click photo or press open
+PV -> APP : call open_single_view(photo_path)
+APP -> SPV : create SinglePhotoViewer(photo_path)
+APP -> APP : set active_viewer = SinglePhotoViewer
+APP -> APP : update_layout()
+
+@enduml

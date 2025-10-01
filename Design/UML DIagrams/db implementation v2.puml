@@ -1,0 +1,106 @@
+@startuml
+skinparam style strict
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+hide methods
+hide stereotypes
+
+entity collections {
+  * id : SERIAL <<PK>>
+  --
+  name : TEXT
+  created_at : TIMESTAMP
+}
+
+entity photos {
+  * id : SERIAL <<PK>>
+  --
+  collection_id : INT <<FK>>
+  file_path : TEXT
+  file_name : TEXT
+  imported_at : TIMESTAMP
+  status : TEXT
+}
+
+entity exif_data {
+  * id : SERIAL <<PK>>
+  --
+  photo_id : INT <<FK>>
+  tag_name : TEXT
+  tag_value : TEXT
+}
+
+entity scores {
+  * id : SERIAL <<PK>>
+  --
+  photo_id : INT <<FK>>
+  type : TEXT
+  value : REAL
+  scaled_value : REAL
+}
+
+entity photo_quality {
+  * id : SERIAL <<PK>>
+  --
+  photo_id : INT <<FK>>
+  quality_score : REAL
+}
+
+entity faces {
+  * id : SERIAL <<PK>>
+  --
+  photo_id : INT <<FK>>
+  x1 : INT
+  y1 : INT
+  x2 : INT
+  y2 : INT
+}
+
+entity embeddings {
+  * id : SERIAL <<PK>>
+  --
+  photo_id : INT <<FK>>
+  embedding : REAL[]
+}
+
+entity styles {
+  * id : SERIAL <<PK>>
+  --
+  name : TEXT
+  description : TEXT
+}
+
+entity photo_styles {
+  * photo_id : INT <<FK>>
+  * style_id : INT <<FK>>
+  --
+  <<PK(photo_id, style_id)>>
+}
+
+entity near_duplicate_groups {
+  * id : SERIAL <<PK>>
+  --
+  method : TEXT
+  created_at : TIMESTAMP
+}
+
+entity near_duplicate_photos {
+  * group_id : INT <<FK>>
+  * photo_id : INT <<FK>>
+  --
+  <<PK(group_id, photo_id)>>
+}
+
+' ---------- Relationships ----------
+collections ||--o{ photos
+photos ||--o{ exif_data
+photos ||--o{ scores
+photos ||--o{ photo_quality
+photos ||--o{ faces
+photos ||--o{ embeddings
+photos ||--o{ photo_styles
+styles ||--o{ photo_styles
+photos ||--o{ near_duplicate_photos
+near_duplicate_groups ||--o{ near_duplicate_photos
+
+@enduml

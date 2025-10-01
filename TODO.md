@@ -30,7 +30,7 @@
 - [x] Cam Student ID number on report
 - [x] Duplicate detection threshold value adjustment
 - [ ] Face detection - save to DB
-- [ ] Test duplicate detection - maybe run on import? compare each image to prev for better consistency throughout burst
+- [x] Test duplicate detection - maybe run on import? compare each image to prev for better consistency throughout burst
 - [ ] Create thumbnails on import, save thumbnails to DB, perform operations on thumbnails rather than full images for better performance
 - [ ] Static analysis fixes
 - [ ] Face detection accuracy needs improvment - Issue #13
@@ -42,7 +42,7 @@
 - [ ] Import validation
 - [ ] Collection management - highlight, add, remove photos from collections
 - [ ] Filter thumbnail view using exif - date, camera, etc.
-- [ ] Create new documentation for current system architecture
+- [x] Create new documentation for current system architecture
 - [ ] Set thresholds for good photo
 - [ ] Thumbnail highlighting based on photo goodness
 - [ ] Show suggested photos for deletion/keeping

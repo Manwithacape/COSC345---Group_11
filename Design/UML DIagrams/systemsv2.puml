@@ -1,0 +1,59 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+title Systems Model v2 (AutoCull)
+
+' Main app shell
+component "AutoCullApp\n(app.py)" as APP
+component "Sidebar Buttons\n(sidebar_buttons.py)" as SB
+component "Photo Viewer\n(photo_viewer.py)" as PV
+component "Filmstrip Viewer\n(filmstrip_viewer.py)" as FS
+component "Collections Viewer\n(collections_viewer.py)" as CV
+component "Single Photo Viewer\n(single_photo_viewer.py)" as SPV
+component "Faces Frame\n(faces_frame.py)" as FF
+
+' Data & logic
+component "Photo Importer\n(photo_importer.py)" as IMPORT
+component "EXIF Reader\n(exif_reader.py)" as EXIF
+component "Photo Scorer\n(photo_scorer.py)" as SCORER
+component "Near-Duplicate Detector\n(duplicates.py)" as DUP
+component "Database\n(db.py + schema.sql)" as DB
+
+' Specialized side panels
+component "EXIF Viewer\n(exif_viewer.py)" as EV
+component "Score Viewer\n(score_viewer.py)" as SV
+component "Duplicate Viewer\n(duplicate_viewer.py)" as DV
+
+' Relationships
+APP --> SB : user actions\n(import, find duplicates)
+APP --> PV : display grid
+APP --> FS : thumbnails
+APP --> CV : collections management
+APP --> SPV : single photo view
+APP --> FF : face previews
+
+SB --> IMPORT : import photos
+SB --> DUP : run duplicate detection
+
+IMPORT --> EXIF : extract EXIF
+IMPORT --> SCORER : analyze images
+IMPORT --> DUP : process per-photo hash
+IMPORT --> DB : save photo & metadata
+
+EXIF --> DB : save EXIF tags
+SCORER --> DB : save metrics
+DUP --> DB : group duplicates
+
+PV --> DB : fetch photos
+FS --> DB : fetch thumbnails
+EV --> DB : fetch EXIF per photo
+SV --> DB : fetch scores per photo
+DV --> DB : fetch duplicates per photo
+CV --> DB : fetch collections
+SPV --> DB : fetch photo details
+FF --> DB : (future face data)
+
+DB <.. APP : central storage
+
+@enduml
