@@ -2,6 +2,7 @@
 import ttkbootstrap as ttk
 import tkinter as tk
 from tkinter.scrolledtext import ScrolledText
+from tkinter import messagebox  # <-- NEW
 from main_viewer import MainViewer
 from base_viewer import BaseThumbnailViewer
 from PIL import Image, ImageTk, ImageDraw, ImageFont
@@ -29,6 +30,12 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
         self.selected_idx = None
         self.db = db
         self.photo_analyzer = PhotoAnalyzer(db)
+
+        # --- NEW: context menu state (for right-click delete) ---
+        self._ctx_menu = None
+        self._ctx_photo_id = None
+        self.current_collection_id = None  # set in refresh_photos / by CollectionsViewer
+        # --------------------------------------------------------
 
         # toolbar for controls (e.g., thumbnail size)
         self.toolbar = ttk.Frame(self.inner_frame)
@@ -119,7 +126,7 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
 
     def refresh_photos(self, collection_id=None):
         """Load photos as thumbnails."""
-        self.current_collection_id = collection_id
+        self.current_collection_id = collection_id  # keep current collection
         for lbl in self.labels:
             try:
                 lbl.destroy()
@@ -178,6 +185,10 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
                 "<Double-1>",
                 lambda e, path=photo["file_path"], pid=photo["id"]: self._show_single_photo(path, pid)
             )
+
+            # ---- NEW: right-click context menu bindings for delete ----
+            self._bind_thumb_context(lbl, photo_id=photo["id"])
+            # -----------------------------------------------------------
 
             self.labels.append(lbl)
 
@@ -238,6 +249,47 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
         """Ask the app to switch the center pane to a full SinglePhotoViewer."""
         if callable(self.open_single_callback):
             self.open_single_callback(photo_path, photo_id)
+
+    # ------------------ NEW: context menu helpers ------------------
+
+    def _ensure_context_menu(self):
+        if self._ctx_menu is None:
+            self._ctx_menu = tk.Menu(self, tearoff=False)
+            self._ctx_menu.add_command(
+                label="Delete from collection",
+                command=self._ctx_delete_selected
+            )
+
+    def _bind_thumb_context(self, widget, photo_id: int):
+        """Attach right-click (and Ctrl+Click on macOS) to a thumb widget."""
+        self._ensure_context_menu()
+        widget._photo_id = photo_id
+        widget.bind("<Button-3>", self._on_thumb_context)          # Windows/Linux
+        widget.bind("<Control-Button-1>", self._on_thumb_context)  # macOS convenience
+
+    def _on_thumb_context(self, event):
+        self._ensure_context_menu()
+        self._ctx_photo_id = getattr(event.widget, "_photo_id", None)
+        if not self._ctx_photo_id:
+            return
+        try:
+            self._ctx_menu.tk_popup(event.x_root, event.y_root)
+        finally:
+            self._ctx_menu.grab_release()
+
+    def _ctx_delete_selected(self):
+        pid = self._ctx_photo_id
+        if not pid:
+            return
+        if not messagebox.askyesno("Delete photo", "Remove this photo from the collection? This also removes its scores/EXIF/etc."):
+            return
+        try:
+            self.db.delete_photo(pid)
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to delete photo: {e}")
+            return
+        # Refresh the same collection
+        self.refresh_photos(getattr(self, "current_collection_id", None))
 
     # --------LLM Helper Methods-------
 

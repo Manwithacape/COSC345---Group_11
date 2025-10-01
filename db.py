@@ -1,4 +1,3 @@
-
 import os
 import sys
 import psycopg2
@@ -91,6 +90,10 @@ class Database:
         """
         return self.fetch(query, (collection_id, file_path, file_name, status))[0]["id"]
 
+    def delete_photo(self, photo_id: int):
+        """Delete a photo; ON DELETE CASCADE in schema removes related rows."""
+        self.execute("DELETE FROM photos WHERE id=%s", (photo_id,))
+
     def create_face(self, photo_id: int, bbox):
         query = """
         INSERT INTO faces (photo_id, x1, y1, x2, y2)
@@ -116,8 +119,6 @@ class Database:
             query += " WHERE collection_id=%s"
             return self.fetch(query, (collection_id,))
         return self.fetch(query)
-    
-    
 
     def get_all_photos(self):
         return self.fetch("SELECT * FROM photos")
@@ -164,6 +165,7 @@ class Database:
         if row:
             return row[0]["quality_score"]
         return None        
+
     # ----------------- Styles -----------------
     def add_style(self, name, description=None):
         query = "INSERT INTO styles (name, description) VALUES (%s,%s) ON CONFLICT (name) DO NOTHING RETURNING id"
@@ -288,10 +290,8 @@ class Database:
         self.execute("DELETE FROM near_duplicate_groups")
         print("Cleared all near-duplicate groups and assignments.")
         
-    
     # ----------------- Queries -----------------
     def get_first_photo_for_collection(self, collection_id):
         query = "SELECT * FROM photos WHERE collection_id=%s ORDER BY id LIMIT 1"
         results = self.fetch(query, (collection_id,))
         return results[0] if results else None
-    
