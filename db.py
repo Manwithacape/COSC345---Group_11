@@ -294,3 +294,4 @@ class Database:
         query = "SELECT * FROM photos WHERE collection_id=%s ORDER BY id LIMIT 1"
         results = self.fetch(query, (collection_id,))
         return results[0] if results else None
+    

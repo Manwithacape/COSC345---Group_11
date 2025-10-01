@@ -246,11 +246,11 @@ class AutoCullApp(ttk.Window):
         self.update_layout()
 
     # ---------- NEW: open single image in full center pane ----------
-    def open_single_view(self, photo_path: str):
+    def open_single_view(self, photo_path: str, photo_id):
         self.prev_viewer = self.active_viewer
         if self.active_viewer:
             self.active_viewer.place_forget()
-        self.single_viewer = SinglePhotoViewer(self, photo_path=photo_path)
+        self.single_viewer = SinglePhotoViewer(self, db=self.db, photo_path=photo_path, photo_id=photo_id)
         self.active_viewer = self.single_viewer
         self.update_layout()
 
