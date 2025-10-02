@@ -39,10 +39,13 @@ class FilmstripViewer(BaseThumbnailViewer):
             photo_id = getattr(lbl, "photo_id", None)
             if not img_path or not photo_id:
                 continue
+
             tk_img = self.load_thumbnail(img_path)
             if not tk_img:
                 continue
+
             self.thumbs.append(tk_img)
+
             thumb_lbl = ttk.Label(
                 self.inner_frame,
                 image=tk_img,
@@ -51,17 +54,19 @@ class FilmstripViewer(BaseThumbnailViewer):
                 relief="solid"
             )
             thumb_lbl.image = tk_img
-            thumb_lbl.photo_id = photo_id
+            thumb_lbl.photo_id = photo_id                # keep id on widget
+            thumb_lbl.photo_path = img_path              # <-- NEW: keep path too
             thumb_lbl.bind("<Button-1>", lambda e, pid=photo_id: self.on_thumb_click(pid))
             thumb_lbl.pack(side="left", padx=self.padding, pady=self.padding)
             self.labels.append(thumb_lbl)
+
         self.update_highlight()
 
     def update_highlight(self, selected_photo_id=None):
         if selected_photo_id:
             self.selected_id = selected_photo_id
         for lbl in self.labels:
-            if lbl.photo_id == self.selected_id:
+            if lbl.photo_id == getattr(self, "selected_id", None):
                 lbl.config(relief="solid")
                 self._scroll_to_label(lbl)
             else:
@@ -75,12 +80,11 @@ class FilmstripViewer(BaseThumbnailViewer):
         if hasattr(self.photo_viewer, "_on_photo_click"):
             self.photo_viewer._on_photo_click(photo_id)
 
-        # Show single photo
+        # Show single photo (pass both path and id)
         if hasattr(self.photo_viewer, "_show_single_photo"):
-            # Find the photo path
             photo_lbl = next((lbl for lbl in self.photo_viewer.labels if lbl.photo_id == photo_id), None)
             if photo_lbl:
-                self.photo_viewer._show_single_photo(photo_lbl.photo_path)
+                self.photo_viewer._show_single_photo(photo_lbl.photo_path, photo_lbl.photo_id)  # <-- FIX
 
     def _scroll_to_label(self, lbl):
         """Scroll canvas to make the given thumbnail centered."""

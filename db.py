@@ -94,6 +94,10 @@ class Database:
         """Delete a photo; ON DELETE CASCADE in schema removes related rows."""
         self.execute("DELETE FROM photos WHERE id=%s", (photo_id,))
 
+    def delete_collection(self, collection_id: int):
+        """Delete a collection; photos and related rows cascade via FK."""
+        self.execute("DELETE FROM collections WHERE id=%s", (collection_id,))
+
     def create_face(self, photo_id: int, bbox):
         query = """
         INSERT INTO faces (photo_id, x1, y1, x2, y2)
