@@ -6,7 +6,7 @@ class Suggestions:
     def suggest_for_photo(self, photo_id):
         """
         Suggest 'keep' for best duplicate, 'delete' for others.
-        group_photos: list of (photo_id, quality_score)
+        Suggest 'delete' for low-quality photos.
         """
         quality = self.db.get_quality_score(photo_id)
         duplicates = self.db.get_near_duplicates(photo_id)
