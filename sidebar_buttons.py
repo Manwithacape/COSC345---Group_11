@@ -1,6 +1,6 @@
 # sidebar_buttons.py
 import ttkbootstrap as ttk
-from ttkbootstrap.dialogs import Querybox
+from ttkbootstrap.dialogs import Querybox, Messagebox
 from tkinter import filedialog
 import threading
 from progress_dialog import ProgressDialog 
@@ -142,3 +142,70 @@ class SidebarButtons:
         """Button for going back to the previous page"""
         if hasattr(self.master, "go_back"):
             self.master.go_back()
+
+    def cull_photos(self):
+        """Delete all photos currently marked as 'delete' in the DB (and delete files)."""
+        from ttkbootstrap.dialogs import Messagebox, Querybox
+        import os
+
+        # confirm
+        if not Messagebox.yesno("Cull photos", "Permanently delete all photos marked 'delete'?"):
+            return
+
+        # fetch list of photos marked delete
+        photos = self.db.get_photos_by_suggestion('delete')  # returns list of dicts or tuples
+
+        if not photos:
+            Messagebox.show_info("Cull photos", "No photos are marked 'delete'.")
+            return
+
+        # optional: backup option or move files to a trash folder instead of permanent delete
+        # use_trash = True
+        # trash_dir = os.path.join(os.path.expanduser("~"), ".autocull_trash")
+        # if use_trash:
+        #     os.makedirs(trash_dir, exist_ok=True)
+
+        # perform deletion in DB transaction (so UI state remains consistent)
+        deleted_count = 0
+        errors = []
+
+        for row in photos:
+            try:
+                photo_id = row['id'] if isinstance(row, dict) else row[0]
+                filepath = row.get('file_path') if isinstance(row, dict) else row[1]
+
+                # delete file from disk (or move to trash)
+                try:
+                    if filepath:
+                        # if use_trash:
+                        #     import shutil, uuid
+                        #     _, ext = os.path.splitext(filepath)
+                        #     newname = f"{photo_id}_{uuid.uuid4().hex}{ext}"
+                        #     shutil.move(filepath, os.path.join(trash_dir, newname))
+                        # else:
+                            os.remove(filepath)
+                except Exception as e_file:
+                    # file deletion failed, but keep going to let DB be consistent; record error
+                    errors.append(f"File {filepath}: {e_file}")
+
+                # delete DB row (use wrapper method)
+                self.db.delete_photo(photo_id)
+                deleted_count += 1
+
+            except Exception as e:
+                errors.append(f"Photo id {row}: {e}")
+
+        # refresh UI
+        try:
+            self.photo_viewer.refresh_photos() 
+        except Exception:
+            # fallback on app refresh
+            try:
+                self.master.update_layout()
+            except Exception:
+                pass
+
+        summary = f"Deleted {deleted_count} photos."
+        if errors:
+            summary += "\nSome errors occurred:\n" + "\n".join(errors[:10])
+        Messagebox.show_info("Cull photos", summary)

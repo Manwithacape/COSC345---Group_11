@@ -314,3 +314,11 @@ class Database:
             JOIN near_duplicate_photos ndp ON p.id = ndp.photo_id
             WHERE ndp.group_id=%s"""
         return self.fetch(query, (group_id,))
+    
+    def get_photos_by_suggestion(self, suggestion):
+        """
+        Retrieve all photos with a specific suggestion ('keep' or 'delete').
+        Returns list of dicts with id and filepath
+        """
+        query = "SELECT id, file_path FROM photos WHERE suggestion=%s"
+        return self.fetch(query, (suggestion,))

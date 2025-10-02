@@ -102,6 +102,9 @@ class AutoCullApp(ttk.Window):
         self.sidebar_buttons.add_button(
             self.left_sidebar.body, "Return", self.sidebar_buttons.return_button
         )
+        self.sidebar_buttons.add_button(
+            self.left_sidebar.body, "Cull Photos", self.sidebar_buttons.cull_photos
+        )
         self.left_sidebar.pack(side="left", fill="y")
 
         # ---------- Right sidebar & other viewers (scrollable) ----------
