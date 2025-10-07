@@ -134,7 +134,10 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
         if not self.grid_area.winfo_ismapped():
             self.grid_area.pack(fill="both", expand=True)
 
-        self.photos = self.db.get_photos(collection_id)
+        # self.photos = self.db.get_photos(collection_id)
+        self.photos = [
+            p for p in self.db.get_photos(collection_id) 
+            if (p.get("suggestion") or "").lower() != "deleted"]
 
         # Compute rankings
         ranked = self.photo_analyzer.rank_by_quality([p["id"] for p in self.photos])

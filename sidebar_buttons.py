@@ -5,6 +5,7 @@ from tkinter import filedialog
 import threading
 from progress_dialog import ProgressDialog 
 import os
+import shutil, uuid
 
 class SidebarButtons:
     """Holds logic for sidebar button actions."""
@@ -149,69 +150,56 @@ class SidebarButtons:
 
     # ------------------- Cull Photos ----------------
     def cull_photos(self):
-        """Delete all photos currently marked as 'delete' in the DB (and delete files)."""
+        """Move all photos marked 'delete' to a trash folder."""
 
-        # confirm
-        if not Messagebox.yesno("Cull photos", "Permanently delete all photos marked 'delete'?"):
+        if not Messagebox.yesno("Move all photos marked 'delete' to trash?", "Cull Photos"):
             return
-
-        # fetch list of photos marked delete
-        photos = self.db.get_photos_by_suggestion('delete')  # returns list of dicts or tuples
-
+        
+        photos = self.db.get_photos_by_suggestion("delete")
         if not photos:
-            Messagebox.show_info("Cull photos", "No photos are marked 'delete'.")
+            Messagebox.show_info("Cull Photos", "No photos marked 'delete'.")
             return
-
-        # optional: backup option or move files to a trash folder instead of permanent delete
-        use_trash = True
+        
         trash_dir = os.path.join(os.path.expanduser("~"), ".autocull_trash")
-        if use_trash:
-            os.makedirs(trash_dir, exist_ok=True)
+        os.makedirs(trash_dir, exist_ok=True)
 
-        # perform deletion in DB transaction (so UI state remains consistent)
-        deleted_count = 0
+        moved_count = 0
         errors = []
 
         for row in photos:
+            photo_id = row['id'] if isinstance(row, dict) else row[0]
+            filepath = row.get('file_path') if isinstance(row, dict) else row[1]
+
+            if not filepath or not os.path.exists(filepath):
+                errors.append(f"File not found: {filepath}")
+                continue
+
+            _, ext = os.path.splitext(filepath)
+            newname = f"{photo_id}_{uuid.uuid4().hex}{ext}"
+            trash_path = os.path.join(trash_dir, newname)
+
+            shutil.move(filepath, trash_path)
+
             try:
-                photo_id = row['id'] if isinstance(row, dict) else row[0]
-                filepath = row.get('file_path') if isinstance(row, dict) else row[1]
-
-                # delete file from disk (or move to trash)
-                try:
-                    if filepath:
-                        if use_trash:
-                            import shutil, uuid
-                            _, ext = os.path.splitext(filepath)
-                            newname = f"{photo_id}_{uuid.uuid4().hex}{ext}"
-                            shutil.move(filepath, os.path.join(trash_dir, newname))
-                        else:
-                            os.remove(filepath)
-                except Exception as e_file:
-                    # file deletion failed, but keep going to let DB be consistent; record error
-                    errors.append(f"File {filepath}: {e_file}")
-
-                # delete DB row (use wrapper method)
-                self.db.delete_photo(photo_id)
-                deleted_count += 1
-
+                if hasattr(self.db, "update_photo_file_path"):
+                    self.db.update_photo_file_path(photo_id, trash_path)
+                self.db.update_photo_suggestion(photo_id, "deleted")
             except Exception as e:
                 errors.append(f"Photo id {row}: {e}")
 
-        # refresh UI
         try:
-            self.photo_viewer.refresh_photos() 
+            self.photo_viewer.refresh_photos()
         except Exception:
-            # fallback on app refresh
             try:
                 self.master.update_layout()
             except Exception:
                 pass
 
-        summary = f"Deleted {deleted_count} photos."
+        summary = f"Moved {moved_count} photos to trash"
+
         if errors:
-            summary += "\nSome errors occurred:\n" + "\n".join(errors[:10])
-        Messagebox.show_info("Cull photos", summary)
+            summary += "\nSome errors occured:\n" + "\n".join(errors[:10])
+        Messagebox.show_info("Cull Photos", summary)
 
     # ------------------- Show Suggestions ----------------
     def show_suggestions(self):
@@ -229,7 +217,11 @@ class SidebarButtons:
 
             def task():
                 try:
-                    photo_list = self.db.get_all_photos()  # list of dicts with 'id' and 'file_path'
+                    # photo_list = self.db.get_all_photos()  # list of dicts with 'id' and 'file_path'
+                    photo_list = [
+                        p for p in self.db.get_all_photos()
+                        if (p.get("suggestion") or "").lower() != "deleted"
+                    ]
 
                     existing_groups = self.db.get_near_duplicate_groups()
                     if not existing_groups:
@@ -247,12 +239,16 @@ class SidebarButtons:
                     for group_id, photos in group_map.items():
                         best = max(photos, key=lambda p: p.get("score", 0) or 0)
                         for p in photos:
+                            if (p.get("suggestion") or "").lower() == "deleted":
+                                continue
                             pid = p["id"]
                             sugg = "keep" if pid == best["id"] else "delete"
                             self.db.update_photo_suggestion(pid, sugg)
                             handled_ids.add(pid)
 
                     for photo in photo_list:
+                        if (photo.get("suggestion") or "").lower() == "deleted":
+                            continue
                         pid = photo["id"]
                         if pid in handled_ids:
                             continue

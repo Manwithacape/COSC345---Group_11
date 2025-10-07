@@ -117,10 +117,13 @@ class Database:
             return self.fetch(query, (collection_id,))
         return self.fetch(query)
     
-    
-
     def get_all_photos(self):
         return self.fetch("SELECT * FROM photos")
+    
+    def update_photo_file_path(self, photo_id, new_path):
+        """Update the file path of a photo."""
+        query = "UPDATE photos SET file_path=%s WHERE id=%s"
+        self.execute(query, (new_path, photo_id))
 
     # ----------------- EXIF -----------------
     def add_exif(self, photo_id, tag_name, tag_value):
