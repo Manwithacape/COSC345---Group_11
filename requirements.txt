@@ -10,5 +10,9 @@ ttkbootstrap
 rawpy
 psycopg2-binary
 google-genai
+torch 
+torchvision
+transformers
+face_recognition
 
 
