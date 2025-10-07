@@ -4,6 +4,7 @@ from ttkbootstrap.dialogs import Querybox, Messagebox
 from tkinter import filedialog
 import threading
 from progress_dialog import ProgressDialog 
+import os
 
 class SidebarButtons:
     """Holds logic for sidebar button actions."""
@@ -20,6 +21,9 @@ class SidebarButtons:
         self.photo_viewer = photo_viewer
         self.importer = importer
         self.buttons = []
+        self.cull_button = None
+        self.suggestions_button = None
+        self.suggestions_visible = False
 
     # ----------------- Helper to add button -----------------
     def add_button(self, sidebar, text, command):
@@ -143,10 +147,9 @@ class SidebarButtons:
         if hasattr(self.master, "go_back"):
             self.master.go_back()
 
+    # ------------------- Cull Photos ----------------
     def cull_photos(self):
         """Delete all photos currently marked as 'delete' in the DB (and delete files)."""
-        from ttkbootstrap.dialogs import Messagebox, Querybox
-        import os
 
         # confirm
         if not Messagebox.yesno("Cull photos", "Permanently delete all photos marked 'delete'?"):
@@ -160,10 +163,10 @@ class SidebarButtons:
             return
 
         # optional: backup option or move files to a trash folder instead of permanent delete
-        # use_trash = True
-        # trash_dir = os.path.join(os.path.expanduser("~"), ".autocull_trash")
-        # if use_trash:
-        #     os.makedirs(trash_dir, exist_ok=True)
+        use_trash = True
+        trash_dir = os.path.join(os.path.expanduser("~"), ".autocull_trash")
+        if use_trash:
+            os.makedirs(trash_dir, exist_ok=True)
 
         # perform deletion in DB transaction (so UI state remains consistent)
         deleted_count = 0
@@ -177,12 +180,12 @@ class SidebarButtons:
                 # delete file from disk (or move to trash)
                 try:
                     if filepath:
-                        # if use_trash:
-                        #     import shutil, uuid
-                        #     _, ext = os.path.splitext(filepath)
-                        #     newname = f"{photo_id}_{uuid.uuid4().hex}{ext}"
-                        #     shutil.move(filepath, os.path.join(trash_dir, newname))
-                        # else:
+                        if use_trash:
+                            import shutil, uuid
+                            _, ext = os.path.splitext(filepath)
+                            newname = f"{photo_id}_{uuid.uuid4().hex}{ext}"
+                            shutil.move(filepath, os.path.join(trash_dir, newname))
+                        else:
                             os.remove(filepath)
                 except Exception as e_file:
                     # file deletion failed, but keep going to let DB be consistent; record error
@@ -209,3 +212,96 @@ class SidebarButtons:
         if errors:
             summary += "\nSome errors occurred:\n" + "\n".join(errors[:10])
         Messagebox.show_info("Cull photos", summary)
+
+    # ------------------- Show Suggestions ----------------
+    def show_suggestions(self):
+        """
+        Suggest 'keep' for best duplicate, 'delete' for others.
+        Suggest 'delete' for low-quality photos.
+        """
+        try:
+            if not self.importer:
+                self.master.show_centered_info("Not Available", "Photo importer is not configured.")
+                return
+            
+            dialog = ProgressDialog(self.master, title="Generating Suggestions", message="Analyzing photos...")
+            dialog.start()
+
+            def task():
+                try:
+                    photo_list = self.db.get_all_photos()  # list of dicts with 'id' and 'file_path'
+
+                    existing_groups = self.db.get_near_duplicate_groups()
+                    if not existing_groups:
+                        print("[INFO] No existing duplicate groups found, running duplicate detection first.")
+                        if hasattr(self.importer, "duplicates"):
+                            duplicates = self.importer.duplicates
+                            duplicates.find_duplicates_batch(photo_list)
+                            existing_groups = self.db.get_near_duplicate_groups()
+                    else:
+                        print(f"[INFO] Found {len(existing_groups)} duplicate groups - using existing results.")
+                    
+                    group_map = {g["id"]: g["photos"] for g in existing_groups}
+                    handled_ids = set()
+
+                    for group_id, photos in group_map.items():
+                        best = max(photos, key=lambda p: p.get("score", 0) or 0)
+                        for p in photos:
+                            pid = p["id"]
+                            sugg = "keep" if pid == best["id"] else "delete"
+                            self.db.update_photo_suggestion(pid, sugg)
+                            handled_ids.add(pid)
+
+                    for photo in photo_list:
+                        pid = photo["id"]
+                        if pid in handled_ids:
+                            continue
+
+                        score = photo.get("score", 0.0)
+                        if score < 0.4:
+                            suggestion = "delete"
+                        elif score > 0.7:
+                            suggestion = "keep"
+                        else:
+                            suggestion = "undecided"
+                        self.db.update_photo_suggestion(pid, suggestion)
+
+                    self.master.after(0, lambda: (
+                        dialog.finish(success=True),
+                        self.master.show_centered_info("Suggestions Complete", "Photo suggestions have been updated."),
+                        self.photo_viewer.refresh_photos(None) if self.photo_viewer else None
+                    ))
+
+                except Exception as e:
+                    self.master.after(0, lambda e=e: (
+                        dialog.finish(success=False),
+                        self.master.show_centered_info("Error", f"Error generating suggestions: {e}")
+                    ))
+
+            threading.Thread(target=task, daemon=True).start()
+        except Exception as e:
+            self.master.show_centered_info("Error", f"Error generating suggestions: {e}")
+
+    def toggle_suggestions(self):
+        """Toggle suggestions view and Cull button visibility."""
+        if not self.suggestions_visible:
+            # Run show_suggestions normally
+            self.show_suggestions()
+            # Show Cull button
+            if self.cull_button:
+                self.cull_button.pack(fill="x", pady=2, padx=5)
+            # Change button text
+            if self.suggestions_button:
+                self.suggestions_button.config(text="Hide Suggestions")
+            self.suggestions_visible = True
+        else:
+            # Hide Cull button
+            if self.cull_button:
+                self.cull_button.pack_forget()
+            # Change button text back
+            if self.suggestions_button:
+                self.suggestions_button.config(text="Show Suggestions")
+            self.suggestions_visible = False
+
+        if self.photo_viewer:
+            self.photo_viewer.refresh_photos(self.photo_viewer.current_collection_id)
