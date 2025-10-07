@@ -31,6 +31,8 @@ class SidebarButtons:
     # ----------------- Import -----------------
     def import_files(self):
         import tkinter as tk
+        more_directories = True
+        file_paths = []
 
         try:
             file_paths = filedialog.askopenfilenames(
@@ -38,6 +40,21 @@ class SidebarButtons:
                 filetypes=[("Images", "*.jpg *.jpeg *.tif *.tiff *.cr2 *.nef *.arw *.dng *.rw2 *.orf *.raf *.srw *.pef"),
                            ("All Files", "*.*")]
             )
+            
+            while more_directories:
+                if not file_paths:
+                    return
+                more = tk.messagebox.askyesno("More Photos", "Do you want to add photos from another directory?")
+                if more:
+                    additional_files = filedialog.askopenfilenames(
+                        title="Select More Photos",
+                        filetypes=[("Images", "*.jpg *.jpeg *.tif *.tiff *.cr2 *.nef *.arw *.dng *.rw2 *.orf *.raf *.srw *.pef"),
+                                   ("All Files", "*.*")])
+                    if additional_files:
+                        file_paths = list(file_paths) + list(additional_files)
+                else:
+                    more_directories = False 
+            # Need to put in here how to import multiple files from different directories            
             if not file_paths:
                 return
 
