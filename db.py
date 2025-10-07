@@ -123,9 +123,14 @@ class Database:
             query += " WHERE collection_id=%s"
             return self.fetch(query, (collection_id,))
         return self.fetch(query)
-
+    
     def get_all_photos(self):
         return self.fetch("SELECT * FROM photos")
+    
+    def update_photo_file_path(self, photo_id, new_path):
+        """Update the file path of a photo."""
+        query = "UPDATE photos SET file_path=%s WHERE id=%s"
+        self.execute(query, (new_path, photo_id))
 
     # ----------------- EXIF -----------------
     def add_exif(self, photo_id, tag_name, tag_value):
@@ -299,3 +304,31 @@ class Database:
         query = "SELECT * FROM photos WHERE collection_id=%s ORDER BY id LIMIT 1"
         results = self.fetch(query, (collection_id,))
         return results[0] if results else None
+    
+    # -----------------Suggestions -----------------
+    def update_photo_suggestion(self, photo_id, suggestion):
+        """Set or update the suggestioin for a photo ('keep', or 'delete')."""
+        query = "UPDATE photos SET suggestion=%s WHERE id=%s"
+        self.execute(query, (suggestion, photo_id))
+
+    def get_photo_suggestion(self, photo_id):
+        """Retrieve the suggestion for a photo."""
+        rows = self.fetch("SELECT suggestion FROM photos WHERE id=%s", (photo_id,))
+        return rows[0]["suggestion"] if rows and "suggestion" in rows[0] else None
+
+    def get_photos_with_suggestions(self, group_id):
+        """Retrieve all photos in a group along with their suggestions."""
+        query = """
+            SELECT p.id AS photo_id, p.file_name, p.suggestion
+            FROM photos p
+            JOIN near_duplicate_photos ndp ON p.id = ndp.photo_id
+            WHERE ndp.group_id=%s"""
+        return self.fetch(query, (group_id,))
+    
+    def get_photos_by_suggestion(self, suggestion):
+        """
+        Retrieve all photos with a specific suggestion ('keep' or 'delete').
+        Returns list of dicts with id and filepath
+        """
+        query = "SELECT id, file_path FROM photos WHERE suggestion=%s"
+        return self.fetch(query, (suggestion,))

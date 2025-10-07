@@ -104,7 +104,7 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
         self._set_feedback = _set_feedback
         # --- end floating card ---
 
-        self.refresh_photos()
+        # self.refresh_photos()
 
     def add_score_overlay(self, image, rank, score):
         try:
@@ -141,7 +141,10 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
         if not self.grid_area.winfo_ismapped():
             self.grid_area.pack(fill="both", expand=True)
 
-        self.photos = self.db.get_photos(collection_id)
+        # self.photos = self.db.get_photos(collection_id)
+        self.photos = [
+            p for p in self.db.get_photos(collection_id) 
+            if (p.get("suggestion") or "").lower() != "deleted"]
 
         # Compute rankings
         ranked = self.photo_analyzer.rank_by_quality([p["id"] for p in self.photos])
@@ -154,13 +157,14 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
 
         for photo in ranked_photos:
             photo_id = photo["id"]
+
             # Start from a uniform, letterboxed PIL thumbnail
             pil_thumb = self.create_uniform_thumbnail_pil(photo["file_path"]) or None
             if pil_thumb is None:
                 tk_img = None
             else:
-                score = self.db.get_quality_score(photo["id"])
-                rank = rank_map.get(photo["id"], "-")
+                score = self.db.get_quality_score(photo_id)
+                rank = rank_map.get(photo_id, "-")
                 if score is not None:
                     pil_thumb = self.add_score_overlay(pil_thumb, rank, score)
                 tk_img = ImageTk.PhotoImage(pil_thumb)
@@ -169,21 +173,41 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
 
             self.thumbs.append(tk_img)
 
+            # Frame holds thumbnail + dropdown
+            frame = ttk.Frame(self.grid_area, padding=5)
+            frame.photo_id = photo_id
+
+            # Thumbnail
             lbl = ttk.Label(
-                self.grid_area,
+                frame,
                 image=tk_img,
                 cursor="hand2",
-                bootstyle="dark",
                 relief="flat"
             )
             lbl.image = tk_img
-            lbl.photo_id = photo["id"]
+            lbl.photo_id = photo_id
             lbl.photo_path = photo["file_path"]
 
-            lbl.bind("<Button-1>", lambda e, pid=photo["id"]: self._on_photo_click(pid))
+            # Only show suggestion if available
+            show_suggestions = getattr(self.master.sidebar_buttons, "suggestions_visible", False)
+            if show_suggestions:
+                # Get suggestion from DB (default undecided if not set)
+                suggestion = self.db.get_photo_suggestion(photo_id) or "undecided"
+                if suggestion == "keep":
+                    frame.config(bootstyle="success")  # green
+                elif suggestion == "delete":
+                    frame.config(bootstyle="danger")  # red
+                else:
+                    frame.config(bootstyle="secondary")  # gray
+            else:
+                frame.config(bootstyle="secondary")  # gray
+
+            lbl.pack()
+
+            lbl.bind("<Button-1>", lambda e, pid=photo_id: self._on_photo_click(pid))
             lbl.bind(
                 "<Double-1>",
-                lambda e, path=photo["file_path"], pid=photo["id"]: self._show_single_photo(path, pid)
+                lambda e, path=photo["file_path"], pid=photo_id: self._show_single_photo(path, pid)
             )
 
             # ---- NEW: right-click context menu bindings for delete ----
@@ -191,12 +215,39 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
             # -----------------------------------------------------------
 
             self.labels.append(lbl)
+            if show_suggestions:
+                # Dropdown for keep/delete/undecided
+                choice_var = tk.StringVar(value=suggestion)
+                choice = ttk.Combobox(
+                    frame,
+                    textvariable=choice_var,
+                    values=["keep", "delete", "undecided"],
+                    state="readonly",
+                    width=10
+                )
+                choice.pack(pady=2)
+
+                def on_choice(event, pid=photo_id, var=choice_var, fr=frame):
+                    new_val = var.get()
+                    self.db.update_photo_suggestion(pid, new_val)
+                    # Update border instantly
+                    if new_val == "keep":
+                        fr.config(bootstyle="success")
+                    elif new_val == "delete":
+                        fr.config(bootstyle="danger")
+                    else:
+                        fr.config(bootstyle="secondary")
+
+                choice.bind("<<ComboboxSelected>>", on_choice)
+
+            self.labels.append(frame)
 
         self._reflow_grid()
 
         if self.labels:
             self._select_idx(0)
             self.select_photo(self.labels[0].photo_id)
+
 
     def _on_photo_click(self, photo_id):
         idx = next((i for i, lbl in enumerate(self.labels) if lbl.photo_id == photo_id), None)
