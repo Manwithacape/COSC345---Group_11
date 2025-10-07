@@ -1,0 +1,196 @@
+\documentclass[12pt,a4paper]{article}
+
+% --- Packages ---
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+
+% --- Header / Footer ---
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{AutoCull User Documentation}
+\rhead{\thepage}
+
+% --- Hyperlink setup ---
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=cyan,
+    pdftitle={AutoCull End User Documentation},
+    pdfauthor={Kevin Wang},
+    pdfsubject={Image Management Software},
+    pdfkeywords={AutoCull, photo sorting, duplicate detection, user guide}
+}
+
+% --- Code block style ---
+\lstdefinestyle{console}{
+    backgroundcolor=\color{gray!10},
+    basicstyle=\ttfamily\footnotesize,
+    frame=single,
+    breaklines=true
+}
+
+% --- Section styling ---
+\titleformat{\section}{\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{1em}{}
+
+% --- Document Info ---
+\title{\textbf{AutoCull End-User Documentation}}
+\author{Group 11}
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+% -------------------------------------------------------------------------
+\section{Introduction}
+
+\textbf{AutoCull} is an intelligent image management application that automatically identifies and removes near-duplicate or low-quality photos from a given collection. The program leverages AI/ML techniques to both streamline large-scale photo curation, and improve the user's photographic abilities.
+
+This document serves as a comprehensive guide for end users, covering installation, usage, configuration, and troubleshooting.
+
+% -------------------------------------------------------------------------
+\section{System Requirements}
+
+\begin{itemize}
+    \item Operating System: Windows 10 or later / macOS / Linux
+    \item Python 3.10 or higher
+    \item PostgreSQL 14 or higher
+    \item Recommended RAM: 8 GB+
+    \item Disk space: Minimum 1 GB free
+\end{itemize}
+
+% -------------------------------------------------------------------------
+\section{Installation Guide}
+
+\subsection{Step 1: Clone or Download the Repository}
+\begin{lstlisting}[style=console]
+git clone https://github.com/Manwithacape/COSC345---Group_11.git
+cd COSC345---Group_11
+\end{lstlisting}
+
+\subsection{Step 2: Create a Virtual Environment}
+\begin{lstlisting}[style=console]
+python -m venv venv
+source venv/bin/activate       # macOS/Linux
+venv\Scripts\activate          # Windows
+\end{lstlisting}
+
+\subsection{Step 3: Install Dependencies}
+\begin{lstlisting}[style=console]
+pip install -r requirements.txt
+\end{lstlisting}
+
+\subsection{Step 4: Set Up PostgreSQL Database}
+
+AutoCull uses PostgreSQL to store image metadata, similarity metrics, and user preferences.
+
+\begin{enumerate}[label=\arabic*.]
+    \item Install PostgreSQL 14 or higher from \url{https://www.postgresql.org/download/}.
+    \item During installation, note your chosen \textbf{username}, \textbf{password}, and \textbf{port number} (default is 5432).
+    \item Open the PostgreSQL interactive terminal:
+    \begin{lstlisting}[style=console]
+    psql -U postgres
+    \end{lstlisting}
+    \item Create a new database and user for AutoCull:
+    \begin{lstlisting}[style=console]
+    CREATE DATABASE autocull_db;
+    CREATE USER autocull_user WITH PASSWORD 'yourpassword';
+    GRANT ALL PRIVILEGES ON DATABASE autocull_db TO autocull_user;
+    \end{lstlisting}
+
+    Example contents:
+    \begin{lstlisting}[style=console]
+    {
+        "dbname": "autocull_db",
+        "user": "autocull_user",
+        "password": "yourpassword",
+        "host": "localhost",
+        "port": 5432
+    }
+    \end{lstlisting}
+    \item Initialize the schema using file contents from \texttt{schema.db}:
+    You should see a confirmation message indicating that tables were created successfully.
+\end{enumerate}
+
+\subsection{Step 5: Launch AutoCull}
+\begin{lstlisting}[style=console]
+python app.py
+\end{lstlisting}
+
+If the program launches successfully, you should see the AutoCull interface.
+
+% -------------------------------------------------------------------------
+\section{Using AutoCull}
+
+\subsection{Basic Workflow}
+
+\begin{enumerate}[label=\arabic*.]
+    \item Launch AutoCull.
+    \item Import images by selecting "Import" from the sidebar.
+    \item AutoCull scans for near duplicates and low-quality images.
+    \item Review detected clusters of similar images.
+    \item Confirm deletion or move duplicates to a separate folder.
+\end{enumerate}
+
+\subsection{GUI}
+The GUI provides options for:
+\begin{itemize}
+    \item Photo importing
+    \item Viewing detected duplicates
+    \item Marking photos for deletion
+    \item Previewing detected duplicates
+    \item Batch delete/move operations
+    \item Viewing collections
+    \item Creating collections
+    \item Viewing exif data
+    \item Viewing image metrics
+\end{itemize}
+
+% -------------------------------------------------------------------------
+\section{Troubleshooting}
+
+\begin{itemize}
+    \item \textbf{Program doesn’t start:}  
+      Ensure Python 3.10+ is installed and dependencies are correctly installed.
+
+    \item \textbf{Database connection error:}  
+      Verify that PostgreSQL is running and credentials in \texttt{db\_config.json} are correct.
+
+    \item \textbf{No duplicates found:}  
+      Try lowering the \texttt{threshold} value.
+
+    \item \textbf{Slow performance:}  
+      Use smaller batches or disable subfolder recursion.
+
+    \item \textbf{Permission errors:}  
+      Run as administrator or check write permissions on output directories.
+\end{itemize}
+
+% -------------------------------------------------------------------------
+\section{About}
+
+This application was developed as part of a university project for COSC345. For more information, visit the GitHub repository: \url{https://github.com/Manwithacape/COSC345---Group_11}
+
+Please do not attempt to contact anyone regarding bugs, issues, or feature requests. These will likely not be addressed.
+
+% -------------------------------------------------------------------------
+\section{Credits and License}
+
+Developed by \textbf{Group 11, COSC345 2025 S2} as part of the AutoCull project.  
+
+Licensed under the MIT License.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+\end{document}
