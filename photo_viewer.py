@@ -152,8 +152,11 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
             tk_img = ImageTk.PhotoImage(pil_thumb)
             self.thumbs.append(tk_img)
 
+            frame = ttk.Frame(self.grid_area, padding=5)
+            frame.photo_id = photo["id"]
+
             lbl = ttk.Label(
-                self.grid_area,
+                frame,
                 image=tk_img,
                 cursor="hand2",
                 bootstyle="dark",
@@ -162,7 +165,8 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
             lbl.image = tk_img
             lbl.photo_id = photo["id"]
             lbl.photo_path = photo["file_path"]
-            lbl.pack()
+            # lbl.pack()
+            lbl.grid(row=0, column=0)
 
             lbl.bind("<Button-1>", lambda e, pid=photo["id"]: self._on_photo_click(pid))
             lbl.bind(
@@ -174,7 +178,7 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
             self._bind_thumb_context(lbl, photo_id=photo["id"])
             # -----------------------------------------------------------
 
-            self.labels.append(lbl)
+            self.labels.append(frame)
 
         self._reflow_grid()
 
