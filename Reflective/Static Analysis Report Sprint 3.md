@@ -41,3 +41,5 @@ While many of the same issues picked up in the last sprint are still present, ma
 This has greatly improved the number of low severity issues present in the team's code.
 
 Still to be worked on by the team is better commenting/documentation to improve the onbaording experience for other developers potentially joining the development effort.
+
+Overall, the score given to the entire code directory by Pylint has dropped in the last sprint. This is due to the fact that large amounts of new code has been merged in. This should be addressed within the coming sprint. It should be noted that many of the files that were present in the previous sprint have been improved upon and now score higher. 
