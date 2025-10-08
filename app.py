@@ -102,16 +102,7 @@ class AutoCullApp(ttk.Window):
         self.sidebar_buttons.add_button(
             self.left_sidebar.body, "Return", self.sidebar_buttons.return_button
         )
-        self.sidebar_buttons.cull_button = self.sidebar_buttons.add_button(
-            self.left_sidebar.body, "Cull Photos", self.sidebar_buttons.cull_photos
-        )
-        self.sidebar_buttons.cull_button.pack_forget()  # hide initially
-        self.sidebar_buttons.suggestions_button = self.sidebar_buttons.add_button(
-            self.left_sidebar.body, "Show Suggestions", self.sidebar_buttons.toggle_suggestions
-        )
         self.left_sidebar.pack(side="left", fill="y")
-
-        self.photo_viewer.refresh_photos()
 
         # ---------- Right sidebar & other viewers (scrollable) ----------
         self.right_sidebar = Sidebar(self, side="right")
