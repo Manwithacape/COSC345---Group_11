@@ -2,6 +2,7 @@
 import tkinter as tk
 import ttkbootstrap as ttk
 
+
 class ScrollableFrame(ttk.Frame):
     """A simple vertically scrollable frame for stacking widgets."""
 
@@ -33,12 +34,12 @@ class ScrollableFrame(ttk.Frame):
         self.canvas.itemconfigure(self._win, width=self.canvas.winfo_width())
 
     def _on_mousewheel(self, event):
-        if event.num == 4:        # Linux up
+        if event.num == 4:  # Linux up
             self.canvas.yview_scroll(-1, "units")
-        elif event.num == 5:      # Linux down
+        elif event.num == 5:  # Linux down
             self.canvas.yview_scroll(1, "units")
-        else:                     # Windows / macOS
-            self.canvas.yview_scroll(int(-event.delta/120), "units")
+        else:  # Windows / macOS
+            self.canvas.yview_scroll(int(-event.delta / 120), "units")
 
     def _bind_mouse(self, _):
         self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)

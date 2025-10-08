@@ -11,10 +11,10 @@ Features:
 
 Run this file to start the application.
 """
-import os, sys
+
+import os
+import sys
 import ttkbootstrap as ttk
-from ttkbootstrap.dialogs import Messagebox, Querybox
-from tkinter import filedialog
 from gui import Sidebar
 from db import Database
 from photo_importer import PhotoImporter
@@ -33,6 +33,7 @@ import tkinter as tk
 # Pillow for loading .webp logo
 try:
     from PIL import Image, ImageTk
+
     _HAS_PIL = True
 except Exception:
     _HAS_PIL = False
@@ -85,19 +86,27 @@ class AutoCullApp(ttk.Window):
         # ---------- Left sidebar ----------
         self.left_sidebar = Sidebar(self, side="left", db=self.db)
         self.sidebar_buttons.add_button(
-            self.left_sidebar.body, "View Photos", lambda: self.after(0, self._switch_to_photos)
+            self.left_sidebar.body,
+            "View Photos",
+            lambda: self.after(0, self._switch_to_photos),
         )
         self.sidebar_buttons.add_button(
-            self.left_sidebar.body, "View Collections", lambda: self.after(0, self._switch_to_collections)
+            self.left_sidebar.body,
+            "View Collections",
+            lambda: self.after(0, self._switch_to_collections),
         )
         self.sidebar_buttons.add_button(
             self.left_sidebar.body, "Import Photos", self.sidebar_buttons.import_files
         )
         self.sidebar_buttons.add_button(
-            self.left_sidebar.body, "Find Duplicates", self.sidebar_buttons.find_duplicates
+            self.left_sidebar.body,
+            "Find Duplicates",
+            self.sidebar_buttons.find_duplicates,
         )
         self.sidebar_buttons.add_button(
-            self.left_sidebar.body, "Clear Duplicates (Dev)", self.sidebar_buttons.clear_duplicates
+            self.left_sidebar.body,
+            "Clear Duplicates (Dev)",
+            self.sidebar_buttons.clear_duplicates,
         )
         self.sidebar_buttons.add_button(
             self.left_sidebar.body, "Return", self.sidebar_buttons.return_button
@@ -191,7 +200,7 @@ class AutoCullApp(ttk.Window):
         # Show/hide and place Back button depending on active view
         if isinstance(self.active_viewer, SinglePhotoViewer):
             self.back_btn.place(x=lw + 10, y=10)
-            self.back_btn.lift() 
+            self.back_btn.lift()
         else:
             self.back_btn.place_forget()
 
@@ -201,7 +210,9 @@ class AutoCullApp(ttk.Window):
 
         # File
         file_menu = ttk.Menu(menubar, tearoff=0)
-        file_menu.add_command(label="New Collection", command=lambda: print("New Collection"))
+        file_menu.add_command(
+            label="New Collection", command=lambda: print("New Collection")
+        )
         file_menu.add_command(label="Open Collection...", command=lambda: print("Open"))
         file_menu.add_separator()
         file_menu.add_command(label="Import Photos", command=self.sidebar_import_photos)
@@ -217,8 +228,12 @@ class AutoCullApp(ttk.Window):
 
         # Collections
         collections_menu = ttk.Menu(menubar, tearoff=0)
-        collections_menu.add_command(label="View Photos", command=self._switch_to_photos)
-        collections_menu.add_command(label="View Collections", command=self._switch_to_collections)
+        collections_menu.add_command(
+            label="View Photos", command=self._switch_to_photos
+        )
+        collections_menu.add_command(
+            label="View Collections", command=self._switch_to_collections
+        )
         menubar.add_cascade(label="Collections", menu=collections_menu)
 
         self.config(menu=menubar)
@@ -250,7 +265,9 @@ class AutoCullApp(ttk.Window):
         self.prev_viewer = self.active_viewer
         if self.active_viewer:
             self.active_viewer.place_forget()
-        self.single_viewer = SinglePhotoViewer(self, db=self.db, photo_path=photo_path, photo_id=photo_id)
+        self.single_viewer = SinglePhotoViewer(
+            self, db=self.db, photo_path=photo_path, photo_id=photo_id
+        )
         self.active_viewer = self.single_viewer
         self.update_layout()
 
@@ -318,7 +335,9 @@ def create_splash(master):
         img_lbl.image = img_obj  # prevent GC
         img_lbl.pack(pady=(12, 12))
     except Exception as e:
-        ttk.Label(container, text="AutoCull", font=("Segoe UI", 24, "bold")).pack(pady=(32, 8))
+        ttk.Label(container, text="AutoCull", font=("Segoe UI", 24, "bold")).pack(
+            pady=(32, 8)
+        )
         ttk.Label(container, text=f"Loading… (logo error: {e})").pack(pady=(0, 12))
 
     ttk.Label(container, text="Loading…", font=("Segoe UI", 11)).pack()

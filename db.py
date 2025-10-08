@@ -7,10 +7,12 @@ from dotenv import load_dotenv
 
 load_dotenv()  # loads DB credentials from .env
 
+
 def resource_path(filename):
-    if hasattr(sys, '_MEIPASS'):
+    if hasattr(sys, "_MEIPASS"):
         return os.path.join(sys._MEIPASS, filename)
     return os.path.join(os.path.dirname(__file__), filename)
+
 
 class Database:
     def __init__(self):
@@ -21,27 +23,27 @@ class Database:
         port = os.getenv("DB_PORT", "5432")
         try:
             self.conn = psycopg2.connect(
-                dbname=dbname,
-                user=user,
-                password=password,
-                host=host,
-                port=port
+                dbname=dbname, user=user, password=password, host=host, port=port
             )
         except OperationalError as e:
             if f'database "{dbname}" does not exist' in str(e):
                 # Connect to default database and create the target database
-                conn = psycopg2.connect(dbname="postgres", user=user, password=password, host=host, port=port)
-                conn.autocommit = True
-                with conn.cursor() as cur:
-                    cur.execute(sql.SQL("CREATE DATABASE {};").format(sql.Identifier(dbname)))
-                conn.close()
-                # Try connecting again
-                self.conn = psycopg2.connect(
-                    dbname=dbname,
+                conn = psycopg2.connect(
+                    dbname="postgres",
                     user=user,
                     password=password,
                     host=host,
-                    port=port
+                    port=port,
+                )
+                conn.autocommit = True
+                with conn.cursor() as cur:
+                    cur.execute(
+                        sql.SQL("CREATE DATABASE {};").format(sql.Identifier(dbname))
+                    )
+                conn.close()
+                # Try connecting again
+                self.conn = psycopg2.connect(
+                    dbname=dbname, user=user, password=password, host=host, port=port
                 )
             else:
                 raise
@@ -74,16 +76,18 @@ class Database:
 
     def get_collections(self):
         return self.fetch("SELECT * FROM collections ORDER BY created_at DESC")
-    
+
     def get_collection(self, collection_id):
         query = """
             SELECT * 
             FROM collections
             WHERE collection_id='%s'"""
-        return self 
-        
+        return self
+
     # ----------------- Photos -----------------
-    def add_photo(self, collection_id: int, file_path: str, file_name: str, status="undecided"):
+    def add_photo(
+        self, collection_id: int, file_path: str, file_name: str, status="undecided"
+    ):
         query = """
         INSERT INTO photos (collection_id, file_path, file_name, status)
         VALUES (%s,%s,%s,%s) RETURNING id
@@ -103,7 +107,9 @@ class Database:
         INSERT INTO faces (photo_id, x1, y1, x2, y2)
         VALUES (%s, %s, %s, %s, %s) RETURNING id
         """
-        return self.fetch(query, (photo_id, bbox[0], bbox[1], bbox[2], bbox[3]))[0]["id"]
+        return self.fetch(query, (photo_id, bbox[0], bbox[1], bbox[2], bbox[3]))[0][
+            "id"
+        ]
 
     def get_faces(self, photo_id: int):
         """
@@ -116,7 +122,7 @@ class Database:
             WHERE f.photo_id=%s
         """
         return self.fetch(query, (photo_id,))
-    
+
     def get_photos(self, collection_id=None):
         query = "SELECT * FROM photos"
         if collection_id:
@@ -147,7 +153,9 @@ class Database:
         self.execute(query, (photo_id, embedding))
 
     def get_embedding(self, photo_id):
-        return self.fetch("SELECT embedding FROM embeddings WHERE photo_id=%s", (photo_id,))
+        return self.fetch(
+            "SELECT embedding FROM embeddings WHERE photo_id=%s", (photo_id,)
+        )
 
     # ----------------- Scores -----------------
     def add_score(self, photo_id, score_type, value, scaled_value):
@@ -156,7 +164,7 @@ class Database:
 
     def get_scores(self, photo_id):
         return self.fetch("SELECT * FROM scores WHERE photo_id=%s", (photo_id,))
-    
+
     def get_scaled_scores(self, photo_id):
         return self.fetch("SELECT * FROM scores WHERE photo_id=%s", (photo_id,))
 
@@ -165,10 +173,12 @@ class Database:
         self.execute(query, (photo_id, quality_score))
 
     def get_quality_score(self, photo_id):
-        row = self.fetch("SELECT quality_score FROM photo_quality WHERE photo_id=%s", (photo_id,))
+        row = self.fetch(
+            "SELECT quality_score FROM photo_quality WHERE photo_id=%s", (photo_id,)
+        )
         if row:
             return row[0]["quality_score"]
-        return None        
+        return None
 
     # ----------------- Styles -----------------
     def add_style(self, name, description=None):
@@ -181,11 +191,14 @@ class Database:
         self.execute(query, (photo_id, style_id))
 
     def get_styles_for_photo(self, photo_id):
-        return self.fetch("""
+        return self.fetch(
+            """
             SELECT s.* FROM styles s
             JOIN photo_styles ps ON s.id = ps.style_id
             WHERE ps.photo_id=%s
-        """, (photo_id,))
+        """,
+            (photo_id,),
+        )
 
     # ----------------- Near Duplicates -----------------
     def add_near_duplicate_group(self, method=None):
@@ -198,10 +211,14 @@ class Database:
         try:
             cursor.execute(query, (method,))
             group_id = cursor.fetchone()[0]
-            print(f"[DEBUG] Created near-duplicate group_id={group_id}, method={method}")
+            print(
+                f"[DEBUG] Created near-duplicate group_id={group_id}, method={method}"
+            )
             return group_id
         except Exception as e:
-            print(f"[ERROR] Failed to create near-duplicate group (method={method}): {e}")
+            print(
+                f"[ERROR] Failed to create near-duplicate group (method={method}): {e}"
+            )
             return None
         finally:
             cursor.close()
@@ -222,7 +239,9 @@ class Database:
             cursor.execute(query, (group_id, photo_id))
             print(f"[DEBUG] Assigned photo_id={photo_id} to group_id={group_id}")
         except Exception as e:
-            print(f"[ERROR] Failed to assign photo_id={photo_id} to group_id={group_id}: {e}")
+            print(
+                f"[ERROR] Failed to assign photo_id={photo_id} to group_id={group_id}: {e}"
+            )
         finally:
             cursor.close()
 
@@ -234,11 +253,14 @@ class Database:
         query = "SELECT * FROM near_duplicate_groups"
         groups = self.fetch(query)
         for group in groups:
-            photos = self.fetch("""
+            photos = self.fetch(
+                """
                 SELECT p.* FROM photos p
                 JOIN near_duplicate_photos ndp ON p.id = ndp.photo_id
                 WHERE ndp.group_id=%s
-            """, (group["id"],))
+            """,
+                (group["id"],),
+            )
             group["photos"] = photos
         return groups
 
@@ -293,7 +315,7 @@ class Database:
         self.execute("DELETE FROM near_duplicate_photos")
         self.execute("DELETE FROM near_duplicate_groups")
         print("Cleared all near-duplicate groups and assignments.")
-        
+
     # ----------------- Queries -----------------
     def get_first_photo_for_collection(self, collection_id):
         query = "SELECT * FROM photos WHERE collection_id=%s ORDER BY id LIMIT 1"

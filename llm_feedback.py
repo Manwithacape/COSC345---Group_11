@@ -10,8 +10,10 @@ from google import genai
 # Model choice: fast & cheap; switch to "gemini-2.5-pro" for higher fidelity.
 MODEL = "gemini-2.5-flash"
 
+
 class Paragraph(BaseModel):
     paragraph: str
+
 
 # Load .env so the Gemini key can be provided outside source control.
 load_dotenv()
@@ -40,10 +42,13 @@ _SYSTEM = (
     Write one concise paragraph about the collection only refering to the above facts and what could possibly be improved."""
 )
 
+
 def _pack_facts(facts: Dict[str, Any]) -> str:
     # Keep it explicit and small so the model can't wander
     import json
+
     return "<facts>\n" + json.dumps(facts, indent=2, ensure_ascii=False) + "\n</facts>"
+
 
 def make_paragraph(user_prompt: str, facts: Dict[str, Any]) -> str:
     """
@@ -51,13 +56,7 @@ def make_paragraph(user_prompt: str, facts: Dict[str, Any]) -> str:
 
     NOTE: Parameter order is (user_prompt, facts) to match callers.
     """
-    contents = (
-        _SYSTEM
-        + "\n\nTask: "
-        + user_prompt
-        + "\n\n"
-        + _pack_facts(facts)
-    )
+    contents = _SYSTEM + "\n\nTask: " + user_prompt + "\n\n" + _pack_facts(facts)
 
     resp = _client.models.generate_content(
         model=MODEL,
@@ -71,4 +70,4 @@ def make_paragraph(user_prompt: str, facts: Dict[str, Any]) -> str:
     )
     # Prefer parsed (schema-validated) text; fall back to raw
     parsed = getattr(resp, "parsed", None)
-    return (parsed.paragraph if parsed else resp.text)
+    return parsed.paragraph if parsed else resp.text

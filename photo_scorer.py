@@ -6,11 +6,13 @@ from db import Database
 import rawpy
 from io import BytesIO
 
+
 class PhotoScorer:
     """
     Comprehensive image scoring using OpenCV and skimage.
     Stores all computed metrics in the database if a DB instance is provided.
     """
+
     def __init__(self, db: Database = None):
         self.db = db
 
@@ -21,7 +23,18 @@ class PhotoScorer:
         If RAW, extract JPEG thumbnail and score that.
         """
         import os
-        raw_extensions = {'.cr2', '.nef', '.arw', '.dng', '.rw2', '.orf', '.raf', '.srw', '.pef'}
+
+        raw_extensions = {
+            ".cr2",
+            ".nef",
+            ".arw",
+            ".dng",
+            ".rw2",
+            ".orf",
+            ".raf",
+            ".srw",
+            ".pef",
+        }
         ext = os.path.splitext(file_path)[1].lower()
         img = None
         if ext in raw_extensions:
@@ -56,28 +69,24 @@ class PhotoScorer:
         scores = {
             # ---------------- Sharpness / focus ----------------
             "laplacian_var": float(cv2.Laplacian(gray, cv2.CV_64F).var()),
-            "sobel_energy": float(np.sum(np.square(cv2.Sobel(gray, cv2.CV_64F,1,0))) +
-                                  np.sum(np.square(cv2.Sobel(gray, cv2.CV_64F,0,1)))),
-
+            "sobel_energy": float(
+                np.sum(np.square(cv2.Sobel(gray, cv2.CV_64F, 1, 0)))
+                + np.sum(np.square(cv2.Sobel(gray, cv2.CV_64F, 0, 1)))
+            ),
             # ---------------- Noise ----------------
-            "noise": float(np.mean(np.abs(gray - cv2.GaussianBlur(gray,(3,3),0)))),
-
+            "noise": float(np.mean(np.abs(gray - cv2.GaussianBlur(gray, (3, 3), 0)))),
             # ---------------- Exposure / brightness ----------------
             "brightness_mean": float(np.mean(gray)),
             "brightness_median": float(np.median(gray)),
-            "saturation_mean": float(np.mean(hsv[:,:,1])),
-            "saturation_std": float(np.std(hsv[:,:,1])),
-
+            "saturation_mean": float(np.mean(hsv[:, :, 1])),
+            "saturation_std": float(np.std(hsv[:, :, 1])),
             # ---------------- Contrast ----------------
             "contrast_std": float(np.std(gray)),
             "contrast_range": float(gray.max() - gray.min()),
-
             # ---------------- Colorfulness ----------------
             "colorfulness": self._colorfulness(img),
-
             # ---------------- Entropy / texture ----------------
             "entropy": float(self._entropy(gray)),
-
             # ---------------- Size / aspect ----------------
             "width": img.shape[1],
             "height": img.shape[0],
@@ -110,13 +119,18 @@ class PhotoScorer:
 
         # Define which metrics are "higher is better" (good if high, bad if low)
         higher_is_better = {
-            "laplacian_var", "sobel_energy", "brightness_mean", "brightness_median",
-            "saturation_mean", "contrast_std", "contrast_range", "colorfulness", "entropy"
+            "laplacian_var",
+            "sobel_energy",
+            "brightness_mean",
+            "brightness_median",
+            "saturation_mean",
+            "contrast_std",
+            "contrast_range",
+            "colorfulness",
+            "entropy",
         }
         # Metrics where "lower is better" (good if low, bad if high)
-        lower_is_better = {
-            "noise", "saturation_std"
-        }
+        lower_is_better = {"noise", "saturation_std"}
         # For width, height, aspect_ratio, treat values near the middle of the range as best
         middle_is_better = {"width", "height", "aspect_ratio"}
 
@@ -144,7 +158,7 @@ class PhotoScorer:
                 scaled_scores[metric] = float(value)  # No scaling applied
 
         return scaled_scores
-    
+
     def score_and_store(self, photo_id, file_path):
         """
         Compute all metrics and store them in the DB for the given photo_id.
@@ -157,7 +171,9 @@ class PhotoScorer:
 
         # Save all unscaled metrics
         for metric_name, value in scores.items():
-            self.db.add_score(photo_id, metric_name, float(value), scaled_scores[metric_name])
+            self.db.add_score(
+                photo_id, metric_name, float(value), scaled_scores[metric_name]
+            )
 
         # Store detected face bounding boxes
         for bbox in face_bboxes:
@@ -174,17 +190,27 @@ class PhotoScorer:
         """
         if self.db is None:
             raise ValueError("Database instance not provided.")
-        
+
         # Select metrics to include in overall quality score
         relevant_metrics = [
-            "laplacian_var", "sobel_energy", "noise", "brightness_mean",
-            "saturation_mean", "contrast_std", "colorfulness", "entropy"
+            "laplacian_var",
+            "sobel_energy",
+            "noise",
+            "brightness_mean",
+            "saturation_mean",
+            "contrast_std",
+            "colorfulness",
+            "entropy",
         ]
-        valid_scores = [scaled_scores[m] for m in relevant_metrics if m in scaled_scores]
+        valid_scores = [
+            scaled_scores[m] for m in relevant_metrics if m in scaled_scores
+        ]
         if not valid_scores:
             overall_score = 0.0
         else:
-            overall_score = float(np.mean(valid_scores)) # FOR NOW A SIMPLE AVERAGE OF THE SCALED SCORES. LATER WEIGHT THEM
+            overall_score = float(
+                np.mean(valid_scores)
+            )  # FOR NOW A SIMPLE AVERAGE OF THE SCALED SCORES. LATER WEIGHT THEM
 
         # Store overall quality score
         self.db.add_quality_score(photo_id, overall_score)
@@ -198,17 +224,19 @@ class PhotoScorer:
         (B, G, R) = cv2.split(img.astype("float"))
         rg = np.abs(R - G)
         yb = np.abs(0.5 * (R + G) - B)
-        return float(np.sqrt(rg.mean()**2 + yb.mean()**2) + 0.3 * (rg.std() + yb.std()))
+        return float(
+            np.sqrt(rg.mean() ** 2 + yb.mean() ** 2) + 0.3 * (rg.std() + yb.std())
+        )
 
     def _entropy(self, gray):
         """
         Computes Shannon entropy of a grayscale image.
         """
-        hist = cv2.calcHist([gray], [0], None, [256], [0,256])
+        hist = cv2.calcHist([gray], [0], None, [256], [0, 256])
         hist_norm = hist.ravel() / hist.sum()
         hist_norm = hist_norm[hist_norm > 0]
         return float(-np.sum(hist_norm * np.log2(hist_norm)))
-    
+
     # ------ FACE DETECTION ------
     def detect_faces(self, file_path):
         """
@@ -221,19 +249,23 @@ class PhotoScorer:
             raise ValueError(f"Cannot read image for face detection: {file_path}")
 
         # set up the face detector
-        face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+        face_cascade = cv2.CascadeClassifier(
+            cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+        )
 
         # Convert to grayscale
         gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
 
         # Detect faces
-        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+        faces = face_cascade.detectMultiScale(
+            gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30)
+        )
 
         # Convert to list of tuples (left, upper, right, lower)
         bounding_boxes = [self.convert_bbox(face) for face in faces]
 
         return bounding_boxes
-    
+
     def convert_bbox(self, bbox):
         """
         Convert (x, y, w, h) to (left, upper, right, lower) as native Python ints.

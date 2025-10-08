@@ -6,8 +6,23 @@ from photo_scorer import PhotoScorer
 from exif_reader import ExifReader
 from photo_analyzer import PhotoAnalyzer
 
+
 class PhotoImporter:
-    SUPPORTED_EXTENSIONS = (".jpg", ".jpeg", ".tif", ".tiff", '.cr2', '.nef', '.arw', '.dng', '.rw2', '.orf', '.raf', '.srw', '.pef')
+    SUPPORTED_EXTENSIONS = (
+        ".jpg",
+        ".jpeg",
+        ".tif",
+        ".tiff",
+        ".cr2",
+        ".nef",
+        ".arw",
+        ".dng",
+        ".rw2",
+        ".orf",
+        ".raf",
+        ".srw",
+        ".pef",
+    )
 
     def __init__(self, db: Database, near_dup_threshold=5):
         self.db = db
@@ -15,7 +30,9 @@ class PhotoImporter:
         self.scorer = PhotoScorer(db)
         self.photo_analyzer = PhotoAnalyzer(db)
 
-    def import_files(self, file_paths: list[str], collection_id: int, default_styles=None):
+    def import_files(
+        self, file_paths: list[str], collection_id: int, default_styles=None
+    ):
         imported_count = 0
         for file_path in file_paths:
             try:
@@ -29,8 +46,14 @@ class PhotoImporter:
     def import_folder(self, folder_path: str, collection_id: int, default_styles=None):
         folder = Path(folder_path)
         if not folder.exists() or not folder.is_dir():
-            raise ValueError(f"Folder {folder_path} does not exist or is not a directory")
-        files = [str(f) for f in folder.glob("*") if f.suffix.lower() in self.SUPPORTED_EXTENSIONS]
+            raise ValueError(
+                f"Folder {folder_path} does not exist or is not a directory"
+            )
+        files = [
+            str(f)
+            for f in folder.glob("*")
+            if f.suffix.lower() in self.SUPPORTED_EXTENSIONS
+        ]
         return self.import_files(files, collection_id, default_styles)
 
     def _import_file(self, file: Path, collection_id: int, default_styles=None):
@@ -41,9 +64,7 @@ class PhotoImporter:
         exif = ExifReader.read_exif(file)
 
         photo_id = self.db.add_photo(
-            collection_id=collection_id,
-            file_path=str(file),
-            file_name=file.name
+            collection_id=collection_id, file_path=str(file), file_name=file.name
         )
 
         # Automatically analyze new photo

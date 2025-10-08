@@ -4,6 +4,7 @@ from PIL import Image, ImageTk
 import os
 import rawpy
 
+
 class BaseThumbnailViewer(ttk.Frame):
     """
     Shared base class for displaying photo thumbnails.
@@ -16,20 +17,31 @@ class BaseThumbnailViewer(ttk.Frame):
         self.db = db
         self.thumb_size = thumb_size
         self.padding = padding
-        self.labels = []     # Tk Labels for thumbnails
-        self.thumbs = []     # ImageTk.PhotoImage refs
-        self.photos = []     # DB rows or metadata dicts
+        self.labels = []  # Tk Labels for thumbnails
+        self.thumbs = []  # ImageTk.PhotoImage refs
+        self.photos = []  # DB rows or metadata dicts
         self.selected_id = None
 
     def _open_image(self, file_path):
         """Open an image path and return a PIL Image. Handles common RAWs via rawpy."""
-        raw_extensions = {'.cr2', '.nef', '.arw', '.dng', '.rw2', '.orf', '.raf', '.srw', '.pef'}
+        raw_extensions = {
+            ".cr2",
+            ".nef",
+            ".arw",
+            ".dng",
+            ".rw2",
+            ".orf",
+            ".raf",
+            ".srw",
+            ".pef",
+        }
         ext = os.path.splitext(file_path)[1].lower()
         if ext in raw_extensions:
             with rawpy.imread(file_path) as raw:
                 thumb = raw.extract_thumb()
                 if thumb.format == rawpy.ThumbFormat.JPEG:
                     from io import BytesIO
+
                     return Image.open(BytesIO(thumb.data))
                 return Image.fromarray(thumb.data)
         return Image.open(file_path)

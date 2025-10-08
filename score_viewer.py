@@ -1,5 +1,6 @@
 from base_sidebar_viewer import BaseSidebarViewer
 
+
 class ScoreViewer(BaseSidebarViewer):
     def __init__(self, parent, db, **kwargs):
         super().__init__(parent, db, title="Photo Scores", default_height=300, **kwargs)

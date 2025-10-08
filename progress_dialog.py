@@ -2,9 +2,16 @@
 import ttkbootstrap as ttk
 import tkinter as tk
 
+
 class ProgressDialog(tk.Toplevel):
-    def __init__(self, master, title="Working...", message="Please wait...",
-                 indeterminate=True, maximum=100):
+    def __init__(
+        self,
+        master,
+        title="Working...",
+        message="Please wait...",
+        indeterminate=True,
+        maximum=100,
+    ):
         super().__init__(master)
         self.title(title)
         self.resizable(False, False)
@@ -24,7 +31,7 @@ class ProgressDialog(tk.Toplevel):
         self.progress = ttk.Progressbar(
             frm,
             mode="indeterminate" if indeterminate else "determinate",
-            maximum=self.maximum
+            maximum=self.maximum,
         )
         self.progress.pack(fill="x", pady=(0, 10))
 
@@ -42,8 +49,12 @@ class ProgressDialog(tk.Toplevel):
         # Center on parent safely (guard against masters not yet mapped)
         try:
             self.update_idletasks()
-            x = master.winfo_rootx() + (master.winfo_width() // 2 - self.winfo_width() // 2)
-            y = master.winfo_rooty() + (master.winfo_height() // 2 - self.winfo_height() // 2)
+            x = master.winfo_rootx() + (
+                master.winfo_width() // 2 - self.winfo_width() // 2
+            )
+            y = master.winfo_rooty() + (
+                master.winfo_height() // 2 - self.winfo_height() // 2
+            )
             self.geometry(f"+{x}+{y}")
         except Exception:
             pass

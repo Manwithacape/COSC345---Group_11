@@ -7,6 +7,7 @@ import numpy as np
 from sklearn.cluster import DBSCAN
 from db import Database
 
+
 class NearDuplicateDetector:
     """
     Detects near-duplicate photos using perceptual hashing and DBSCAN clustering.
@@ -32,7 +33,9 @@ class NearDuplicateDetector:
 
         :param photo_list: list of dicts, each with 'id' and 'file_path'
         """
-        self._log(f"[DEBUG] Starting batch duplicate detection for {len(photo_list)} photos.")
+        self._log(
+            f"[DEBUG] Starting batch duplicate detection for {len(photo_list)} photos."
+        )
         if not photo_list:
             return
 
@@ -57,11 +60,7 @@ class NearDuplicateDetector:
 
         hashes_np = np.array(hashes)
 
-        clustering = DBSCAN(
-            eps=self.threshold / 64,
-            min_samples=2,
-            metric="hamming"
-        )
+        clustering = DBSCAN(eps=self.threshold / 64, min_samples=2, metric="hamming")
         labels = clustering.fit_predict(hashes_np)
         self._log(f"[DEBUG] Clustering labels: {labels}")
 
@@ -82,7 +81,9 @@ class NearDuplicateDetector:
                     # Clustered: reuse group_id per cluster
                     if label not in cluster_map:
                         # Check if any photo in this cluster already has a group
-                        cluster_photos = [pid for pid, lbl in zip(photo_ids, labels) if lbl == label]
+                        cluster_photos = [
+                            pid for pid, lbl in zip(photo_ids, labels) if lbl == label
+                        ]
                         existing_group_id = None
                         for pid in cluster_photos:
                             groups = self.db.get_groups_for_photo(pid)
@@ -94,10 +95,10 @@ class NearDuplicateDetector:
                             group_id = existing_group_id
                         else:
                             group_id = self.db.add_near_duplicate_group(method="phash")
-                            
+
                         cluster_map[label] = group_id
                         # self._log(f"[DEBUG] Created cluster group_id={group_id} for label={label}")
-                 
+
                     group_id = cluster_map[label]
                     self.db.assign_photo_to_near_duplicate_group(group_id, photo_id)
                     # self._log(f"[DEBUG] photo_id={photo_id} -> group_id={group_id}")
