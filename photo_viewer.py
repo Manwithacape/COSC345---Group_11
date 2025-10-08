@@ -24,14 +24,14 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
         self.thumb_size = 120
         self.padding = 10
         self.columns = 1
-        self.labels = []
+        self.labels = []            # list of FRAMES; each frame holds an image label
         self.thumbs = []
         self.single_item_active = False
         self.selected_idx = None
         self.db = db
         self.photo_analyzer = PhotoAnalyzer(db)
 
-        # NEW: remember last number of columns so we can clear them on change
+        # remember last number of columns so we can clear them on change
         self._last_cols = 0
 
         # context menu state
@@ -151,7 +151,14 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
             frame = ttk.Frame(self.grid_area, padding=0)
             frame.photo_id = photo_id
 
-            lbl = ttk.Label(frame, image=tk_img, cursor="hand2", relief="flat")
+            # keep a small border so the selected relief is visible
+            lbl = ttk.Label(
+                frame,
+                image=tk_img,
+                cursor="hand2",
+                relief="flat",
+                borderwidth=2,
+            )
             lbl.image = tk_img
             lbl.photo_id = photo_id
             lbl.photo_path = photo["file_path"]
@@ -179,7 +186,11 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
                 ], pid=photo_id: self._show_single_photo(path, pid),
             )
 
+            # right-click delete
             self._bind_thumb_context(lbl, photo_id=photo_id)
+
+            # store a direct handle to the image-label for highlighting
+            frame._image_label = lbl
             self.labels.append(frame)
 
         self._reflow_grid()
@@ -204,19 +215,25 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
         self.select_photo(photo_id)
 
     def _select_idx(self, idx):
+        # remove previous highlight (on the image label)
         if self.selected_idx is not None and 0 <= self.selected_idx < len(self.labels):
-            self.labels[self.selected_idx].config(relief="flat")
-        self.selected_idx = idx
-        self.labels[idx].config(relief="solid")
+            prev = self.labels[self.selected_idx]
+            if hasattr(prev, "_image_label") and prev._image_label.winfo_exists():
+                prev._image_label.config(relief="flat")
 
-    # SIZE CHANGE: rebuild and reflow (important for avoiding stale columns)
+        # highlight current (on the image label)
+        self.selected_idx = idx
+        current = self.labels[idx]
+        if hasattr(current, "_image_label") and current._image_label.winfo_exists():
+            current._image_label.config(relief="solid")
+
+    # SIZE CHANGE: rebuild and reflow
     def _on_size_change(self):
         size_map = {"Small": 80, "Medium": 120, "Large": 180}
         new_size = size_map.get(self.size_var.get(), 120)
         if new_size != self.thumb_size:
             self.thumb_size = new_size
             self.refresh_photos(getattr(self, "current_collection_id", None))
-            # force a layout pass after the rebuild
             self.after_idle(self._reflow_grid)
 
     # REFLOW: compute columns fresh, clear previous columnconfigure,
@@ -236,14 +253,13 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
             return
 
         gp = self.padding
-        cell_w = self.thumb_size + gp * 2 + 10  # 10px slack for borders/shadows
+        cell_w = self.thumb_size + gp * 2 + 10  # slack for borders/shadows
 
-        # compute how many columns fit; then clamp to avoid edge overshoot
         cols = max(1, container_w // cell_w)
         while cols > 1 and (cols * cell_w + gp) > container_w:
             cols -= 1
 
-        # CLEAR previous column configs so old widths don't linger
+        # clear previous column configs
         if self._last_cols:
             for c in range(self._last_cols):
                 try:
@@ -251,7 +267,7 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
                 except Exception:
                     pass
 
-        # remove any old placements
+        # remove old placements
         for fr in self.labels:
             if fr.winfo_exists():
                 fr.grid_forget()
@@ -262,13 +278,13 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
                 r, c = divmod(i, cols)
                 fr.grid(row=r, column=c, padx=gp, pady=gp, sticky="n")
 
-        # set current columns; do NOT stretch (weight=0) to prevent overshoot
+        # set current columns; do NOT stretch to avoid overshoot
         for c in range(cols):
             self.grid_area.columnconfigure(
                 c, weight=0, minsize=self.thumb_size + gp * 2
             )
 
-        self._last_cols = cols  # remember for next clear
+        self._last_cols = cols
         self.feedback_card.lift()
 
     # ---------------- single-photo ----------------
