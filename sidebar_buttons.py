@@ -1,11 +1,11 @@
 # sidebar_buttons.py
-import ttkbootstrap as ttk
-from ttkbootstrap.dialogs import Querybox, Messagebox
-from tkinter import filedialog
 import threading
-from progress_dialog import ProgressDialog
 import os
 import shutil, uuid
+from tkinter import filedialog
+import ttkbootstrap as ttk
+from ttkbootstrap.dialogs import Querybox, Messagebox
+from progress_dialog import ProgressDialog
 
 
 class SidebarButtons:
