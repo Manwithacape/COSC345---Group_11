@@ -1,6 +1,7 @@
 # main_viewer.py
 import ttkbootstrap as ttk
 
+
 class MainViewer(ttk.Frame):
     """
     Base scrollable viewer using a Canvas + Frame.
@@ -11,14 +12,18 @@ class MainViewer(ttk.Frame):
         super().__init__(parent, **kwargs)
 
         self.canvas = ttk.Canvas(self, highlightthickness=0)
-        self.scrollbar_y = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.scrollbar_y = ttk.Scrollbar(
+            self, orient="vertical", command=self.canvas.yview
+        )
         self.canvas.configure(yscrollcommand=self.scrollbar_y.set)
 
         self.scrollbar_y.pack(side="right", fill="y")
         self.canvas.pack(side="left", fill="both", expand=True)
 
         self.inner_frame = ttk.Frame(self.canvas)
-        self.window_id = self.canvas.create_window((0, 0), window=self.inner_frame, anchor="nw")
+        self.window_id = self.canvas.create_window(
+            (0, 0), window=self.inner_frame, anchor="nw"
+        )
 
         # Guard: don't let inner-frame updates fight single-photo mode
         self.inner_frame.bind("<Configure>", self._on_inner_configure)

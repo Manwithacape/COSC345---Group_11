@@ -3,9 +3,10 @@ import ttkbootstrap as ttk
 from ttkbootstrap.dialogs import Querybox, Messagebox
 from tkinter import filedialog
 import threading
-from progress_dialog import ProgressDialog 
+from progress_dialog import ProgressDialog
 import os
 import shutil, uuid
+
 
 class SidebarButtons:
     """Holds logic for sidebar button actions."""
@@ -36,54 +37,78 @@ class SidebarButtons:
     # ----------------- Import -----------------
     def import_files(self):
         import tkinter as tk
+
         more_directories = True
         file_paths = []
 
         try:
             file_paths = filedialog.askopenfilenames(
                 title="Select Photos",
-                filetypes=[("Images", "*.jpg *.jpeg *.tif *.tiff *.cr2 *.nef *.arw *.dng *.rw2 *.orf *.raf *.srw *.pef"),
-                           ("All Files", "*.*")]
+                filetypes=[
+                    (
+                        "Images",
+                        "*.jpg *.jpeg *.tif *.tiff *.cr2 *.nef *.arw *.dng *.rw2 *.orf *.raf *.srw *.pef",
+                    ),
+                    ("All Files", "*.*"),
+                ],
             )
-            
+
             while more_directories:
                 if not file_paths:
                     return
-                more = tk.messagebox.askyesno("More Photos", "Do you want to add photos from another directory?")
+                more = tk.messagebox.askyesno(
+                    "More Photos", "Do you want to add photos from another directory?"
+                )
                 if more:
                     additional_files = filedialog.askopenfilenames(
                         title="Select More Photos",
-                        filetypes=[("Images", "*.jpg *.jpeg *.tif *.tiff *.cr2 *.nef *.arw *.dng *.rw2 *.orf *.raf *.srw *.pef"),
-                                   ("All Files", "*.*")])
+                        filetypes=[
+                            (
+                                "Images",
+                                "*.jpg *.jpeg *.tif *.tiff *.cr2 *.nef *.arw *.dng *.rw2 *.orf *.raf *.srw *.pef",
+                            ),
+                            ("All Files", "*.*"),
+                        ],
+                    )
                     if additional_files:
                         file_paths = list(file_paths) + list(additional_files)
                 else:
-                    more_directories = False 
-            # Need to put in here how to import multiple files from different directories            
+                    more_directories = False
+            # Need to put in here how to import multiple files from different directories
             if not file_paths:
                 return
 
             if not self.importer:
-                self.master.show_centered_info("Not Available", "Photo importer is not configured.")
+                self.master.show_centered_info(
+                    "Not Available", "Photo importer is not configured."
+                )
                 return
 
             # Input box for collection name
             collection_name = Querybox.get_string("Enter collection name:")
             if not collection_name:
-                self.master.show_centered_info("No Name", "Collection name is required.")
+                self.master.show_centered_info(
+                    "No Name", "Collection name is required."
+                )
                 return
 
             collection_id = self.db.add_collection(collection_name)
 
             def do_import():
-                dialog = ProgressDialog(self.master, title="Importing Photos", message="Importing photos, please wait...")
+                dialog = ProgressDialog(
+                    self.master,
+                    title="Importing Photos",
+                    message="Importing photos, please wait...",
+                )
                 dialog.start()
 
                 def finish(success, imported_count=None, error=None):
                     # Always finish/close progress dialog
                     dialog.finish(success=success, imported_count=imported_count)
                     if success:
-                        self.master.show_centered_info("Import Complete", f"Imported {imported_count} photos.")
+                        self.master.show_centered_info(
+                            "Import Complete", f"Imported {imported_count} photos."
+                        )
                         if self.photo_viewer:
                             self.photo_viewer.refresh_photos(collection_id)
                     else:
@@ -91,11 +116,11 @@ class SidebarButtons:
 
                 try:
                     imported_count = self.importer.import_files(
-                        list(file_paths),
-                        collection_id,
-                        default_styles=["General"]
+                        list(file_paths), collection_id, default_styles=["General"]
                     )
-                    self.master.after(0, lambda: finish(True, imported_count=imported_count))
+                    self.master.after(
+                        0, lambda: finish(True, imported_count=imported_count)
+                    )
                 except Exception as e:
                     self.master.after(0, lambda: finish(False, error=e))
 
@@ -108,28 +133,48 @@ class SidebarButtons:
     def find_duplicates(self):
         try:
             if not (self.importer and hasattr(self.importer, "duplicates")):
-                self.master.show_centered_info("Not Available", "Duplicate detection is not configured.")
+                self.master.show_centered_info(
+                    "Not Available", "Duplicate detection is not configured."
+                )
                 return
 
-            dialog = ProgressDialog(self.master, title="Finding Duplicates", message="Analyzing images...")
+            dialog = ProgressDialog(
+                self.master, title="Finding Duplicates", message="Analyzing images..."
+            )
             dialog.start()
 
             def task():
                 try:
                     duplicates_detector = self.importer.duplicates
-                    photo_list = self.db.get_all_photos()  # list of dicts with 'id' and 'file_path'
+                    photo_list = (
+                        self.db.get_all_photos()
+                    )  # list of dicts with 'id' and 'file_path'
                     duplicates_detector.find_duplicates_batch(photo_list)
 
-                    self.master.after(0, lambda: (
-                        dialog.finish(success=True),
-                        self.master.show_centered_info("Duplicates Found", "Near-duplicate detection complete."),
-                        self.photo_viewer.refresh_photos(None) if self.photo_viewer else None
-                    ))
+                    self.master.after(
+                        0,
+                        lambda: (
+                            dialog.finish(success=True),
+                            self.master.show_centered_info(
+                                "Duplicates Found", "Near-duplicate detection complete."
+                            ),
+                            (
+                                self.photo_viewer.refresh_photos(None)
+                                if self.photo_viewer
+                                else None
+                            ),
+                        ),
+                    )
                 except Exception as e:
-                    self.master.after(0, lambda: (
-                        dialog.finish(success=False),
-                        self.master.show_centered_info("Error", f"Error finding duplicates: {e}")
-                    ))
+                    self.master.after(
+                        0,
+                        lambda: (
+                            dialog.finish(success=False),
+                            self.master.show_centered_info(
+                                "Error", f"Error finding duplicates: {e}"
+                            ),
+                        ),
+                    )
 
             threading.Thread(target=task, daemon=True).start()
 
@@ -155,7 +200,9 @@ class SidebarButtons:
         """Development button: clear all duplicates in DB."""
         if self.db:
             self.db.clear_duplicates()
-            self.master.show_centered_info("Duplicates Cleared", "All duplicates have been cleared.")
+            self.master.show_centered_info(
+                "Duplicates Cleared", "All duplicates have been cleared."
+            )
             if self.photo_viewer:
                 self.photo_viewer.refresh_photos(None)
 
@@ -169,14 +216,16 @@ class SidebarButtons:
     def cull_photos(self):
         """Move all photos marked 'delete' to a trash folder."""
 
-        if not Messagebox.yesno("Move all photos marked 'delete' to trash?", "Cull Photos"):
+        if not Messagebox.yesno(
+            "Move all photos marked 'delete' to trash?", "Cull Photos"
+        ):
             return
-        
+
         photos = self.db.get_photos_by_suggestion("delete")
         if not photos:
             Messagebox.show_info("Cull Photos", "No photos marked 'delete'.")
             return
-        
+
         trash_dir = os.path.join(os.path.expanduser("~"), ".autocull_trash")
         os.makedirs(trash_dir, exist_ok=True)
 
@@ -184,8 +233,8 @@ class SidebarButtons:
         errors = []
 
         for row in photos:
-            photo_id = row['id'] if isinstance(row, dict) else row[0]
-            filepath = row.get('file_path') if isinstance(row, dict) else row[1]
+            photo_id = row["id"] if isinstance(row, dict) else row[0]
+            filepath = row.get("file_path") if isinstance(row, dict) else row[1]
 
             if not filepath or not os.path.exists(filepath):
                 errors.append(f"File not found: {filepath}")
@@ -226,30 +275,41 @@ class SidebarButtons:
         """
         try:
             if not self.importer:
-                self.master.show_centered_info("Not Available", "Photo importer is not configured.")
+                self.master.show_centered_info(
+                    "Not Available", "Photo importer is not configured."
+                )
                 return
-            
-            dialog = ProgressDialog(self.master, title="Generating Suggestions", message="Analyzing photos...")
+
+            dialog = ProgressDialog(
+                self.master,
+                title="Generating Suggestions",
+                message="Analyzing photos...",
+            )
             dialog.start()
 
             def task():
                 try:
                     # photo_list = self.db.get_all_photos()  # list of dicts with 'id' and 'file_path'
                     photo_list = [
-                        p for p in self.db.get_all_photos()
+                        p
+                        for p in self.db.get_all_photos()
                         if (p.get("suggestion") or "").lower() != "deleted"
                     ]
 
                     existing_groups = self.db.get_near_duplicate_groups()
                     if not existing_groups:
-                        print("[INFO] No existing duplicate groups found, running duplicate detection first.")
+                        print(
+                            "[INFO] No existing duplicate groups found, running duplicate detection first."
+                        )
                         if hasattr(self.importer, "duplicates"):
                             duplicates = self.importer.duplicates
                             duplicates.find_duplicates_batch(photo_list)
                             existing_groups = self.db.get_near_duplicate_groups()
                     else:
-                        print(f"[INFO] Found {len(existing_groups)} duplicate groups - using existing results.")
-                    
+                        print(
+                            f"[INFO] Found {len(existing_groups)} duplicate groups - using existing results."
+                        )
+
                     group_map = {g["id"]: g["photos"] for g in existing_groups}
                     handled_ids = set()
 
@@ -279,21 +339,38 @@ class SidebarButtons:
                             suggestion = "undecided"
                         self.db.update_photo_suggestion(pid, suggestion)
 
-                    self.master.after(0, lambda: (
-                        dialog.finish(success=True),
-                        self.master.show_centered_info("Suggestions Complete", "Photo suggestions have been updated."),
-                        self.photo_viewer.refresh_photos(None) if self.photo_viewer else None
-                    ))
+                    self.master.after(
+                        0,
+                        lambda: (
+                            dialog.finish(success=True),
+                            self.master.show_centered_info(
+                                "Suggestions Complete",
+                                "Photo suggestions have been updated.",
+                            ),
+                            (
+                                self.photo_viewer.refresh_photos(None)
+                                if self.photo_viewer
+                                else None
+                            ),
+                        ),
+                    )
 
                 except Exception as e:
-                    self.master.after(0, lambda e=e: (
-                        dialog.finish(success=False),
-                        self.master.show_centered_info("Error", f"Error generating suggestions: {e}")
-                    ))
+                    self.master.after(
+                        0,
+                        lambda e=e: (
+                            dialog.finish(success=False),
+                            self.master.show_centered_info(
+                                "Error", f"Error generating suggestions: {e}"
+                            ),
+                        ),
+                    )
 
             threading.Thread(target=task, daemon=True).start()
         except Exception as e:
-            self.master.show_centered_info("Error", f"Error generating suggestions: {e}")
+            self.master.show_centered_info(
+                "Error", f"Error generating suggestions: {e}"
+            )
 
     def toggle_suggestions(self):
         """Toggle suggestions view and Cull button visibility."""

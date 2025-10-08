@@ -1,5 +1,6 @@
 from base_sidebar_viewer import BaseSidebarViewer
 
+
 class ExifViewer(BaseSidebarViewer):
     def __init__(self, parent, db, **kwargs):
         super().__init__(parent, db, title="EXIF Data", default_height=400, **kwargs)

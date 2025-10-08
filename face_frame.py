@@ -2,6 +2,7 @@ import tkinter as tk
 from PIL import ImageTk
 from PIL import Image
 
+
 class FaceFrame(tk.Frame):
     """
     A Tkinter Frame that displays a cropped face from an image.
@@ -11,12 +12,13 @@ class FaceFrame(tk.Frame):
     Author:
         Daniel Paxton
     """
+
     def __init__(self, parent, photo_path, bounding_box):
 
         # Initialize the parent class
         super().__init__(parent)
 
-        # Store the photo path and bounding box 
+        # Store the photo path and bounding box
         self.photo_path = photo_path
         self.bounding_box = bounding_box
 
@@ -28,7 +30,7 @@ class FaceFrame(tk.Frame):
         self.label = tk.Label(self, image=self.photo_image)
 
         self.label.pack(fill="x", expand=True)
-    
+
     def crop_face(self):
         """
         Crops the region of the image defined by the bounding box.
@@ -37,7 +39,7 @@ class FaceFrame(tk.Frame):
             PIL.Image: The cropped image.
         """
         image = Image.open(self.photo_path)
-        cropped_image = image.crop(self.bounding_box) # (left, upper, right, lower)
+        cropped_image = image.crop(self.bounding_box)  # (left, upper, right, lower)
 
         # Resize the cropped image to 200x200 for consistent display
         cropped_image = cropped_image.resize((200, 200))

@@ -2,6 +2,7 @@ import tkinter as tk
 import ttkbootstrap as ttk
 from face_frame import FaceFrame
 
+
 class FacesFrame(tk.Frame):
     """
     A Tkinter Frame that displays multiple cropped faces from an image.
@@ -9,6 +10,7 @@ class FacesFrame(tk.Frame):
         photo_path (str): The path to the image file.
         bounding_boxes (list): A list of tuples defining the bounding boxes [(left, upper, right, lower), ...].
     """
+
     def __init__(self, parent, photo_id, db):
         # Initialize the parent class
         super().__init__(parent)
@@ -20,14 +22,11 @@ class FacesFrame(tk.Frame):
         self.face_frames = []
         self.create_face_frames()
 
-        self.toggled = True # Faces are shown by default
-        
+        self.toggled = True  # Faces are shown by default
+
         # make a collapse/expand button
         self.toggle_btn = ttk.Button(
-            self,
-            text="Faces ⯆",
-            command=self.toggle_faces,
-            bootstyle="secondary"
+            self, text="Faces ⯆", command=self.toggle_faces, bootstyle="secondary"
         )
         self.toggle_btn.pack(side="top", pady=5, fill="x")
 
@@ -46,14 +45,16 @@ class FacesFrame(tk.Frame):
         """
         if not self.photo_id:
             return
-        
-        self.face_data = self.db.get_faces(self.photo_id) # x1, y1, x2, y2, photo_path
+
+        self.face_data = self.db.get_faces(self.photo_id)  # x1, y1, x2, y2, photo_path
 
         if not self.face_data:
             return
-        
-        photo_path = self.face_data[0]['file_path']
-        bounding_boxes = [(face['x1'], face['y1'], face['x2'], face['y2']) for face in self.face_data]
+
+        photo_path = self.face_data[0]["file_path"]
+        bounding_boxes = [
+            (face["x1"], face["y1"], face["x2"], face["y2"]) for face in self.face_data
+        ]
 
         for bbox in bounding_boxes:
             face_frame = FaceFrame(self, photo_path, bbox)

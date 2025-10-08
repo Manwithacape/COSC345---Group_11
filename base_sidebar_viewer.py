@@ -1,12 +1,14 @@
 """
 defines a base class for sidebar viewers with collapsible headers, scrollable treeviews, and resizable grips.
 """
+
 import ttkbootstrap as ttk
 from db import Database
 
 MIN_COLLAPSED_HEIGHT = 30
 DEFAULT_HEIGHT = 300
 GRIP_HEIGHT = 6
+
 
 class BaseSidebarViewer(ttk.Frame):
     """
@@ -21,7 +23,14 @@ class BaseSidebarViewer(ttk.Frame):
       - Override update_content(photo_id)
     """
 
-    def __init__(self, parent, db: Database, title="Viewer", default_height=DEFAULT_HEIGHT, **kwargs):
+    def __init__(
+        self,
+        parent,
+        db: Database,
+        title="Viewer",
+        default_height=DEFAULT_HEIGHT,
+        **kwargs,
+    ):
         """
         initialize the sidebar viewer
         :param parent: parent Tkinter widget
@@ -47,7 +56,7 @@ class BaseSidebarViewer(ttk.Frame):
             self.top_bar,
             text=f"{self.title} ⯆",
             bootstyle="secondary",
-            command=self.toggle
+            command=self.toggle,
         )
         self.toggle_btn.pack(pady=0, padx=0, fill="x", anchor="w")
 
@@ -59,9 +68,7 @@ class BaseSidebarViewer(ttk.Frame):
         self.tree_scroll.pack(side="right", fill="y")
 
         self.tree = ttk.Treeview(
-            self.tree_frame,
-            show="headings",
-            yscrollcommand=self.tree_scroll.set
+            self.tree_frame, show="headings", yscrollcommand=self.tree_scroll.set
         )
         self.setup_columns(self.tree)
         self.tree.pack(fill="both", expand=True)

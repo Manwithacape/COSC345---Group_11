@@ -1,5 +1,6 @@
 from base_sidebar_viewer import BaseSidebarViewer
 
+
 class DuplicateViewer(BaseSidebarViewer):
     def __init__(self, parent, db, **kwargs):
         super().__init__(parent, db, title="Duplicates", default_height=400, **kwargs)
@@ -25,4 +26,6 @@ class DuplicateViewer(BaseSidebarViewer):
         for g in groups:
             group_id = g["group_id"]
             for p in self.db.get_photos_in_group(group_id):
-                self.tree.insert("", "end", values=(group_id, p["photo_id"], p["file_name"]))
+                self.tree.insert(
+                    "", "end", values=(group_id, p["photo_id"], p["file_name"])
+                )

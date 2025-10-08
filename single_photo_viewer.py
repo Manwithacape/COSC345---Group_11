@@ -77,7 +77,9 @@ class SinglePhotoViewer(MainViewer):
         self.feedback_card.columnconfigure(0, weight=1)
         self.feedback_card.rowconfigure(0, weight=1)
 
-        self.feedback_card.place(relx=0.0, rely=1.0, x=12, y=-12, anchor="sw", width=360)
+        self.feedback_card.place(
+            relx=0.0, rely=1.0, x=12, y=-12, anchor="sw", width=360
+        )
         self.feedback_card.lift()
         # ------------------------------------------------------------
 
@@ -86,6 +88,7 @@ class SinglePhotoViewer(MainViewer):
             self.feedback_box.delete("1.0", "end")
             self.feedback_box.insert("1.0", text)
             self.feedback_box.configure(state="disabled")
+
         self._set_feedback = _set_feedback
 
         if photo_path:
@@ -126,7 +129,9 @@ class SinglePhotoViewer(MainViewer):
             self.canvas.delete(self._img_item)
 
         cx, cy = cw // 2, ch // 2
-        self._img_item = self.canvas.create_image(cx, cy, image=self._img_tk, anchor="center")
+        self._img_item = self.canvas.create_image(
+            cx, cy, image=self._img_tk, anchor="center"
+        )
         self.canvas.tag_raise(self._img_item)
 
         # no scrolling in fit view
@@ -139,7 +144,7 @@ class SinglePhotoViewer(MainViewer):
             self.canvas.itemconfigure(self.window_id, state="normal")
         except Exception:
             pass
-        
+
     # -----------LLM Helper Methods-----------
     # --------LLM Helper Methods-------
 
@@ -177,11 +182,13 @@ class SinglePhotoViewer(MainViewer):
             except Exception:
                 scores = None
 
-            facts["photos"].append({
-                "id": pid,
-                "exif": exif,
-                "scores": scores,
-            })
+            facts["photos"].append(
+                {
+                    "id": pid,
+                    "exif": exif,
+                    "scores": scores,
+                }
+            )
 
         return facts
 
@@ -203,10 +210,7 @@ class SinglePhotoViewer(MainViewer):
 
         def work():
             try:
-                para = make_paragraph(
-                    user_prompt_photo,
-                    self._photo_facts()
-                )
+                para = make_paragraph(user_prompt_photo, self._photo_facts())
                 out = [para, ""]
                 self.after(0, lambda: self._set_feedback("\n".join(out)))
             except Exception as e:

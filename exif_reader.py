@@ -6,22 +6,34 @@ import os
 import rawpy
 import exifread
 
+
 class ExifReader:
     """
     Safely extract EXIF data from images.
     Handles bytes, rationals, nested tuples, None, and missing IFDs.
     """
+
     @staticmethod
     def read_exif(file_path: Path) -> dict:
         exif_data = {}
 
-        raw_extensions = {'.cr2', '.nef', '.arw', '.dng', '.rw2', '.orf', '.raf', '.srw', '.pef'}
+        raw_extensions = {
+            ".cr2",
+            ".nef",
+            ".arw",
+            ".dng",
+            ".rw2",
+            ".orf",
+            ".raf",
+            ".srw",
+            ".pef",
+        }
         ext = os.path.splitext(str(file_path))[1].lower()
         try:
             if ext in raw_extensions:
                 # Use exifread for RAW files
                 try:
-                    with open(str(file_path), 'rb') as f:
+                    with open(str(file_path), "rb") as f:
                         tags = exifread.process_file(f, details=False)
                     for k, v in tags.items():
                         exif_data[str(k)] = str(v)
@@ -37,7 +49,9 @@ class ExifReader:
                     if not isinstance(ifd, dict):
                         continue
                     for tag, value in ifd.items():
-                        tag_info = piexif.TAGS.get(ifd_name, {}).get(tag, {"name": str(tag)})
+                        tag_info = piexif.TAGS.get(ifd_name, {}).get(
+                            tag, {"name": str(tag)}
+                        )
                         tag_name = tag_info["name"]
                         exif_data[tag_name] = ExifReader._normalize_value(value)
         except Exception as e:

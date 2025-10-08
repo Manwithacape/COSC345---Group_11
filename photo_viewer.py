@@ -132,7 +132,9 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
 
         ranked = self.photo_analyzer.rank_by_quality([p["id"] for p in self.photos])
         rank_map = {pid: idx + 1 for idx, (pid, _) in enumerate(ranked)}
-        ranked_photos = sorted(self.photos, key=lambda p: rank_map.get(p["id"], float("inf")))
+        ranked_photos = sorted(
+            self.photos, key=lambda p: rank_map.get(p["id"], float("inf"))
+        )
 
         for photo in ranked_photos:
             photo_id = photo["id"]
@@ -172,7 +174,9 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
             lbl.bind("<Button-1>", lambda e, pid=photo_id: self._on_photo_click(pid))
             lbl.bind(
                 "<Double-1>",
-                lambda e, path=photo["file_path"], pid=photo_id: self._show_single_photo(path, pid),
+                lambda e, path=photo[
+                    "file_path"
+                ], pid=photo_id: self._show_single_photo(path, pid),
             )
 
             self._bind_thumb_context(lbl, photo_id=photo_id)
@@ -188,7 +192,11 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
 
     def _on_photo_click(self, photo_id):
         idx = next(
-            (i for i, fr in enumerate(self.labels) if getattr(fr, "photo_id", None) == photo_id),
+            (
+                i
+                for i, fr in enumerate(self.labels)
+                if getattr(fr, "photo_id", None) == photo_id
+            ),
             None,
         )
         if idx is not None:
@@ -256,7 +264,9 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
 
         # set current columns; do NOT stretch (weight=0) to prevent overshoot
         for c in range(cols):
-            self.grid_area.columnconfigure(c, weight=0, minsize=self.thumb_size + gp * 2)
+            self.grid_area.columnconfigure(
+                c, weight=0, minsize=self.thumb_size + gp * 2
+            )
 
         self._last_cols = cols  # remember for next clear
         self.feedback_card.lift()
@@ -272,7 +282,9 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
     def _ensure_context_menu(self):
         if self._ctx_menu is None:
             self._ctx_menu = tk.Menu(self, tearoff=False)
-            self._ctx_menu.add_command(label="Delete from collection", command=self._ctx_delete_selected)
+            self._ctx_menu.add_command(
+                label="Delete from collection", command=self._ctx_delete_selected
+            )
 
     def _bind_thumb_context(self, widget, photo_id: int):
         self._ensure_context_menu()
@@ -349,7 +361,9 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
         def work():
             try:
                 col_para = make_paragraph(user_prompt_collection, self._photo_facts())
-                self.after(0, lambda: self._set_feedback("— Collection —\n" + col_para + "\n"))
+                self.after(
+                    0, lambda: self._set_feedback("— Collection —\n" + col_para + "\n")
+                )
             except Exception as e:
                 self.after(0, lambda e=e: self._set_feedback(f"LLM error: {e}"))
 

@@ -1,16 +1,20 @@
 # collections_viewer.py
 import os
-import tkinter as tk                      # <-- NEW
-from tkinter import messagebox            # <-- NEW
+import tkinter as tk  # <-- NEW
+from tkinter import messagebox  # <-- NEW
 import ttkbootstrap as ttk
 from PIL import Image, ImageTk, UnidentifiedImageError
 from main_viewer import MainViewer
 
 THUMBNAIL_SIZE = (90, 90)
 
+
 class CollectionsViewer(MainViewer):
     """Scrollable list of collections with selection highlighting."""
-    def __init__(self, parent, db, photo_viewer=None, switch_to_photos_callback=None, **kwargs):
+
+    def __init__(
+        self, parent, db, photo_viewer=None, switch_to_photos_callback=None, **kwargs
+    ):
         kwargs.pop("photo_viewer", None)
         kwargs.pop("switch_to_photos_callback", None)
         super().__init__(parent, **kwargs)
@@ -36,8 +40,7 @@ class CollectionsViewer(MainViewer):
         if self._ctx_menu is None:
             self._ctx_menu = tk.Menu(self, tearoff=False)
             self._ctx_menu.add_command(
-                label="Delete collection",
-                command=self._ctx_delete_collection
+                label="Delete collection", command=self._ctx_delete_collection
             )
 
     def _on_card_context(self, event, idx: int):
@@ -56,7 +59,7 @@ class CollectionsViewer(MainViewer):
             return
         if not messagebox.askyesno(
             "Delete collection",
-            "Delete this collection and ALL its photos? This cannot be undone."
+            "Delete this collection and ALL its photos? This cannot be undone.",
         ):
             return
         try:
@@ -66,7 +69,10 @@ class CollectionsViewer(MainViewer):
             return
 
         # If the PhotoViewer was showing this collection, clear it.
-        if self.photo_viewer and getattr(self.photo_viewer, "current_collection_id", None) == cid:
+        if (
+            self.photo_viewer
+            and getattr(self.photo_viewer, "current_collection_id", None) == cid
+        ):
             self.photo_viewer.refresh_photos(None)
 
         self.refresh_collections()
@@ -84,7 +90,9 @@ class CollectionsViewer(MainViewer):
             if os.path.exists(p):
                 return p
         except Exception as e:
-            print(f"[thumb] Failed to fetch thumbnail path for coll {coll.get('id')}: {e}")
+            print(
+                f"[thumb] Failed to fetch thumbnail path for coll {coll.get('id')}: {e}"
+            )
         return None
 
     def _load_thumbnail(self, path: str) -> ImageTk.PhotoImage:
@@ -145,17 +153,23 @@ class CollectionsViewer(MainViewer):
             else:
                 thumb_lbl.configure(text="[No thumbnail]")
 
-            name_lbl = ttk.Label(card, text=coll["name"], anchor="center", padding=(0, 5))
+            name_lbl = ttk.Label(
+                card, text=coll["name"], anchor="center", padding=(0, 5)
+            )
             name_lbl.pack(side="top", fill="x")
 
             # Double-click to open
             for w in (card, thumb_lbl, name_lbl):
-                w.bind("<Double-1>", lambda e, i=idx: self._on_collection_double_click(i))
+                w.bind(
+                    "<Double-1>", lambda e, i=idx: self._on_collection_double_click(i)
+                )
 
             # ---- NEW: right-click (and Ctrl+Click on macOS) to delete ----
             for w in (card, thumb_lbl, name_lbl):
-                w.bind("<Button-3>",            lambda e, i=idx: self._on_card_context(e, i))
-                w.bind("<Control-Button-1>",    lambda e, i=idx: self._on_card_context(e, i))
+                w.bind("<Button-3>", lambda e, i=idx: self._on_card_context(e, i))
+                w.bind(
+                    "<Control-Button-1>", lambda e, i=idx: self._on_card_context(e, i)
+                )
             # ----------------------------------------------------------------
 
     def display_feedback(self):
@@ -166,10 +180,12 @@ class CollectionsViewer(MainViewer):
         """Double-click: refresh PhotoViewer and switch to it safely."""
         collection_id = self.collection_ids[idx]
         if self.switch_to_photos_callback:
+
             def update_view():
                 if self.photo_viewer:
                     # remember collection for PhotoViewer (helps after deletes)
                     self.photo_viewer.current_collection_id = collection_id
                     self.photo_viewer.refresh_photos(collection_id)
                 self.switch_to_photos_callback()
+
             self.after(0, update_view)

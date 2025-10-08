@@ -4,13 +4,22 @@ from base_viewer import BaseThumbnailViewer
 
 HIGHLIGHT_BORDER = 3
 
+
 class FilmstripViewer(BaseThumbnailViewer):
     """
     Horizontal scrolling strip of thumbnails.
     Works with the new MainViewer-based PhotoViewer.
     """
 
-    def __init__(self, parent, photo_viewer, exif_viewer=None, score_viewer=None, duplicates_viewer=None, **kwargs):
+    def __init__(
+        self,
+        parent,
+        photo_viewer,
+        exif_viewer=None,
+        score_viewer=None,
+        duplicates_viewer=None,
+        **kwargs
+    ):
         super().__init__(parent, thumb_size=80, padding=5, **kwargs)
         self.photo_viewer = photo_viewer
         self.exif_viewer = exif_viewer
@@ -18,16 +27,25 @@ class FilmstripViewer(BaseThumbnailViewer):
         self.duplicates_viewer = duplicates_viewer
 
         # Use MainViewer-style canvas
-        self.canvas = ttk.Canvas(self, height=self.thumb_size + 2*self.padding, highlightthickness=0)
-        self.scrollbar = ttk.Scrollbar(self, orient="horizontal", command=self.canvas.xview)
+        self.canvas = ttk.Canvas(
+            self, height=self.thumb_size + 2 * self.padding, highlightthickness=0
+        )
+        self.scrollbar = ttk.Scrollbar(
+            self, orient="horizontal", command=self.canvas.xview
+        )
         self.canvas.configure(xscrollcommand=self.scrollbar.set)
 
         self.scrollbar.pack(side="bottom", fill="x")
         self.canvas.pack(side="top", fill="x", expand=True)
 
         self.inner_frame = ttk.Frame(self.canvas)
-        self.window_id = self.canvas.create_window((0,0), window=self.inner_frame, anchor="nw")
-        self.inner_frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+        self.window_id = self.canvas.create_window(
+            (0, 0), window=self.inner_frame, anchor="nw"
+        )
+        self.inner_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")),
+        )
 
         self.refresh_thumbs()
 
@@ -51,12 +69,14 @@ class FilmstripViewer(BaseThumbnailViewer):
                 image=tk_img,
                 cursor="hand2",
                 bootstyle="dark",
-                relief="solid"
+                relief="solid",
             )
             thumb_lbl.image = tk_img
-            thumb_lbl.photo_id = photo_id                # keep id on widget
-            thumb_lbl.photo_path = img_path              # <-- NEW: keep path too
-            thumb_lbl.bind("<Button-1>", lambda e, pid=photo_id: self.on_thumb_click(pid))
+            thumb_lbl.photo_id = photo_id  # keep id on widget
+            thumb_lbl.photo_path = img_path  # <-- NEW: keep path too
+            thumb_lbl.bind(
+                "<Button-1>", lambda e, pid=photo_id: self.on_thumb_click(pid)
+            )
             thumb_lbl.pack(side="left", padx=self.padding, pady=self.padding)
             self.labels.append(thumb_lbl)
 
@@ -82,9 +102,14 @@ class FilmstripViewer(BaseThumbnailViewer):
 
         # Show single photo (pass both path and id)
         if hasattr(self.photo_viewer, "_show_single_photo"):
-            photo_lbl = next((lbl for lbl in self.photo_viewer.labels if lbl.photo_id == photo_id), None)
+            photo_lbl = next(
+                (lbl for lbl in self.photo_viewer.labels if lbl.photo_id == photo_id),
+                None,
+            )
             if photo_lbl:
-                self.photo_viewer._show_single_photo(photo_lbl.photo_path, photo_lbl.photo_id)  # <-- FIX
+                self.photo_viewer._show_single_photo(
+                    photo_lbl.photo_path, photo_lbl.photo_id
+                )  # <-- FIX
 
     def _scroll_to_label(self, lbl):
         """Scroll canvas to make the given thumbnail centered."""
