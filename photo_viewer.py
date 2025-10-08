@@ -95,6 +95,9 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
             self.feedback_box.insert("1.0", text)
             self.feedback_box.configure(state="disabled")
 
+        # Expose setter for use in other methods/threads
+        self._set_feedback = _set_feedback
+
         self.refresh_photos()
 
     def add_score_overlay(self, image, rank, score):
