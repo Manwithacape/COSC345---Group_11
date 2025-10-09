@@ -104,11 +104,11 @@ class AutoCullApp(
             "Find Duplicates",
             self.sidebar_buttons.find_duplicates,
         )
-        self.sidebar_buttons.add_button(
-            self.left_sidebar.body,
-            "Clear Duplicates (Dev)",
-            self.sidebar_buttons.clear_duplicates,
-        )
+        # self.sidebar_buttons.add_button(
+        #     self.left_sidebar.body,
+        #     "Clear Duplicates (Dev)",
+        #     self.sidebar_buttons.clear_duplicates,
+        # )
         self.sidebar_buttons.add_button(
             self.left_sidebar.body, "Return", self.sidebar_buttons.return_button
         )
