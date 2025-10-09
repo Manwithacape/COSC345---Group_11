@@ -111,14 +111,22 @@ class Database:
         return self.fetch(query, (photo_id,))
     
     def get_photos(self, collection_id=None):
-        query = "SELECT * FROM photos"
+        query = """
+            SELECT * FROM photos
+            WHERE (suggestion IS NULL OR suggestion != 'deleted')
+        """
+        params = []
         if collection_id:
-            query += " WHERE collection_id=%s"
-            return self.fetch(query, (collection_id,))
-        return self.fetch(query)
+            query += " AND collection_id=%s"
+            params.append(collection_id)
+        return self.fetch(query, tuple(params))
     
     def get_all_photos(self):
-        return self.fetch("SELECT * FROM photos")
+        query = """
+            SELECT * FROM photos
+            WHERE (suggestion IS NULL OR suggestion != 'deleted')
+         """
+        return self.fetch(query)
     
     def update_photo_file_path(self, photo_id, new_path):
         """Update the file path of a photo."""
@@ -290,7 +298,19 @@ class Database:
         self.execute("DELETE FROM near_duplicate_photos")
         self.execute("DELETE FROM near_duplicate_groups")
         print("Cleared all near-duplicate groups and assignments.")
-        
+
+    def get_photos_without_duplicate_group(self):
+        """
+        Return all photos that are not part of any near-duplicate group.
+        """
+        query = """
+            SELECT p.* 
+            From photos p
+            LEFT JOIN near_duplicate_photos g ON p.id = g.photo_id
+            WHERE g.photo_id IS NULL
+                AND (p.suggestion IS NULL OR p.suggestion != %s)
+        """
+        return self.fetch(query, ('deleted',))
     
     # ----------------- Queries -----------------
     def get_first_photo_for_collection(self, collection_id):

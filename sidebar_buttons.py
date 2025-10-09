@@ -100,7 +100,7 @@ class SidebarButtons:
             def task():
                 try:
                     duplicates_detector = self.importer.duplicates
-                    photo_list = self.db.get_all_photos()  # list of dicts with 'id' and 'file_path'
+                    photo_list = self.db.get_photos_without_duplicate_group()  # list of dicts with 'id' and 'file_path'
                     duplicates_detector.find_duplicates_batch(photo_list)
 
                     self.master.after(0, lambda: (
@@ -179,6 +179,7 @@ class SidebarButtons:
             trash_path = os.path.join(trash_dir, newname)
 
             shutil.move(filepath, trash_path)
+            moved_count += 1
 
             try:
                 if hasattr(self.db, "update_photo_file_path"):
@@ -224,11 +225,15 @@ class SidebarButtons:
                     ]
 
                     existing_groups = self.db.get_near_duplicate_groups()
-                    if not existing_groups:
-                        print("[INFO] No existing duplicate groups found, running duplicate detection first.")
+                    ungrouped_photos = self.db.get_photos_without_duplicate_group()
+
+                    if ungrouped_photos:
+                        print("[INFO] Found {len(ungrouped_photos)} ungrouped photos, running partial duplicate detection.")
                         if hasattr(self.importer, "duplicates"):
                             duplicates = self.importer.duplicates
-                            duplicates.find_duplicates_batch(photo_list)
+                            # Collect all photos already in groups to include in detection
+                            grouped_photos = [photo for group in existing_groups for photo in group["photos"]]
+                            duplicates.find_duplicates_batch(ungrouped_photos + grouped_photos)
                             existing_groups = self.db.get_near_duplicate_groups()
                     else:
                         print(f"[INFO] Found {len(existing_groups)} duplicate groups - using existing results.")
@@ -247,12 +252,21 @@ class SidebarButtons:
                             handled_ids.add(pid)
 
                     for photo in photo_list:
+                        current_suggestion = (photo.get("suggestion") or "").lower()
+
                         if (photo.get("suggestion") or "").lower() == "deleted":
                             continue
+
+                        # Skip if already has a non-undecided suggestion
+                        if current_suggestion in {"keep", "delete"}:
+                            continue
+
+                        # Skip if already handled in a duplicate group
                         pid = photo["id"]
                         if pid in handled_ids:
                             continue
 
+                        # Otherwise, suggest based on quality score
                         score = photo.get("score", 0.0)
                         if score < 0.4:
                             suggestion = "delete"
@@ -260,7 +274,10 @@ class SidebarButtons:
                             suggestion = "keep"
                         else:
                             suggestion = "undecided"
-                        self.db.update_photo_suggestion(pid, suggestion)
+                        
+                        # Only update if suggestion changed
+                        if suggestion != current_suggestion:
+                            self.db.update_photo_suggestion(pid, suggestion)
 
                     self.master.after(0, lambda: (
                         dialog.finish(success=True),
