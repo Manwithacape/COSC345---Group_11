@@ -1,11 +1,36 @@
-# base_viewer.py
+"""Base thumbnail viewer: loads images (incl. common RAWs), builds thumbnails,
+tracks selection, and notifies linked viewers (EXIF/score/filmstrip/faces)."""
+
+# stdlib first
+import os
+from io import BytesIO
+
+# third-party
 import ttkbootstrap as ttk
 from PIL import Image, ImageTk
-import os
 import rawpy
 
+# --- Compatibility shims (minimal) -------------------------------------------
 
-class BaseThumbnailViewer(ttk.Frame):
+# Pillow resampling compatibility (avoid E1101 and always define a value)
+try:
+    RESAMPLE_LANCZOS = Image.Resampling.LANCZOS  # type: ignore[attr-defined]
+except (NameError, AttributeError):
+    # Fall back to LANCZOS or BICUBIC; final fallback uses 0 (NEAREST).
+    RESAMPLE_LANCZOS = getattr(Image, "LANCZOS", getattr(Image, "BICUBIC", 0))
+
+# rawpy exception compatibility (avoid E1101 on some builds)
+try:
+    RawpyLibRawError = rawpy.LibRawError  # type: ignore[attr-defined]
+except AttributeError:
+    class RawpyLibRawError(Exception):
+        """Fallback when rawpy.LibRawError is unavailable."""
+        # no pass needed; docstring provides the body
+        ...
+
+class BaseThumbnailViewer(  # pylint: disable=too-many-ancestors
+    ttk.Frame
+):
     """
     Shared base class for displaying photo thumbnails.
     Handles loading images, keeping references, selection,
@@ -25,23 +50,16 @@ class BaseThumbnailViewer(ttk.Frame):
     def _open_image(self, file_path):
         """Open an image path and return a PIL Image. Handles common RAWs via rawpy."""
         raw_extensions = {
-            ".cr2",
-            ".nef",
-            ".arw",
-            ".dng",
-            ".rw2",
-            ".orf",
-            ".raf",
-            ".srw",
-            ".pef",
+            ".cr2", ".nef", ".arw", ".dng", ".rw2",
+            ".orf", ".raf", ".srw", ".pef",
         }
         ext = os.path.splitext(file_path)[1].lower()
         if ext in raw_extensions:
             with rawpy.imread(file_path) as raw:
                 thumb = raw.extract_thumb()
-                if thumb.format == rawpy.ThumbFormat.JPEG:
-                    from io import BytesIO
-
+                # Avoid direct enum reference to silence E1101 on some rawpy versions
+                is_jpeg = getattr(getattr(thumb, "format", None), "name", None) == "JPEG"
+                if is_jpeg:
                     return Image.open(BytesIO(thumb.data))
                 return Image.fromarray(thumb.data)
         return Image.open(file_path)
@@ -61,7 +79,7 @@ class BaseThumbnailViewer(ttk.Frame):
             # Scale to fit within the square
             size = int(self.thumb_size)
             img_copy = img.copy()
-            img_copy.thumbnail((size, size), Image.LANCZOS)
+            img_copy.thumbnail((size, size), RESAMPLE_LANCZOS)
 
             # Create square canvas and paste centered
             canvas = Image.new("RGB", (size, size), color=bg_color)
@@ -72,22 +90,25 @@ class BaseThumbnailViewer(ttk.Frame):
             else:
                 canvas.paste(img_copy, (x, y))
             return canvas
-        except Exception as e:
-            print(f"Failed to create uniform thumbnail for {file_path}: {e}")
+        except (OSError, RawpyLibRawError, ValueError) as exc:
+            # OSError covers PIL IO/decoding.
+            # RawpyLibRawError covers RAW decoding issues; ValueError for malformed data.
+            print(f"Failed to create uniform thumbnail for {file_path}: {exc}")
             return None
 
     def load_thumbnail(self, file_path):
-        """Return ImageTk.PhotoImage uniform square thumbnail for display."""
+        """Return ImageTk.PhotoImage uniform square thumbnail for display (or None on error)."""
         try:
             pil_thumb = self.create_uniform_thumbnail_pil(file_path)
             if pil_thumb is None:
                 return None
             return ImageTk.PhotoImage(pil_thumb)
-        except Exception as e:
-            print(f"Failed to load thumbnail for {file_path}: {e}")
+        except (OSError, ValueError) as exc:
+            print(f"Failed to load thumbnail for {file_path}: {exc}")
             return None
 
     def clear_thumbnails(self):
+        """Destroy all thumbnail labels and clear image references."""
         for lbl in self.labels:
             lbl.destroy()
         self.labels = []
@@ -108,7 +129,7 @@ class BaseThumbnailViewer(ttk.Frame):
     def _notify(self, photo_id):
         """Call updates on linked viewers if parent has them."""
         master = self.master
-        # Filmstrip, EXIF, score, duplicate viewers may exist in parent
+        # Filmstrip, EXIF, score, duplicate, and faces viewers may exist in parent
         if hasattr(master, "exif_viewer") and master.exif_viewer:
             master.exif_viewer.update_content(photo_id)
         if hasattr(master, "score_viewer") and master.score_viewer:
