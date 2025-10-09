@@ -176,8 +176,8 @@ class PhotoScorer:
             )
 
         # Store detected face bounding boxes
-        for bbox in face_bboxes:
-            self.db.create_face(photo_id, bbox)
+        # for bbox in face_bboxes:
+        #     self.db.create_face(photo_id, bbox)
 
         # Compute and store overall quality score
         overall_quality = self.average_quality_score(photo_id, scaled_scores)
