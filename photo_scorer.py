@@ -167,7 +167,7 @@ class PhotoScorer:
             raise ValueError("Database instance not provided.")
         scores = self.score_photo(file_path)
         scaled_scores = self.scale_scores(scores)
-        face_bboxes = self.detect_faces(file_path)
+        # face_bboxes = self.detect_faces(file_path)
 
         # Save all unscaled metrics
         for metric_name, value in scores.items():
