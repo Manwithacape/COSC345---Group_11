@@ -4,6 +4,7 @@ from PIL import Image, ImageTk
 from main_viewer import MainViewer
 from tkinter.scrolledtext import ScrolledText  # NEW
 from llm_feedback import make_paragraph
+from progress_dialog import ProgressDialog
 import threading
 
 
@@ -200,20 +201,58 @@ class SinglePhotoViewer(MainViewer):
 
         collection_id = getattr(self, "current_collection_id", None)
 
+        # Note: keep as a single string (no commas) to avoid tuple creation
         user_prompt_photo = (
             "Write a short paragraph (3–5 sentences) assessing the selected photo. "
-            "If constructive feedback can be given do so, act as if you are a photography teacher."
+            "If constructive feedback can be given do so, act as if you are a photography teacher. "
             "Use only the provided facts (EXIF + numeric scores). "
+            "Do not mention anything about resolution. "
             "If a detail is missing, state 'insufficient data' rather than assuming. "
             "Do not invent camera settings, locations, or subjects."
+        )
+
+        # Show loading dialog and disable the button while generating
+        try:
+            self.gen_btn.configure(state="disabled")
+        except Exception:
+            pass
+        pd = ProgressDialog(
+            self,
+            title="Generating feedback",
+            message="Asking AI for feedback...",
+            indeterminate=True,
         )
 
         def work():
             try:
                 para = make_paragraph(user_prompt_photo, self._photo_facts())
                 out = [para, ""]
-                self.after(0, lambda: self._set_feedback("\n".join(out)))
+                def on_ok():
+                    try:
+                        self._set_feedback("\n".join(out))
+                    finally:
+                        try:
+                            pd.finish(success=True)
+                        except Exception:
+                            pass
+                        try:
+                            self.gen_btn.configure(state="normal")
+                        except Exception:
+                            pass
+                self.after(0, on_ok)
             except Exception as e:
-                self.after(0, lambda e=e: self._set_feedback(f"LLM error: {e}"))
+                def on_err(e=e):
+                    try:
+                        self._set_feedback(f"LLM error: {e}")
+                    finally:
+                        try:
+                            pd.finish(success=False, error=str(e))
+                        except Exception:
+                            pass
+                        try:
+                            self.gen_btn.configure(state="normal")
+                        except Exception:
+                            pass
+                self.after(0, on_err)
 
         threading.Thread(target=work, daemon=True).start()
