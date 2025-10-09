@@ -1,5 +1,6 @@
 """
-defines a base class for sidebar viewers with collapsible headers, scrollable treeviews, and resizable grips.
+Defines a base class for sidebar viewers with collapsible headers,
+scrollable treeviews, and a resizable grip.
 """
 
 import ttkbootstrap as ttk
@@ -10,13 +11,17 @@ DEFAULT_HEIGHT = 300
 GRIP_HEIGHT = 6
 
 
-class BaseSidebarViewer(ttk.Frame):
+class BaseSidebarViewer(  # pylint: disable=too-many-ancestors, too-many-instance-attributes
+    ttk.Frame
+):
     """
     Base class for right-hand sidebar viewers.
+
     Provides:
       - Collapsible header bar
       - Scrollable Treeview
       - Resize grip
+
     Subclasses should:
       - Define self.title
       - Override setup_columns(tree)
@@ -27,23 +32,29 @@ class BaseSidebarViewer(ttk.Frame):
         self,
         parent,
         db: Database,
-        title="Viewer",
-        default_height=DEFAULT_HEIGHT,
+        title: str = "Viewer",
+        default_height: int = DEFAULT_HEIGHT,
         **kwargs,
-    ):
+    ) -> None:
         """
-        initialize the sidebar viewer
-        :param parent: parent Tkinter widget
-        :param db: Database instance for data access
-        :param title: Title for the header bar
-        :param default_height: Default expanded height
-        :param kwargs: additional ttk.Frame parameters
+        Initialize the sidebar viewer.
+
+        Args:
+            parent: Parent Tkinter/ttk widget.
+            db: Database instance for data access.
+            title: Title for the header bar.
+            default_height: Default expanded height.
+            **kwargs: Additional ttk.Frame parameters.
         """
         super().__init__(parent, **kwargs)
         self.db = db
         self.title = title
         self.collapsed = False
         self.expanded_height = default_height
+
+        # Predeclare resize handler state to avoid attribute-defined-outside-init
+        self._start_y = 0
+        self._start_height = default_height
 
         self.pack_propagate(False)
         self.configure(height=self.expanded_height)
@@ -84,16 +95,17 @@ class BaseSidebarViewer(ttk.Frame):
         self.grip.bind("<B1-Motion>", self._do_resize)
 
     # ----------------- Must Override -----------------
-    def setup_columns(self, tree: ttk.Treeview):
-        """Define columns in subclass."""
+    def setup_columns(self, tree: ttk.Treeview) -> None:
+        """Define Treeview columns in subclass."""
         raise NotImplementedError
 
-    def update_content(self, photo_id):
-        """Populate tree in subclass."""
+    def update_content(self, photo_id) -> None:  # type: ignore[override]
+        """Populate tree with rows in subclass."""
         raise NotImplementedError
 
     # ----------------- Toggle -----------------
-    def toggle(self):
+    def toggle(self) -> None:
+        """Collapse/expand the viewer and update header text."""
         if self.collapsed:
             self.configure(height=self.expanded_height)
             self.tree_frame.pack(fill="both", expand=True)
@@ -109,13 +121,15 @@ class BaseSidebarViewer(ttk.Frame):
             self.collapsed = True
 
     # ----------------- Resize -----------------
-    def _start_resize(self, event):
+    def _start_resize(self, _event) -> None:
+        """Begin drag-resize: capture starting mouse Y and current height."""
         self._start_y = self.grip.winfo_rooty()
         self._start_height = self.winfo_height()
         if self.collapsed:
             self.toggle()
 
-    def _do_resize(self, event):
+    def _do_resize(self, _event) -> None:
+        """Resize the viewer height as the mouse is dragged."""
         mouse_y = self.grip.winfo_pointery()
         delta = mouse_y - self._start_y
         new_height = max(MIN_COLLAPSED_HEIGHT, self._start_height + delta)
@@ -123,6 +137,7 @@ class BaseSidebarViewer(ttk.Frame):
         self.configure(height=new_height)
 
     # ----------------- Helpers -----------------
-    def clear_tree(self):
+    def clear_tree(self) -> None:
+        """Remove all rows from the Treeview."""
         for item in self.tree.get_children():
             self.tree.delete(item)
