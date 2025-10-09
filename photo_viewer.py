@@ -8,6 +8,7 @@ from base_viewer import BaseThumbnailViewer
 from PIL import Image, ImageTk, ImageDraw, ImageFont
 from photo_analyzer import PhotoAnalyzer
 from llm_feedback import make_paragraph
+from progress_dialog import ProgressDialog
 import threading
 
 
@@ -362,13 +363,47 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
             "Do not invent camera settings, locations, or subjects."
         )
 
+        # Disable button and show a loading dialog while generating
+        try:
+            self.gen_btn.configure(state="disabled")
+        except Exception:
+            pass
+        pd = ProgressDialog(
+            self,
+            title="Generating feedback",
+            message="Asking AI for collection feedback...",
+            indeterminate=True,
+        )
+
         def work():
             try:
                 col_para = make_paragraph(user_prompt_collection, self._photo_facts())
-                self.after(
-                    0, lambda: self._set_feedback("— Collection —\n" + col_para + "\n")
-                )
+                def on_ok():
+                    try:
+                        self._set_feedback("— Collection —\n" + col_para + "\n")
+                    finally:
+                        try:
+                            pd.finish(success=True)
+                        except Exception:
+                            pass
+                        try:
+                            self.gen_btn.configure(state="normal")
+                        except Exception:
+                            pass
+                self.after(0, on_ok)
             except Exception as e:
-                self.after(0, lambda e=e: self._set_feedback(f"LLM error: {e}"))
+                def on_err(e=e):
+                    try:
+                        self._set_feedback(f"LLM error: {e}")
+                    finally:
+                        try:
+                            pd.finish(success=False, error=str(e))
+                        except Exception:
+                            pass
+                        try:
+                            self.gen_btn.configure(state="normal")
+                        except Exception:
+                            pass
+                self.after(0, on_err)
 
         threading.Thread(target=work, daemon=True).start()
