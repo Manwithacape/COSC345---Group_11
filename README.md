@@ -34,10 +34,13 @@
   - [Dependencies](#dependencies)
   - [Configuration and Setup Notes](#configuration-and-setup-notes)
   - [Best Practices and Important Warnings](#best-practices-and-important-warnings)
+  - [License](#license)
+  - [Roadmap](#roadmap)
+  - [Acknowledgments](#acknowledgments)
 
 ## Project Overview
 
-AutoCull is a comprehensive photo culling and scoring application designed to help photographers manage their photo collections efficiently. The application features a dark-themed interface, sidebar navigation, EXIF data display, scoring, duplicate detection, and more.
+AutoCull is a photo culling and scoring application designed to help photographers manage their photo collections more efficiently. The application features a dark-themed interface, sidebar navigation, EXIF data display, scoring, duplicate detection, and more. Intended to be used post shoot and pre-post-processing. AutoCull should be capable of completing the majority of culling in a fraction of the time the same operation would take a human.
 
 ## High-level Description of Modules
 
@@ -309,3 +312,29 @@ Key methods include `__init__`, image loading/rendering, resizing handling, and 
 - Test thoroughly with different photo formats, especially RAW files.
 - Regularly back up your database to prevent data loss.
 - When using AI models for feedback generation, monitor API usage limits.
+
+## License
+
+This project is licensed under the MIT License.
+
+You are free to use, modify, and distribute this software for any purpose, provided that the original license text and attribution are included with all copies or substantial portions of the software.
+
+The software is provided “as is”, without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement. The authors are not liable for any claim, damages, or other liability arising from use of the software.
+
+## Roadmap
+
+- [ ] Add face clustering visualization
+- [ ] Improve RAW decoding performance
+- [ ] Implement undo/redo for scoring actions
+- [ ] Add multi-threaded import pipeline
+
+## Acknowledgments
+
+AutoCull was developed by Group 11 as part of COSC345 coursework at the University of Otago.
+
+Thanks to:
+
+- Sherlock Licorich for his continued patience towards the project
+- ttkbootstrap and Pillow for the beautiful GUI
+- rawpy and OpenCV for RAW and image analysis
+- Google Gemini for AI-assisted feedback

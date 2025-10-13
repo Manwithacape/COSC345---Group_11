@@ -69,6 +69,7 @@ This document serves as a comprehensive guide for end users, covering installati
     \item Disk space: Minimum 1 GB free
 \end{itemize}
 
+
 % -------------------------------------------------------------------------
 \section{Installation Guide}
 
@@ -130,6 +131,72 @@ python app.py
 If the program launches successfully, you should see the AutoCull interface.
 
 % -------------------------------------------------------------------------
+
+\section{Configuration}
+
+AutoCull requires a database configuration file named \texttt{db\_config.json} or environment variables defined in a \texttt{.env} file in the project root.
+
+\begin{lstlisting}[style=console]
+{
+    "dbname": "autocull_db",
+    "user": "autocull_user",
+    "password": "yourpassword",
+    "host": "localhost",
+    "port": 5432
+}
+\end{lstlisting}
+
+Ensure this file is present before running the application.
+
+
+% -------------------------------------------------------------------------
+\section{Dependencies}
+
+AutoCull relies on several Python libraries for image processing, database interaction, and machine learning.  
+All dependencies can be installed automatically using the \texttt{requirements.txt} file included with the project.
+
+\begin{itemize}
+    \item \textbf{ImageHash} – Perceptual hashing for duplicate detection
+    \item \textbf{numpy} – Numerical operations and data manipulation
+    \item \textbf{opencv\_python} – Image analysis and computer vision tools
+    \item \textbf{piexif} – EXIF metadata reading and writing
+    \item \textbf{Pillow} – Image loading, display, and format conversion
+    \item \textbf{python-dotenv} – Environment variable and configuration management
+    \item \textbf{scikit\_learn} – Machine learning and clustering algorithms
+    \item \textbf{scikit-image} – Advanced image processing utilities
+    \item \textbf{ttkbootstrap} – Modern themed interface for Tkinter
+    \item \textbf{rawpy} – RAW image file decoding
+    \item \textbf{psycopg2-binary} – PostgreSQL database connectivity
+    \item \textbf{google-genai} – Integration for Google Gemini-based text generation
+    \item \textbf{torch} – Core PyTorch deep learning framework
+    \item \textbf{torchvision} – Vision utilities for PyTorch models
+    \item \textbf{transformers} – Access to pretrained deep learning models
+    \item \textbf{face\_recognition} – Face detection and recognition functionality
+    \item \textbf{exifread} – Lightweight EXIF metadata extraction
+    \item \textbf{CLIP (OpenAI)} – Image-text embedding model for similarity and semantic scoring
+\end{itemize}
+
+To install all dependencies:
+\begin{lstlisting}[style=console]
+pip install -r requirements.txt
+\end{lstlisting}
+
+
+% -------------------------------------------------------------------------
+
+\section{Key Features}
+
+\begin{itemize}
+    \item Intelligent duplicate detection using perceptual hashing
+    \item Photo scoring based on exposure, focus, and composition
+    \item EXIF metadata viewer
+    \item Collection management interface
+    \item Integrated PostgreSQL backend for image data
+    \item Lightweight, dark-themed Tkinter GUI
+\end{itemize}
+
+
+% -------------------------------------------------------------------------
 \section{Using AutoCull}
 
 \subsection{Basic Workflow}
@@ -175,6 +242,19 @@ The GUI provides options for:
     \item \textbf{Permission errors:}  
       Run as administrator or check write permissions on output directories.
 \end{itemize}
+
+% -------------------------------------------------------------------------
+
+\section{Uninstallation}
+
+To remove AutoCull, delete the application folder and its virtual environment.  
+If desired, remove the PostgreSQL database using:
+
+\begin{lstlisting}[style=console]
+DROP DATABASE autocull_db;
+DROP USER autocull_user;
+\end{lstlisting}
+
 
 % -------------------------------------------------------------------------
 \section{About}
