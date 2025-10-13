@@ -135,22 +135,25 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
             self.grid_area.pack(fill="both", expand=True)
 
         # self.photos = self.db.get_photos(collection_id)
-        self.photos = [
-            p for p in self.db.get_photos(collection_id) 
-            if (p.get("suggestion") or "").lower() != "deleted"]
+        # self.photos = [
+        #     p for p in self.db.get_photos(collection_id) 
+        #     if (p.get("suggestion") or "").lower() != "deleted"]
+        photos = [p for p in self.db.get_photos(collection_id)]
 
         # Compute rankings
-        ranked = self.photo_analyzer.rank_by_quality([p["id"] for p in self.photos])
+        ranked = self.photo_analyzer.rank_by_quality(p["id"] for p in photos)
         rank_map = {pid: idx + 1 for idx, (pid, _) in enumerate(ranked)}
 
         ranked_photos = sorted(
-            self.photos,
+            photos,
             key=lambda p: rank_map.get(p["id"], float("inf"))
         )
 
         for photo in ranked_photos:
             photo_id = photo["id"]
-
+            if photo["suggestion"] == "deleted":
+                continue  # skip deleted photos
+            
             # Start from a uniform, letterboxed PIL thumbnail
             pil_thumb = self.create_uniform_thumbnail_pil(photo["file_path"]) or None
             if pil_thumb is None:

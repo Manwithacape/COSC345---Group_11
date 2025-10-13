@@ -210,33 +210,33 @@ class PhotoScorer:
         return float(-np.sum(hist_norm * np.log2(hist_norm)))
     
     # ------ FACE DETECTION ------
-    # def detect_faces(self, file_path):
-    #     """
-    #     Detect faces in the image using OpenCV's Haar cascades.
-    #     Returns a list of bounding boxes [(x, y, w, h), ...].
-    #     """
-    #     # attempt to read the image
-    #     cv_image = cv2.imread(file_path)
-    #     if cv_image is None:
-    #         raise ValueError(f"Cannot read image for face detection: {file_path}")
+    def detect_faces(self, file_path):
+        """
+        Detect faces in the image using OpenCV's Haar cascades.
+        Returns a list of bounding boxes [(x, y, w, h), ...].
+        """
+        # attempt to read the image
+        cv_image = cv2.imread(file_path)
+        if cv_image is None:
+            raise ValueError(f"Cannot read image for face detection: {file_path}")
 
-    #     # set up the face detector
-    #     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+        # set up the face detector
+        face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-    #     # Convert to grayscale
-    #     gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
+        # Convert to grayscale
+        gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
 
-    #     # Detect faces
-    #     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+        # Detect faces
+        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
-    #     # Convert to list of tuples (left, upper, right, lower)
-    #     bounding_boxes = [self.convert_bbox(face) for face in faces]
+        # Convert to list of tuples (left, upper, right, lower)
+        bounding_boxes = [self.convert_bbox(face) for face in faces]
 
-    #     return bounding_boxes
+        return bounding_boxes
     
-    # def convert_bbox(self, bbox):
-    #     """
-    #     Convert (x, y, w, h) to (left, upper, right, lower) as native Python ints.
-    #     """
-    #     x, y, w, h = bbox
-    #     return (int(x), int(y), int(x + w), int(y + h))
+    def convert_bbox(self, bbox):
+        """
+        Convert (x, y, w, h) to (left, upper, right, lower) as native Python ints.
+        """
+        x, y, w, h = bbox
+        return (int(x), int(y), int(x + w), int(y + h))

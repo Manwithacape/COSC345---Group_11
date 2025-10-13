@@ -19,8 +19,9 @@ class PhotoImporter:
         imported_count = 0
         for file_path in file_paths:
             try:
-                self._import_file(Path(file_path), collection_id, default_styles)
-                imported_count += 1
+                result = self._import_file(Path(file_path), collection_id, default_styles)
+                if result and result[1]:  # if new import
+                    imported_count += 1
             except Exception as e:
                 print(f"Skipping {file_path}: {e}")
         print(f"Imported {imported_count} photos")
@@ -36,6 +37,11 @@ class PhotoImporter:
     def _import_file(self, file: Path, collection_id: int, default_styles=None):
         if file.suffix.lower() not in self.SUPPORTED_EXTENSIONS:
             raise ValueError(f"Unsupported file type: {file.suffix}")
+
+        existing = self.db.fetch("SELECT id FROM photos WHERE file_path = %s", (str(file),))
+        if existing:
+            print(f"Photo {file} already imported, skipping.")
+            return existing[0]["id"], False
 
         # --- Extract EXIF using the dedicated reader ---
         exif = ExifReader.read_exif(file)
@@ -68,4 +74,4 @@ class PhotoImporter:
             print(f"Failed to score {file.name}: {e}")
 
         print(f"Imported {file}")
-        return photo_id
+        return photo_id, True

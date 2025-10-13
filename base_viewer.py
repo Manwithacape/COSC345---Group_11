@@ -41,7 +41,11 @@ class BaseThumbnailViewer(ttk.Frame):
         Returns None on error.
         """
         try:
-            img = self._open_image(file_path)
+            if "autocull_trash" not in file_path:
+                img = self._open_image(file_path)
+            else:
+                print(f"[INFO] Skipping thumbnail for trash image: {file_path}")
+                return None
             # Ensure RGB (avoid issues with palette/LA modes)
             if img.mode not in ("RGB", "RGBA"):
                 img = img.convert("RGB")

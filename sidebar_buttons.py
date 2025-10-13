@@ -165,29 +165,56 @@ class SidebarButtons:
 
         moved_count = 0
         errors = []
+        moved_files = []
 
-        for row in photos:
-            photo_id = row['id'] if isinstance(row, dict) else row[0]
-            filepath = row.get('file_path') if isinstance(row, dict) else row[1]
+        try:
+            with self.db.conn:
+                with self.db.conn.cursor() as cur:
+                    for row in photos:
+                        photo_id = row['id'] if isinstance(row, dict) else row[0]
+                        filepath = row.get('file_path') if isinstance(row, dict) else row[1]
 
-            if not filepath or not os.path.exists(filepath):
-                errors.append(f"File not found: {filepath}")
-                continue
+                        if not filepath or not os.path.exists(filepath):
+                            errors.append(f"File not found: {filepath}")
+                            continue
 
-            _, ext = os.path.splitext(filepath)
-            newname = f"{photo_id}_{uuid.uuid4().hex}{ext}"
-            trash_path = os.path.join(trash_dir, newname)
+                        _, ext = os.path.splitext(filepath)
+                        newname = f"{photo_id}_{uuid.uuid4().hex}{ext}"
+                        trash_path = os.path.join(trash_dir, newname)
 
-            shutil.move(filepath, trash_path)
-            moved_count += 1
+                        try:
+                            shutil.move(filepath, trash_path)
+                            moved_files.append((trash_path, filepath)) 
+                            moved_count += 1
 
-            try:
-                if hasattr(self.db, "update_photo_file_path"):
-                    self.db.update_photo_file_path(photo_id, trash_path)
-                self.db.update_photo_suggestion(photo_id, "deleted")
-            except Exception as e:
-                errors.append(f"Photo id {row}: {e}")
+                            # Update DB entries within transaction
+                            cur.execute("UPDATE photos SET file_path=%s, suggestion='deleted' WHERE id=%s", (trash_path, photo_id))
+                        except Exception as e:
+                            errors.append(f"Failed to move photo {photo_id}: {e}")
+                            raise # rollback transaction
+                        
+                # If we reach here, transaction was successful
 
+            summary = f"Moved {moved_count} photos to trash"
+
+            if moved_count > 0:
+                self.clear_duplicates()
+
+            if errors:
+                summary += "\nSome errors occured:\n" + "\n".join(errors[:10])
+            Messagebox.show_info("Cull Photos", summary)
+
+        except Exception as e:
+            # Rollback any file moves if DB transaction failed
+            print(f"[ERROR] Cull failed, rolling back: {e}")
+            for trash_path, original_path in moved_files:
+                try:
+                    shutil.move(trash_path, original_path)
+                except Exception as rollback_err:
+                    print(f"[ERROR] Failed to rollback move of {trash_path} to {original_path}: {rollback_err}")
+            Messagebox.show_info("Cull Error", f"An error occurred while culling photos: {e}")
+
+        # Rerfresh UI
         try:
             self.photo_viewer.refresh_photos()
         except Exception:
@@ -195,12 +222,6 @@ class SidebarButtons:
                 self.master.update_layout()
             except Exception:
                 pass
-
-        summary = f"Moved {moved_count} photos to trash"
-
-        if errors:
-            summary += "\nSome errors occured:\n" + "\n".join(errors[:10])
-        Messagebox.show_info("Cull Photos", summary)
 
     # ------------------- Show Suggestions ----------------
     def show_suggestions(self):
