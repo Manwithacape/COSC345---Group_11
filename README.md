@@ -277,19 +277,15 @@ Key methods include `__init__`, image loading/rendering, resizing handling, and 
 
 ## Usage Instructions
 
+See `End User.pdf` for more information
+
 1. Ensure all dependencies are installed (see Dependencies section).
 2. Set up your PostgreSQL database with appropriate credentials.
 3. Run the `app.py` file to launch the AutoCull application.
 
 ## Dependencies
 
-- Python 3.x
-- Tkinter
-- ttkbootstrap
-- Pillow (PIL)
-- rawpy
-- OpenCV (cv2) for image analysis prototypes
-- PyQt5 (for prototype GUI only)
+See `requirements.txt`
 
 ## Configuration and Setup Notes
 
