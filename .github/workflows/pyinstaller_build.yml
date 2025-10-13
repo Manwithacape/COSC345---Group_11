@@ -19,39 +19,21 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
 
+      - name: Create config.json template
+        run: |
+          echo '{"gemini_api_key": "YOUR_API_KEY_HERE"}' > config.json
+
       - name: Build Windows executable
-        run: pyinstaller --onefile --windowed app.py --add-data "schema.sql;." --icon "app.ico"
+        run: pyinstaller app.spec
+
+      - name: Rename executable and create AutoCull folder
+        run: |
+          mkdir AutoCull
+          move dist\app.exe AutoCull\AutoCull.exe
+          copy config.json AutoCull\
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-executable-windows
-          path: dist/app.exe
-
-  build-mac:
-    strategy:
-      matrix:
-        os: [macos-13, macos-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install pyinstaller
-
-      - name: Build Mac executable
-        run: pyinstaller --onefile --windowed app.py --add-data "schema.sql:."
-
-      - name: Upload Mac artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-executable-mac-${{ matrix.os }}
-          path: dist/app
+          name: AutoCull-Windows
+          path: AutoCull/

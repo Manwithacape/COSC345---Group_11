@@ -13,7 +13,6 @@ def resource_path(filename):
         return os.path.join(sys._MEIPASS, filename)
     return os.path.join(os.path.dirname(__file__), filename)
 
-
 class Database:
     def __init__(self):
         dbname = os.getenv("DB_NAME", "autocull_db")

@@ -34,7 +34,6 @@ __pypackages__/
 # PyInstaller
 #  Usually these files are written by a python script from a template
 *.manifest
-*.spec
 
 # Installer logs
 pip-log.txt

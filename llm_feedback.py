@@ -2,6 +2,7 @@
 # llm_feedback.py
 import os
 from typing import Dict, Any
+import sys 
 
 from dotenv import load_dotenv
 from pydantic import BaseModel
@@ -18,18 +19,61 @@ class Paragraph(BaseModel):
 # Load .env so the Gemini key can be provided outside source control.
 load_dotenv()
 
+def get_executable_dir():
+    """Get the directory where the executable is located."""
+    if getattr(sys, 'frozen', False):
+        # Running as PyInstaller executable
+        return os.path.dirname(sys.executable)
+    else:
+        # Running as script
+        return os.path.dirname(os.path.abspath(__file__))
+
+def get_api_key_from_config():
+    """Load the Gemini API key from a config.json file in the executable directory."""
+    import json
+    
+    # Look for config.json in the same directory as the executable
+    exe_dir = get_executable_dir()
+    config_path = os.path.join(exe_dir, "config.json")
+    
+    print(f"Looking for config.json at: {config_path}")
+    
+    try:
+        with open(config_path, "r") as f:
+            print("Loading API key from config.json")
+            config = json.load(f)
+            return config.get("gemini_api_key")
+    except FileNotFoundError:
+        print(f"config.json not found at {config_path}")
+        return None
+    except Exception as e:
+        print(f"Error reading config.json: {e}")
+        return None
 
 def _build_client() -> genai.Client:
     """Return a configured Gemini client or raise for missing credentials."""
+
+    # Try to get the API key from environment variables or config file
     api_key = (
         os.getenv("GEMINI_API_KEY")
         or os.getenv("GOOGLE_API_KEY")
         or os.getenv("GENAI_API_KEY")
     )
+
+
+    ## If not found in env, try config file
     if not api_key:
-        raise RuntimeError(
-            "Missing Gemini API key. Set GEMINI_API_KEY (or GOOGLE_API_KEY) in your environment."
-        )
+
+        print("GEMINI_API_KEY not found in environment variables. Trying config file...")
+        api_key = get_api_key_from_config();
+
+        # If still not found crash with an error
+        if not api_key:
+            raise RuntimeError(
+                "Missing Gemini API key. Set GEMINI_API_KEY (or GOOGLE_API_KEY) in your environment, or provide it in config.json"
+            )
+        
+    print("Using Gemini API key:", api_key[:4] + "..." + api_key[-4:])  # Print partial key for verification
     return genai.Client(api_key=api_key)
 
 
