@@ -2,21 +2,30 @@
 import ttkbootstrap as ttk
 import tkinter as tk
 
-
 class ProgressDialog(tk.Toplevel):
     def __init__(
         self,
-        master,
-        title="Working...",
-        message="Please wait...",
-        indeterminate=True,
-        maximum=100,
+        master,  # Parent widget
+        title="Working...",  # Window title
+        message="Please wait...",  # Message displayed above progress bar
+        indeterminate=True,  # Whether to show an indeterminate progress bar
+        maximum=100,  # Maximum value for the determinate progress bar
     ):
+        """
+        Initialize a ProgressDialog.
+
+        Parameters:
+            master (tk.Widget): Parent widget that owns this dialog.
+            title (str): Title of the dialog window.
+            message (str): Message displayed above the progress bar.
+            indeterminate (bool): If True, shows an indeterminate progress bar; otherwise, a determinate one.
+            maximum (int): Maximum value for the progress bar when in determinate mode.
+        """
         super().__init__(master)
         self.title(title)
-        self.resizable(False, False)
-        self.transient(master)
-        self.grab_set()
+        self.resizable(False, False)  # Make window non-resizable
+        self.transient(master)  # Set as transient dialog to master
+        self.grab_set()  # Grab all events for this window
 
         self.indeterminate = indeterminate
         self.maximum = maximum
@@ -92,11 +101,14 @@ class ProgressDialog(tk.Toplevel):
             pass
 
     def finish(self, success=True, imported_count=None, error=None, delay=200):
-        """Stop animation and close the dialog.
+        """
+        Stop animation and close the dialog.
 
-        - success: bool (unused by caller in your code, but available)
-        - imported_count / error: optional extras we briefly display
-        - delay: milliseconds to wait before destroying so user can see final message
+        Parameters:
+            success (bool): Whether the operation was successful.
+            imported_count (int, optional): Number of items processed if successful.
+            error (str, optional): Error message to display if unsuccessful.
+            delay (int): Milliseconds to wait before destroying so user can see final message.
         """
         try:
             # stop any running indeterminate animation
