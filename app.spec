@@ -50,7 +50,8 @@ a = Analysis(
         'rawpy',
         'piexif',
         'imagehash',
-        'ttkbootstrap'
+        'ttkbootstrap',
+        'exifead'
     ],
     hookspath=[],
     hooksconfig={},
