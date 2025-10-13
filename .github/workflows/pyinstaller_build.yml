@@ -26,14 +26,23 @@ jobs:
       - name: Build Windows executable
         run: pyinstaller app.spec
 
-      - name: Rename executable and create AutoCull folder
+      - name: Create AutoCull distribution folder
         run: |
-          mkdir AutoCull
-          move dist\app.exe AutoCull\AutoCull.exe
-          copy config.json AutoCull\
+          New-Item -ItemType Directory -Force -Path "AutoCull"
+          Copy-Item "dist\app.exe" -Destination "AutoCull\AutoCull.exe"
+          Copy-Item "config.json" -Destination "AutoCull\"
+          
+      - name: Set file permissions
+        run: |
+          icacls "AutoCull\AutoCull.exe" /grant Everyone:F
+          icacls "AutoCull\config.json" /grant Everyone:F
+
+      - name: Create zip archive
+        run: |
+          Compress-Archive -Path "AutoCull\*" -DestinationPath "AutoCull-Windows.zip"
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
           name: AutoCull-Windows
-          path: AutoCull/
+          path: AutoCull-Windows.zip
