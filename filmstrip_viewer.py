@@ -1,9 +1,9 @@
 # filmstrip_viewer.py
+
 import ttkbootstrap as ttk
 from base_viewer import BaseThumbnailViewer
 
 HIGHLIGHT_BORDER = 3
-
 
 class FilmstripViewer(BaseThumbnailViewer):
     """
@@ -20,6 +20,17 @@ class FilmstripViewer(BaseThumbnailViewer):
         duplicates_viewer=None,
         **kwargs
     ):
+        """
+        Initialize FilmstripViewer.
+
+        Args:
+            parent: Parent widget for the filmstrip.
+            photo_viewer: Main PhotoViewer instance to sync with.
+            exif_viewer (optional): EXIF Viewer instance to display metadata.
+            score_viewer (optional): Score Viewer instance to display ratings.
+            duplicates_viewer (optional): Duplicates Viewer instance.
+            **kwargs: Additional arguments for the BaseThumbnailViewer.
+        """
         super().__init__(parent, thumb_size=80, padding=5, **kwargs)
         self.photo_viewer = photo_viewer
         self.exif_viewer = exif_viewer
@@ -50,7 +61,10 @@ class FilmstripViewer(BaseThumbnailViewer):
         self.refresh_thumbs()
 
     def refresh_thumbs(self):
-        """Rebuild filmstrip from current photo viewer thumbnails."""
+        """
+        Rebuild filmstrip from current photo viewer thumbnails.
+        Clears existing thumbnails and loads new ones from the photo viewer.
+        """
         self.clear_thumbnails()
         for lbl in getattr(self.photo_viewer, "labels", []):
             img_path = getattr(lbl, "photo_path", None)
@@ -73,7 +87,7 @@ class FilmstripViewer(BaseThumbnailViewer):
             )
             thumb_lbl.image = tk_img
             thumb_lbl.photo_id = photo_id  # keep id on widget
-            thumb_lbl.photo_path = img_path  # <-- NEW: keep path too
+            thumb_lbl.photo_path = img_path  # keep path too
             thumb_lbl.bind(
                 "<Button-1>", lambda e, pid=photo_id: self.on_thumb_click(pid)
             )
@@ -83,6 +97,13 @@ class FilmstripViewer(BaseThumbnailViewer):
         self.update_highlight()
 
     def update_highlight(self, selected_photo_id=None):
+        """
+        Update the highlight on the currently selected thumbnail.
+
+        Args:
+            selected_photo_id (optional): Photo ID of the newly selected thumbnail.
+                                        If not provided, uses the last selected ID.
+        """
         if selected_photo_id:
             self.selected_id = selected_photo_id
         for lbl in self.labels:
@@ -93,7 +114,14 @@ class FilmstripViewer(BaseThumbnailViewer):
                 lbl.config(relief="flat")
 
     def on_thumb_click(self, photo_id):
-        """Highlight thumbnail, update photo viewer grid, and show single photo."""
+        """
+        Handle click event on a thumbnail.
+        Highlight the selected thumbnail, update the photo viewer grid,
+        and show the single photo.
+
+        Args:
+            photo_id: ID of the clicked photo.
+        """
         self.select_photo(photo_id)
 
         # Update PhotoViewer selection
@@ -109,10 +137,15 @@ class FilmstripViewer(BaseThumbnailViewer):
             if photo_lbl:
                 self.photo_viewer._show_single_photo(
                     photo_lbl.photo_path, photo_lbl.photo_id
-                )  # <-- FIX
+                )
 
     def _scroll_to_label(self, lbl):
-        """Scroll canvas to make the given thumbnail centered."""
+        """
+        Scroll canvas to make the given thumbnail centered.
+
+        Args:
+            lbl: The label of the thumbnail to center.
+        """
         canvas_width = self.canvas.winfo_width()
         lbl_x = lbl.winfo_x() + lbl.winfo_width() // 2
         scroll_x = max(0, lbl_x - canvas_width // 2)

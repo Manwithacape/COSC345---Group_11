@@ -1,11 +1,11 @@
 # exif_reader.py
+
 from pathlib import Path
 from PIL import Image
 import piexif
 import os
 import rawpy
 import exifread
-
 
 class ExifReader:
     """
@@ -15,8 +15,17 @@ class ExifReader:
 
     @staticmethod
     def read_exif(file_path: Path) -> dict:
+        """Read EXIF data from an image file.
+
+        Args:
+            file_path (Path): The path to the image file
+
+        Returns:
+            dict: A dictionary containing EXIF data
+        """
         exif_data = {}
 
+        # Define extensions for RAW files
         raw_extensions = {
             ".cr2",
             ".nef",
@@ -28,7 +37,10 @@ class ExifReader:
             ".srw",
             ".pef",
         }
+
+        # Get file extension in lowercase
         ext = os.path.splitext(str(file_path))[1].lower()
+
         try:
             if ext in raw_extensions:
                 # Use exifread for RAW files
@@ -40,15 +52,19 @@ class ExifReader:
                 except Exception as re:
                     print(f"Failed to read RAW EXIF from {file_path}: {re}")
             else:
+                # Use PIL/Pillow and piexif for other image formats
                 img = Image.open(file_path)
+
                 raw_exif = img.info.get("exif")
                 if not raw_exif:
                     return exif_data
+
                 exif_dict = piexif.load(raw_exif)
                 for ifd_name, ifd in exif_dict.items():
                     if not isinstance(ifd, dict):
                         continue
                     for tag, value in ifd.items():
+                        # Get tag information from piexif.TAGS
                         tag_info = piexif.TAGS.get(ifd_name, {}).get(
                             tag, {"name": str(tag)}
                         )
@@ -56,20 +72,32 @@ class ExifReader:
                         exif_data[tag_name] = ExifReader._normalize_value(value)
         except Exception as e:
             print(f"Failed to read EXIF from {file_path}: {e}")
+
         return exif_data
 
     @staticmethod
     def _normalize_value(value):
-        """Convert EXIF values to Python-friendly types."""
+        """Convert EXIF values to Python-friendly types.
+
+        Args:
+            value: The raw EXIF value that needs normalization
+
+        Returns:
+            The normalized value (string, number, tuple, list)
+        """
         if value is None:
             return ""
         if isinstance(value, bytes):
+            # Convert bytes to string
             return value.decode("utf-8", errors="ignore").replace("\x00", "")
         if isinstance(value, tuple):
+            # Handle rational values (tuples with two integers)
             if len(value) == 2 and all(isinstance(v, int) for v in value):
                 num, den = value
                 return num / den if den != 0 else None
+            # Recursively normalize nested tuples
             return tuple(ExifReader._normalize_value(v) for v in value)
         if isinstance(value, list):
+            # Recursively normalize lists of values
             return [ExifReader._normalize_value(v) for v in value]
         return value
