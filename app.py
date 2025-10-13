@@ -1,4 +1,3 @@
-
 """
 AutoCull Main Application
 This file launches the AutoCull photo culling and scoring GUI.
@@ -46,6 +45,7 @@ class AutoCullApp(
     ttk.Window
 ):  # pylint: disable=too-many-instance-attributes  # NOTE: split into UiState/ViewRefs later
     """Main GUI application: builds the layout, wires viewers, and routes events."""
+
     def __init__(self) -> None:
         super().__init__(themename="darkly")
         # define attributes up front to avoid “attribute-defined-outside-init”
@@ -140,12 +140,14 @@ class AutoCullApp(
         self.bind("<Configure>", self._on_configure)
         # ---------- Set default active viewer last ----------
         self._switch_to_photos()
+
     # ---------- Configure handler ----------
     def _on_configure(self, _event):
         """Debounced layout refresh after window resize/move."""
         if self._layout_after_id:
             self.after_cancel(self._layout_after_id)
         self._layout_after_id = self.after(100, self.update_layout)
+
     # ---------- Go Back Logic --------------
     def go_back(self):
         """Return to the previous viewer if one exists."""
@@ -154,6 +156,7 @@ class AutoCullApp(
                 self.active_viewer.place_forget()
             self.active_viewer = self.prev_viewer
             self.update_layout()
+
     # ---------- Layout ----------
     def update_layout(self):
         """Place sidebars, active viewer, and filmstrip based on current window size."""
@@ -188,6 +191,7 @@ class AutoCullApp(
             self.back_btn.lift()
         else:
             self.back_btn.place_forget()
+
     # ---------- Menubar ----------
     def setup_menubar(self):
         """Create the main menubar and wire commands."""
@@ -218,10 +222,12 @@ class AutoCullApp(
         )
         menubar.add_cascade(label="Collections", menu=collections_menu)
         self.config(menu=menubar)
+
     # ---------- Import wrapper ----------
     def sidebar_import_photos(self):
         """Proxy to trigger the Import Photos flow from the sidebar."""
         self.sidebar_buttons.import_files()
+
     # ---------- Switch view helpers ----------
     def _switch_to_photos(self):
         """Activate the photo grid view and hide the back button."""
@@ -231,6 +237,7 @@ class AutoCullApp(
         self.active_viewer = self.photo_viewer
         self.back_btn.place_forget()  # hide if visible
         self.update_layout()
+
     def _switch_to_collections(self):
         """Activate the collections view and refresh its contents."""
         self.prev_viewer = self.active_viewer
@@ -240,6 +247,7 @@ class AutoCullApp(
         self.back_btn.place_forget()  # hide if visible
         self.collections_viewer.refresh_collections()
         self.update_layout()
+
     # ---------- NEW: open single image in full center pane ----------
     def open_single_view(self, photo_path: str, photo_id):
         """Open a single-photo view in the main pane."""
@@ -251,6 +259,7 @@ class AutoCullApp(
         )
         self.active_viewer = self.single_viewer
         self.update_layout()
+
     # ---------- NEW: centered info dialog for pop-ups ----------
     def show_centered_info(self, title: str, message: str):
         """Show a simple OK dialog centered over the main window."""
@@ -335,6 +344,7 @@ if __name__ == "__main__":
         except tk.TclError:
             pass
         app.deiconify()
+
     splash_win.after(2000, _reveal)
     # 4) Run the single mainloop on the app (not on the splash)
     app.mainloop()

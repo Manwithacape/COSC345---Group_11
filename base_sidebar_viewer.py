@@ -1,3 +1,4 @@
+
 """
 Defines a base class for sidebar viewers with collapsible headers,
 scrollable treeviews, and a resizable grip.
@@ -9,7 +10,6 @@ from db import Database
 MIN_COLLAPSED_HEIGHT = 30
 DEFAULT_HEIGHT = 300
 GRIP_HEIGHT = 6
-
 
 class BaseSidebarViewer(  # pylint: disable=too-many-ancestors, too-many-instance-attributes
     ttk.Frame
@@ -81,7 +81,7 @@ class BaseSidebarViewer(  # pylint: disable=too-many-ancestors, too-many-instanc
         self.tree = ttk.Treeview(
             self.tree_frame, show="headings", yscrollcommand=self.tree_scroll.set
         )
-        self.setup_columns(self.tree)
+        self.setup_columns(self.tree)  # Set up tree columns specific to subclass
         self.tree.pack(fill="both", expand=True)
         self.tree_scroll.config(command=self.tree.yview)
 
@@ -105,7 +105,10 @@ class BaseSidebarViewer(  # pylint: disable=too-many-ancestors, too-many-instanc
 
     # ----------------- Toggle -----------------
     def toggle(self) -> None:
-        """Collapse/expand the viewer and update header text."""
+        """
+        Collapse/expand the viewer and update header text.
+        If collapsed, expand to full height; if expanded, collapse to minimum height.
+        """
         if self.collapsed:
             self.configure(height=self.expanded_height)
             self.tree_frame.pack(fill="both", expand=True)
@@ -122,7 +125,10 @@ class BaseSidebarViewer(  # pylint: disable=too-many-ancestors, too-many-instanc
 
     # ----------------- Resize -----------------
     def _start_resize(self, _event) -> None:
-        """Begin drag-resize: capture starting mouse Y and current height."""
+        """
+        Begin drag-resize: capture starting mouse Y and current height.
+        If currently collapsed, expand before resizing.
+        """
         self._start_y = self.grip.winfo_rooty()
         self._start_height = self.winfo_height()
         if self.collapsed:
