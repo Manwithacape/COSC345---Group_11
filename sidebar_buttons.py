@@ -1,6 +1,6 @@
 # sidebar_buttons.py
 import ttkbootstrap as ttk
-from ttkbootstrap.dialogs import Querybox
+from ttkbootstrap.dialogs import Querybox, Messagebox
 from tkinter import filedialog
 import threading
 from progress_dialog import ProgressDialog 
@@ -30,8 +30,6 @@ class SidebarButtons:
 
     # ----------------- Import -----------------
     def import_files(self):
-        import tkinter as tk
-
         more_directories = True
         file_paths = []
 
@@ -50,10 +48,10 @@ class SidebarButtons:
             while more_directories:
                 if not file_paths:
                     return
-                more = tk.messagebox.askyesno(
-                    "More Photos", "Do you want to add photos from another directory?"
+                resp = Messagebox.yesno(
+                    "Do you want to add photos from another directory?", "More Photos"
                 )
-                if more:
+                if resp == "Yes":
                     additional_files = filedialog.askopenfilenames(
                         title="Select More Photos",
                         filetypes=[
@@ -86,7 +84,23 @@ class SidebarButtons:
                 )
                 return
 
+            # Ensure unique collection name (UI-level check)
+            while hasattr(self.db, "collection_exists") and self.db.collection_exists(collection_name):
+                self.master.show_centered_info(
+                    "Name Taken",
+                    "A collection with that name already exists. \n Please choose a different name.",
+                )
+                collection_name = Querybox.get_string("Enter collection name:")
+            
+
             collection_id = self.db.add_collection(collection_name)
+            if collection_id is None:
+                # Fallback safeguard if DB-level unique constraint blocked the insert
+                self.master.show_centered_info(
+                    "Name Taken",
+                    "A collection with that name already exists. Please choose a different name.",
+                )
+                return
 
             def do_import():
                 dialog = ProgressDialog(

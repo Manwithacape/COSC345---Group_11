@@ -70,8 +70,13 @@ class Database:
 
     # ----------------- Collections -----------------
     def add_collection(self, name: str):
-        query = "INSERT INTO collections (name) VALUES (%s) RETURNING id"
-        return self.fetch(query, (name,))[0]["id"]
+        # Insert with unique constraint handling; return id or None if name exists
+        query = (
+            "INSERT INTO collections (name) VALUES (%s) "
+            "ON CONFLICT (name) DO NOTHING RETURNING id"
+        )
+        result = self.fetch(query, (name,))
+        return result[0]["id"] if result else None
 
     def get_collections(self):
         return self.fetch("SELECT * FROM collections ORDER BY created_at DESC")
@@ -82,6 +87,11 @@ class Database:
             FROM collections
             WHERE collection_id='%s'"""
         return self
+    
+    def collection_exists(self, name: str) -> bool:
+        """Check if a collection with the given name already exists."""
+        rows = self.fetch("SELECT 1 FROM collections WHERE name=%s LIMIT 1", (name,))
+        return bool(rows)
 
     # ----------------- Photos -----------------
     def add_photo(

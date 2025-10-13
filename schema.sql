@@ -7,6 +7,9 @@ CREATE TABLE IF NOT EXISTS collections (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Ensure collection names are unique even on existing databases
+CREATE UNIQUE INDEX IF NOT EXISTS collections_name_key ON collections(name);
+
 -- ----------------- Photos -----------------
 CREATE TABLE IF NOT EXISTS photos (
     id SERIAL PRIMARY KEY,

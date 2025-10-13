@@ -13,6 +13,7 @@ import os
 import sys
 import tkinter as tk
 import ttkbootstrap as ttk
+from ttkbootstrap.dialogs import Messagebox
 from gui import Sidebar
 from db import Database
 from photo_importer import PhotoImporter
@@ -262,22 +263,8 @@ class AutoCullApp(
 
     # ---------- NEW: centered info dialog for pop-ups ----------
     def show_centered_info(self, title: str, message: str):
-        """Show a simple OK dialog centered over the main window."""
-        win = tk.Toplevel(self)
-        win.title(title)
-        win.transient(self)
-        win.grab_set()
-        win.resizable(False, False)
-        frm = ttk.Frame(win, padding=16)
-        frm.pack(fill="both", expand=True)
-        ttk.Label(frm, text=message).pack(pady=(0, 12))
-        ttk.Button(frm, text="OK", command=win.destroy).pack()
-        # center on the app window
-        self.update_idletasks()
-        w, h = 320, 140
-        x = self.winfo_rootx() + (self.winfo_width() - w) // 2
-        y = self.winfo_rooty() + (self.winfo_height() - h) // 2
-        win.geometry(f"{w}x{h}+{x}+{y}")
+        """Use themed messagebox to show an OK dialog."""
+        Messagebox.ok(message, title)
 
 # ---------- Helpers ----------
 def resource_path(filename: str) -> str:
