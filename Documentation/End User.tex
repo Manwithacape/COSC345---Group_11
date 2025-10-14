@@ -206,6 +206,7 @@ pip install -r requirements.txt
     \item Import images by selecting "Import" from the sidebar.
     \item AutoCull scans for near duplicates and low-quality images.
     \item Review detected clusters of similar images.
+    \item Suggest photos for deletion based on quality scores.
     \item Confirm deletion or move duplicates to a separate folder.
 \end{enumerate}
 
@@ -217,6 +218,7 @@ The GUI provides options for:
     \item Marking photos for deletion
     \item Previewing detected duplicates
     \item Batch delete/move operations
+    \item Suggesting photos for deletion based on quality scores
     \item Viewing collections
     \item Creating collections
     \item Viewing exif data
@@ -235,9 +237,6 @@ The GUI provides options for:
 
     \item \textbf{No duplicates found:}  
       Try lowering the \texttt{threshold} value.
-
-    \item \textbf{Slow performance:}  
-      Use smaller batches or disable subfolder recursion.
 
     \item \textbf{Permission errors:}  
       Run as administrator or check write permissions on output directories.

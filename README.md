@@ -5,6 +5,7 @@
 - [AutoCull](#autocull)
   - [Table of Contents](#table-of-contents)
   - [Project Overview](#project-overview)
+  - [Features](#features)
   - [High-level Description of Modules](#high-level-description-of-modules)
     - [Main Application (`app.py`)](#main-application-apppy)
     - [Base Sidebar Viewer (`base_sidebar_viewer.py`)](#base-sidebar-viewer-base_sidebar_viewerpy)
@@ -41,6 +42,19 @@
 ## Project Overview
 
 AutoCull is a photo culling and scoring application designed to help photographers manage their photo collections more efficiently. The application features a dark-themed interface, sidebar navigation, EXIF data display, scoring, duplicate detection, and more. Intended to be used post shoot and pre-post-processing. AutoCull should be capable of completing the majority of culling in a fraction of the time the same operation would take a human.
+
+## Features
+
+This project has been developed as part of the COSC345 paper at the University of Otago. Inspired by post processing software already used by photographers, such as Lightroom, and Photoshop.
+
+- Import photos
+- Photo collection management
+- Photo viewing
+- Detect duplicate and near-duplicate photographs
+- Computes photo quality metrics
+- Provides AI-generated feedback using Google Gemini
+- Intelligent culling suggestions powered by AI/ML
+- Duplicate & near-duplicate deletion
 
 ## High-level Description of Modules
 
