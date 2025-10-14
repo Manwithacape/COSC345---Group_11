@@ -50,7 +50,7 @@ class AutoCullApp(
     def __init__(self) -> None:
         super().__init__(themename="darkly")
         self.title("AutoCull")
-        # self.iconbitmap("app.ico")
+        self.iconbitmap("app.ico")
         # define attributes up front to avoid “attribute-defined-outside-init”
         self.active_viewer = None
         self.prev_viewer = None
