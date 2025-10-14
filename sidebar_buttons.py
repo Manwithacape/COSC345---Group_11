@@ -245,13 +245,13 @@ class SidebarButtons:
                         if (p.get("suggestion") or "").lower() != "deleted"
                     ]
 
-                    if not photo_list:
-                        self.master.master.after(0, lambda:(
-                            dialog.finish(success=False),
-                            self.master.show_centered_info(
-                            "No Photos", "There are no photos to analyze.")
-                        ))
-                        return
+                    # if not photo_list:
+                    #     self.master.master.after(0, lambda:(
+                    #         dialog.finish(success=False),
+                    #         self.master.show_centered_info(
+                    #         "No Photos", "There are no photos to analyze.")
+                    #     ))
+                    #     return
 
                     existing_groups = self.db.get_near_duplicate_groups()
                     ungrouped_photos = self.db.get_photos_without_duplicate_group()
@@ -271,6 +271,9 @@ class SidebarButtons:
                     handled_ids = set()
 
                     for group_id, photos in group_map.items():
+                        if not photos:
+                            continue
+                        
                         best = max(photos, key=lambda p: p.get("score", 0) or 0)
                         for p in photos:
                             if (p.get("suggestion") or "").lower() == "deleted":
