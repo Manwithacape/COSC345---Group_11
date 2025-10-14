@@ -331,16 +331,23 @@ class SidebarButtons:
     def cull_photos(self):
         """Delete all photos marked as 'delete' in the database"""
 
-        if not Messagebox.yesno("Delete all photos marked 'delete'?", "Cull Photos"):
+        # --- Confirmation dialog ---
+        response = Messagebox.yesno(
+            title="Cull Photos",
+            message="Delete all photos marked 'delete'?",
+            alert=True
+        )
+
+        # response can be "Yes", "No", or sometimes True/False depending on version
+        if str(response).lower() not in ("yes", "true"):
+            Messagebox.show_info("Photo culling cancelled", "Operation cancelled.")
             return
-        
+
+        # --- Proceed with deletion ---
         photos = self.db.get_photos_by_suggestion('delete')
         if not photos:
             Messagebox.show_info("Cull Photos", "No photos marked 'delete' found.")
             return
-        
-        deleted_count = 0
-        errors = []
 
         for row in photos:
             photo_id = row["id"] if isinstance(row, dict) else row[0]
