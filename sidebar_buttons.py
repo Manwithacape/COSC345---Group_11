@@ -348,7 +348,10 @@ class SidebarButtons:
         if not photos:
             Messagebox.show_info("Cull Photos", "No photos marked 'delete' found.")
             return
-
+        
+        deleted_count = 0
+        errors = []
+        
         for row in photos:
             photo_id = row["id"] if isinstance(row, dict) else row[0]
             try:
@@ -358,7 +361,8 @@ class SidebarButtons:
                 deleted_count += 1
             except Exception as e:
                 errors.append(f"Error deleting photo ID {photo_id}: {e}")
-
+                
+                
         summary = f"Deleted {deleted_count} photos."
         if errors:
             summary += "\nSome errors occured:\n" + "\n".join(errors[:10])
