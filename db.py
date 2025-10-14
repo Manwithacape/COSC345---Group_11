@@ -325,8 +325,49 @@ class Database:
         self.execute("DELETE FROM near_duplicate_groups")
         print("Cleared all near-duplicate groups and assignments.")
 
+    def get_photos_without_duplicate_group(self):
+        """
+        Return all photos that are not part of any near-duplicate group.
+        """
+        query = """
+            SELECT p.* 
+            From photos p
+            LEFT JOIN near_duplicate_photos g ON p.id = g.photo_id
+            WHERE g.photo_id IS NULL
+                AND (p.suggestion IS NULL OR p.suggestion != %s)
+        """
+        return self.fetch(query, ('deleted',))
+
     # ----------------- Queries -----------------
     def get_first_photo_for_collection(self, collection_id):
         query = "SELECT * FROM photos WHERE collection_id=%s ORDER BY id LIMIT 1"
         results = self.fetch(query, (collection_id,))
         return results[0] if results else None
+
+    # -----------------Suggestions -----------------
+    def update_photo_suggestion(self, photo_id, suggestion):
+        """Set or update the suggestioin for a photo ('keep', or 'delete')."""
+        query = "UPDATE photos SET suggestion=%s WHERE id=%s"
+        self.execute(query, (suggestion, photo_id))
+ 
+    def get_photo_suggestion(self, photo_id):
+        """Retrieve the suggestion for a photo."""
+        rows = self.fetch("SELECT suggestion FROM photos WHERE id=%s", (photo_id,))
+        return rows[0]["suggestion"] if rows and "suggestion" in rows[0] else None
+ 
+    def get_photos_with_suggestions(self, group_id):
+        """Retrieve all photos in a group along with their suggestions."""
+        query = """
+            SELECT p.id AS photo_id, p.file_name, p.suggestion
+            FROM photos p
+            JOIN near_duplicate_photos ndp ON p.id = ndp.photo_id
+            WHERE ndp.group_id=%s"""
+        return self.fetch(query, (group_id,))
+    
+    def get_photos_by_suggestion(self, suggestion):
+        """
+        Retrieve all photos with a specific suggestion ('keep' or 'delete').
+        Returns list of dicts with id and filepath
+        """
+        query = "SELECT id, file_path FROM photos WHERE suggestion=%s"
+        return self.fetch(query, (suggestion,))

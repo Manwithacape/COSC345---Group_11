@@ -20,6 +20,9 @@ class SidebarButtons:
         self.photo_viewer = photo_viewer
         self.importer = importer
         self.buttons = []
+        self.cull_button = None
+        self.suggestions_button = None
+        self.suggestions_visible = False
 
     # ----------------- Helper to add button -----------------
     def add_button(self, sidebar, text, command):
@@ -219,3 +222,166 @@ class SidebarButtons:
         """Button for going back to the previous page"""
         if hasattr(self.master, "go_back"):
             self.master.go_back()
+
+    # ------------------- Suggestion Logic ----------------
+    def show_suggestions(self):
+        """
+        Suggest 'keep' for best duplicate, 'delete' for others.
+        Suggest 'delete' for low-quality photos.
+        """
+        try:
+            if not self.importer:
+                self.master.show_centered_info("Not Available", "Photo importer is not configured.")
+                return
+            
+            dialog = ProgressDialog(self.master, title="Generating Suggestions", message="Analyzing photos...")
+            dialog.start()
+
+            def task():
+                try:
+                    # photo_list = self.db.get_all_photos()  # list of dicts with 'id' and 'file_path'
+                    photo_list = [
+                        p for p in self.db.get_all_photos()
+                        if (p.get("suggestion") or "").lower() != "deleted"
+                    ]
+
+                    if not photo_list:
+                        self.master.master.after(0, lambda:(
+                            dialog.finish(success=False),
+                            self.master.show_centered_info(
+                            "No Photos", "There are no photos to analyze.")
+                        ))
+                        return
+
+                    existing_groups = self.db.get_near_duplicate_groups()
+                    ungrouped_photos = self.db.get_photos_without_duplicate_group()
+
+                    if ungrouped_photos:
+                        print("[INFO] Found {len(ungrouped_photos)} ungrouped photos, running partial duplicate detection.")
+                        if hasattr(self.importer, "duplicates"):
+                            duplicates = self.importer.duplicates
+                            # Collect all photos already in groups to include in detection
+                            grouped_photos = [photo for group in existing_groups for photo in group["photos"]]
+                            duplicates.find_duplicates_batch(ungrouped_photos + grouped_photos)
+                            existing_groups = self.db.get_near_duplicate_groups()
+                    else:
+                        print(f"[INFO] Found {len(existing_groups)} duplicate groups - using existing results.")
+                    
+                    group_map = {g["id"]: g["photos"] for g in existing_groups}
+                    handled_ids = set()
+
+                    for group_id, photos in group_map.items():
+                        best = max(photos, key=lambda p: p.get("score", 0) or 0)
+                        for p in photos:
+                            if (p.get("suggestion") or "").lower() == "deleted":
+                                continue
+                            pid = p["id"]
+                            sugg = "keep" if pid == best["id"] else "delete"
+                            self.db.update_photo_suggestion(pid, sugg)
+                            handled_ids.add(pid)
+
+                    for photo in photo_list:
+                        current_suggestion = (photo.get("suggestion") or "").lower()
+
+                        if (photo.get("suggestion") or "").lower() == "deleted":
+                            continue
+
+                        # Skip if already has a non-undecided suggestion
+                        if current_suggestion in {"keep", "delete"}:
+                            continue
+
+                        # Skip if already handled in a duplicate group
+                        pid = photo["id"]
+                        if pid in handled_ids:
+                            continue
+
+                        # Otherwise, suggest based on quality score
+                        score = photo.get("score", 0.0)
+                        if score < 0.4:
+                            suggestion = "delete"
+                        elif score > 0.7:
+                            suggestion = "keep"
+                        else:
+                            suggestion = "undecided"
+                        
+                        # Only update if suggestion changed
+                        if suggestion != current_suggestion:
+                            self.db.update_photo_suggestion(pid, suggestion)
+
+                    self.master.after(0, lambda: (
+                        dialog.finish(success=True),
+                        self.master.show_centered_info("Suggestions Complete", "Photo suggestions have been updated."),
+                        self.photo_viewer.refresh_photos(None) if self.photo_viewer else None
+                    ))
+
+                except Exception as e:
+                    self.master.after(0, lambda e=e: (
+                        dialog.finish(success=False),
+                        self.master.show_centered_info("Error", f"Error generating suggestions: {e}")
+                    ))
+
+            threading.Thread(target=task, daemon=True).start()
+        except Exception as e:
+            self.master.show_centered_info("Error", f"Error generating suggestions: {e}")
+
+    # ------------------- Cull Photos ----------------
+    def cull_photos(self):
+        """Delete all photos marked as 'delete' in the database"""
+
+        if not Messagebox.yesno("Delete all photos marked 'delete'?", "Cull Photos"):
+            return
+        
+        photos = self.db.get_photos_by_suggestion('delete')
+        if not photos:
+            Messagebox.show_info("Cull Photos", "No photos marked 'delete' found.")
+            return
+        
+        deleted_count = 0
+        errors = []
+
+        for row in photos:
+            photo_id = row["id"] if isinstance(row, dict) else row[0]
+            try:
+                # Temporarily set context and delete
+                self.photo_viewer._ctx_photo_id = photo_id
+                self.photo_viewer._ctx_delete_selected(confirm=False)
+                deleted_count += 1
+            except Exception as e:
+                errors.append(f"Error deleting photo ID {photo_id}: {e}")
+
+        summary = f"Deleted {deleted_count} photos."
+        if errors:
+            summary += "\nSome errors occured:\n" + "\n".join(errors[:10])
+
+        Messagebox.show_info("Cull Photos", summary)
+
+        # Refresh UI once at the end 
+        try:
+            self.photo_viewer.refresh_photos()
+        except Exception:
+            if hasattr(self.master, "update_layout"):
+                self.master.update_layout()
+
+    def toggle_suggestions(self):
+        """Toggle suggestions view and Cull button visibility."""
+        if not self.suggestions_visible:
+            # Run show_suggestions normally
+            self.show_suggestions()
+            # Show Cull button
+            if self.cull_button:
+                self.cull_button.pack(fill="x", pady=2, padx=5)
+            # Change button text
+            if self.suggestions_button:
+                self.suggestions_button.config(text="Hide Suggestions")
+            self.suggestions_visible = True
+        else:
+            # Hide Cull button
+            if self.cull_button:
+                self.cull_button.pack_forget()
+            # Change button text back
+            if self.suggestions_button:
+                self.suggestions_button.config(text="Show Suggestions")
+            self.suggestions_visible = False
+ 
+        if self.photo_viewer:
+            self.photo_viewer.refresh_photos(self.photo_viewer.current_collection_id)

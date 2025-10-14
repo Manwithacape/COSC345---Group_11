@@ -98,7 +98,9 @@ class AutoCullApp(
             lambda: self.after(0, self._switch_to_collections),
         )
         self.sidebar_buttons.add_button(
-            self.left_sidebar.body, "Import Photos", self.sidebar_buttons.import_files
+            self.left_sidebar.body, 
+            "Import Photos", 
+            self.sidebar_buttons.import_files
         )
         self.sidebar_buttons.add_button(
             self.left_sidebar.body,
@@ -111,9 +113,23 @@ class AutoCullApp(
         #     self.sidebar_buttons.clear_duplicates,
         # )
         self.sidebar_buttons.add_button(
-            self.left_sidebar.body, "Return", self.sidebar_buttons.return_button
+            self.left_sidebar.body, 
+            "Return", 
+            self.sidebar_buttons.return_button
+        )
+        self.sidebar_buttons.cull_button = self.sidebar_buttons.add_button(
+            self.left_sidebar.body, 
+            "Cull Photos", 
+            self.sidebar_buttons.cull_photos
+        )
+        self.sidebar_buttons.cull_button.pack_forget()  # hide initially
+        self.sidebar_buttons.suggestions_button = self.sidebar_buttons.add_button(
+            self.left_sidebar.body, 
+            "Show Suggestions", 
+            self.sidebar_buttons.toggle_suggestions
         )
         self.left_sidebar.pack(side="left", fill="y")
+        self.photo_viewer.refresh_photos()  # initial load
         # ---------- Right sidebar & other viewers (scrollable) ----------
         self.right_sidebar = Sidebar(self, side="right")
         # wrap sidebar content in a scrollable frame (attach to .body)

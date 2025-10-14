@@ -99,7 +99,7 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
         # Expose setter for use in other methods/threads
         self._set_feedback = _set_feedback
 
-        self.refresh_photos()
+        # self.refresh_photos()
 
     def add_score_overlay(self, image, rank, score):
         try:
@@ -136,6 +136,8 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
         )
 
         for photo in ranked_photos:
+            # if photo["suggestion"] == "deleted":
+            #     continue # Skip deleted photos
             photo_id = photo["id"]
             # Start from a uniform, letterboxed PIL thumbnail
             pil_thumb = self.create_uniform_thumbnail_pil(photo["file_path"]) or None
@@ -169,6 +171,21 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
             lbl.image = tk_img
             lbl.photo_id = photo["id"]
             lbl.photo_path = photo["file_path"]
+
+            # Only show suggestion if available
+            show_suggestions = getattr(self.master.sidebar_buttons, "suggestions_visible", False)
+            if show_suggestions:
+                # Get suggestion from DB (default undecided if not set)
+                suggestion = self.db.get_photo_suggestion(photo_id) or "undecided"
+                if suggestion == "keep":
+                    frame.config(bootstyle="success") # Green if keep
+                elif suggestion == "delete":
+                    frame.config(bootstyle="danger") # Red if delete
+                else:
+                    frame.config(bootstyle="secondary") # Grey if undecided
+            else:
+                frame.config(bootstyle="secondary") # Grey if suggestions not shown
+
             # lbl.pack()
             lbl.grid(row=0, column=0)
 
@@ -177,6 +194,32 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
                 "<Double-1>",
                 lambda e, path=photo["file_path"], pid=photo["id"]: self._show_single_photo(path, pid)
             )
+
+            if show_suggestions:
+                # Dropdown for keep/delete/undecided
+                choice_var = tk.StringVar(value=suggestion)
+                choice = ttk.Combobox(
+                    frame,
+                    textvariable=choice_var,
+                    values=["keep", "delete", "undecided"],
+                    state="readonly",
+                    width=10
+                )
+                # choice.pack(pady=2)
+                choice.grid(pady=2, row=1, column=0)
+ 
+                def on_choice(event, pid=photo_id, var=choice_var, fr=frame):
+                    new_val = var.get()
+                    self.db.update_photo_suggestion(pid, new_val)
+                    # Update border instantly
+                    if new_val == "keep":
+                        fr.config(bootstyle="success")
+                    elif new_val == "delete":
+                        fr.config(bootstyle="danger")
+                    else:
+                        fr.config(bootstyle="secondary")
+ 
+                choice.bind("<<ComboboxSelected>>", on_choice)
 
             # ---- NEW: right-click context menu bindings for delete ----
             self._bind_thumb_context(lbl, photo_id=photo["id"])
@@ -307,11 +350,13 @@ class PhotoViewer(BaseThumbnailViewer, MainViewer):
         finally:
             self._ctx_menu.grab_release()
 
-    def _ctx_delete_selected(self):
+    def _ctx_delete_selected(self, confirm=True):
         pid = self._ctx_photo_id
         if not pid:
             return
-        if not messagebox.askyesno(
+        
+        # Skip confirmation when called by cull_photos()
+        if confirm and not messagebox.askyesno(
             "Delete photo",
             "Remove this photo from the collection? This also removes its scores/EXIF/etc.",
         ):

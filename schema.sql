@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS photos (
     file_path TEXT NOT NULL,
     file_name TEXT NOT NULL,
     imported_at TIMESTAMP DEFAULT NOW(),
-    status TEXT DEFAULT 'undecided'
+    status TEXT DEFAULT 'undecided',
+    suggestion TEXT DEFAULT 'undecided'
 );
 
 -- ----------------- EXIF Data -----------------
