@@ -31,11 +31,13 @@ jobs:
           New-Item -ItemType Directory -Force -Path "AutoCull"
           Copy-Item "dist\app.exe" -Destination "AutoCull\AutoCull.exe"
           Copy-Item "config.json" -Destination "AutoCull\"
+          Copy-Item "Documentation\End User.pdf" -Destination "AutoCull\"
           
       - name: Set file permissions
         run: |
           icacls "AutoCull\AutoCull.exe" /grant Everyone:F
           icacls "AutoCull\config.json" /grant Everyone:F
+          icacls "AutoCull\End User.pdf" /grant Everyone:F
 
       - name: Create zip archive
         run: |
