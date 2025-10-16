@@ -73,20 +73,34 @@ This document serves as a comprehensive guide for end users, covering installati
 % -------------------------------------------------------------------------
 \section{Installation Guide}
 
-\subsection{Step 1: Clone or Download the Repository}
+\subsection{Step 1: Obtain AutoCull}
+
+You can install AutoCull using one of the following two methods:
+
+\subsubsection*{Option A: Download the Pre-Built Executable (Recommended for Most Users)}
+\begin{enumerate}[label=\arabic*.]
+    \item Visit the project's GitHub repository:  
+    \url{https://github.com/Manwithacape/COSC345---Group_11/actions}
+    \item Under the latest successful build, scroll to the \textbf{Artifacts} section.
+    \item Download the file named \texttt{AutoCull.exe}.
+    \item Once downloaded, simply double-click \texttt{AutoCull.exe} to launch the application.  
+    No setup or Python installation is required.
+\end{enumerate}
+
+\subsubsection*{Option B: Clone and Run the Source Code (For Developers)}
 \begin{lstlisting}[style=console]
 git clone https://github.com/Manwithacape/COSC345---Group_11.git
 cd COSC345---Group_11
 \end{lstlisting}
 
-\subsection{Step 2: Create a Virtual Environment}
+\subsection{Step 2: Create a Virtual Environment (Source Installation Only)}
 \begin{lstlisting}[style=console]
 python -m venv venv
 source venv/bin/activate       # macOS/Linux
 venv\Scripts\activate          # Windows
 \end{lstlisting}
 
-\subsection{Step 3: Install Dependencies}
+\subsection{Step 3: Install Dependencies (Source Installation Only)}
 \begin{lstlisting}[style=console]
 pip install -r requirements.txt
 \end{lstlisting}
@@ -109,7 +123,7 @@ AutoCull uses PostgreSQL to store image metadata, similarity metrics, and user p
     GRANT ALL PRIVILEGES ON DATABASE autocull_db TO autocull_user;
     \end{lstlisting}
 
-    Example contents:
+    Example configuration file (\texttt{.env} or \texttt{config.json}):
     \begin{lstlisting}[style=console]
     {
         "dbname": "autocull_db",
@@ -119,16 +133,23 @@ AutoCull uses PostgreSQL to store image metadata, similarity metrics, and user p
         "port": 5432
     }
     \end{lstlisting}
-    \item Initialize the schema using file contents from \texttt{schema.db}:
+    \item Initialize the schema using the provided \texttt{schema.db} file.  
     You should see a confirmation message indicating that tables were created successfully.
 \end{enumerate}
 
 \subsection{Step 5: Launch AutoCull}
-\begin{lstlisting}[style=console]
-python app.py
-\end{lstlisting}
+
+\begin{itemize}
+    \item \textbf{If using the .exe file:}  
+    Simply double-click \texttt{AutoCull.exe} to start the program.
+    \item \textbf{If running from source:}
+    \begin{lstlisting}[style=console]
+    python app.py
+    \end{lstlisting}
+\end{itemize}
 
 If the program launches successfully, you should see the AutoCull interface.
+
 
 % -------------------------------------------------------------------------
 
