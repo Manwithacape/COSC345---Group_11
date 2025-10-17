@@ -291,7 +291,7 @@ Key methods include `__init__`, image loading/rendering, resizing handling, and 
 
 ## Usage Instructions
 
-See `End User.pdf` for more information
+See `Documentation/End User.pdf` for more information
 
 1. Ensure all dependencies are installed (see Dependencies section).
 2. Set up your PostgreSQL database with appropriate credentials.
